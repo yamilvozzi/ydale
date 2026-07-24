@@ -31,7 +31,7 @@ export default function PinGate({ children }) {
             setError(false)
           }}
           placeholder="PIN"
-          className="bg-superficie border border-borde rounded-lg px-4 py-3 text-center text-lg tracking-widest text-butter placeholder-butter-muted focus:outline-none focus:border-teal"
+          className="bg-superficie border border-borde rounded-lg px-4 py-3 text-center text-lg tracking-widest text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
         />
         {error && (
           <p className="text-sm text-center text-butter-muted">PIN incorrecto</p>
