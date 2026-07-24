@@ -41,16 +41,19 @@ export default function SeccionTextoEditable({
           <button
             onClick={empezarEdicion}
             aria-label={`Editar ${titulo}`}
-            className="p-2 rounded-lg hover:bg-superficie transition-colors"
+            className="group p-2 rounded-lg hover:bg-superficie transition-colors"
           >
-            <Pencil size={18} className="text-butter-muted" />
+            <Pencil
+              size={18}
+              className="text-butter-muted group-hover:text-teal transition-colors"
+            />
           </button>
         ) : (
           <div className="flex gap-1">
             <button
               onClick={cancelar}
               aria-label="Cancelar"
-              className="p-2 rounded-lg hover:bg-superficie transition-colors"
+              className="group p-2 rounded-lg hover:bg-superficie transition-colors"
             >
               <X size={18} className="text-butter-muted" />
             </button>
