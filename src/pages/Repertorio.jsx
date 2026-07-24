@@ -34,8 +34,8 @@ export default function Repertorio() {
       <div className="flex items-center gap-2 mb-4">
   <div className="relative flex-1">
     <Search
-      size={18}
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-teal"
+  size={18}
+  className="absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted"
     />
     <input
       value={busqueda}
