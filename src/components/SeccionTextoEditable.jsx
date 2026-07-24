@@ -1,4 +1,4 @@
-import { Pencil, Check, X, Undo2 } from 'lucide-react'
+import { Pencil, Check, X } from 'lucide-react'
 import { useCampoEditable } from '../hooks/useCampoEditable'
 
 export default function SeccionTextoEditable({
@@ -11,41 +11,47 @@ export default function SeccionTextoEditable({
   fuenteMono = false,
   textoGrande = false,
   lineaUnica = false,
+  columnas = false,
 }) {
   const {
     editando,
     borrador,
     setBorrador,
     guardando,
-    puedeDeshacer,
     empezarEdicion,
     cancelar,
     guardar,
-    deshacer,
   } = useCampoEditable({ temaId, campo, valor, onGuardado })
 
   const claseTexto = [
     fuenteMono ? 'font-mono' : 'font-sans',
-    textoGrande ? 'text-2xl leading-relaxed' : 'text-base leading-relaxed',
+    textoGrande ? 'text-2xl lg:text-xl leading-relaxed' : 'text-base leading-relaxed',
     'whitespace-pre-wrap',
+    // Dos columnas en pantallas grandes: reduce el scroll vertical
+    // en textos largos (p. ej. la letra completa de una canción).
+    columnas && !editando ? 'lg:columns-2 lg:gap-10' : '',
   ].join(' ')
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm tracking-widest text-butter-muted uppercase">
-          {titulo}
-        </h2>
+      <div className={`flex items-center mb-3 ${titulo ? 'justify-between' : 'justify-end'}`}>
+        {titulo && (
+          <h2 className="text-sm tracking-widest text-butter-muted uppercase">
+            {titulo}
+          </h2>
+        )}
 
         {!editando ? (
+          // El lápiz es una acción secundaria: chico, discreto,
+          // no debe competir con el contenido de la sección.
           <button
             onClick={empezarEdicion}
-            aria-label={`Editar ${titulo}`}
-            className="group p-2 rounded-lg hover:bg-superficie transition-colors"
+            aria-label={`Editar ${titulo || 'sección'}`}
+            className="group p-1.5 -mr-1 rounded-lg hover:bg-superficie transition-colors"
           >
             <Pencil
-              size={18}
-              className="text-butter-muted group-hover:text-teal transition-colors"
+              size={14}
+              className="text-butter-muted/60 group-hover:text-teal transition-colors"
             />
           </button>
         ) : (
@@ -90,16 +96,6 @@ export default function SeccionTextoEditable({
         <p className={`${claseTexto} text-butter`}>{valor}</p>
       ) : (
         <p className="text-butter-muted italic">{placeholder}</p>
-      )}
-
-      {puedeDeshacer && (
-        <button
-          onClick={deshacer}
-          className="mt-3 self-start flex items-center gap-2 text-sm text-butter-muted :text-butter transition-colors"
-        >
-          <Undo2 size={14} />
-          Deshacer último cambio
-        </button>
       )}
     </div>
   )
