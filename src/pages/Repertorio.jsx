@@ -76,14 +76,6 @@ export default function Repertorio() {
         </ul>
       )}
 
-      <button
-        onClick={() => setModalAbierto(true)}
-        aria-label="Agregar tema"
-        className="fixed bottom-6 right-6 bg-teal hover:bg-green rounded-full p-4 shadow-lg transition-colors"
-      >
-        <Plus size={24} className="text-butter" />
-      </button>
-
       {modalAbierto && (
         <NuevoTemaModal
           onCerrar={() => setModalAbierto(false)}
