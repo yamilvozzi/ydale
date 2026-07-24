@@ -28,19 +28,32 @@ export default function Repertorio() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col px-4 pt-6 pb-24">
+    <div className="min-h-dvh flex flex-col px-4 pt-6 pb-8">
       <h1 className="text-2xl text-center mb-5 text-butter">Y daaaale!</h1>
 
-      <div className="relative mb-4">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
-        <input
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar..."
-          className="w-full bg-superficie border border-borde rounded-lg pl-10 pr-4 py-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal"
-        />
-      </div>
-
+      <div className="flex items-center gap-2 mb-4">
+  <div className="relative flex-1">
+    <Search
+      size={18}
+      className="absolute left-3 top-1/2 -translate-y-1/2 text-teal"
+    />
+    <input
+      value={busqueda}
+      onChange={(e) => setBusqueda(e.target.value)}
+      placeholder="Buscar..."
+      className="w-full bg-superficie border border-borde rounded-lg pl-10 pr-4 py-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
+    />
+  </div>
+        
+  <button
+    onClick={() => setModalAbierto(true)}
+    aria-label="Agregar tema"
+    className="shrink-0 bg-teal hover:bg-green rounded-lg p-3 transition-colors"
+  >
+    <Plus size={22} className="text-butter" />
+  </button>
+</div>
+  
       {cargando ? (
         <p className="text-butter-muted text-center mt-8">Cargando…</p>
       ) : temasFiltrados.length === 0 ? (
