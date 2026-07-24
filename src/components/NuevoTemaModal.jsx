@@ -40,7 +40,7 @@ export default function NuevoTemaModal({ onCerrar, onCreado }) {
             autoFocus
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="bg-fondo border border-borde rounded-lg p-3 text-butter focus:outline-none focus:border-teal"
+            className="bg-fondo border border-borde rounded-lg p-3 text-butter focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
           />
         </div>
 
@@ -50,7 +50,7 @@ export default function NuevoTemaModal({ onCerrar, onCreado }) {
             value={artista}
             onChange={(e) => setArtista(e.target.value)}
             placeholder="Y daaaale! (si es propio)"
-            className="bg-fondo border border-borde rounded-lg p-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal"
+            className="bg-fondo border border-borde rounded-lg p-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
           />
         </div>
 
