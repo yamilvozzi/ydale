@@ -10,8 +10,8 @@ export default function Letra() {
       campo="letra"
       valor={tema.letra}
       onGuardado={(v) => actualizarCampoLocal('letra', v)}
-      titulo="Letra"
       textoGrande
+      columnas
       placeholder="Todavía no hay letra cargada. Tocá el lápiz para escribirla."
     />
   )

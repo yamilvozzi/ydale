@@ -21,9 +21,6 @@ export default function Escala() {
         <p className="text-butter">
           {tema.tonalidad || 'Sin definir'} · {tema.escala_nombre || 'Sin definir'}
         </p>
-        <p className="text-xs text-butter-muted mt-1">
-          Se edita desde la pestaña Estructura.
-        </p>
       </div>
 
       <div className="flex flex-col gap-4">
