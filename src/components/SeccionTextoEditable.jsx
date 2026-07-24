@@ -76,14 +76,14 @@ export default function SeccionTextoEditable({
             value={borrador}
             onChange={(e) => setBorrador(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && guardar()}
-            className={`${claseTexto} bg-superficie border border-borde rounded-lg p-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal`}
+            className={`${claseTexto} bg-superficie border border-borde rounded-lg p-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30`}
           />
         ) : (
           <textarea
             autoFocus
             value={borrador}
             onChange={(e) => setBorrador(e.target.value)}
-            className={`${claseTexto} flex-1 bg-superficie border border-borde rounded-lg p-4 text-butter placeholder-butter-muted focus:outline-none focus:border-teal resize-none`}
+            className={`${claseTexto} flex-1 bg-superficie border border-borde rounded-lg p-4 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30`}
           />
         )
       ) : valor ? (
@@ -95,7 +95,7 @@ export default function SeccionTextoEditable({
       {puedeDeshacer && (
         <button
           onClick={deshacer}
-          className="mt-3 self-start flex items-center gap-2 text-sm text-butter-muted hover:text-butter transition-colors"
+          className="mt-3 self-start flex items-center gap-2 text-sm text-butter-muted :text-butter transition-colors"
         >
           <Undo2 size={14} />
           Deshacer último cambio
