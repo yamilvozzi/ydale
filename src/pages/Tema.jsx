@@ -28,9 +28,9 @@ export default function Tema() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col items-center">
       {/* Volver: jerarquía visual distinta a las pestañas, no es "una más". */}
-      <div className="flex items-center gap-3 px-4 pt-4">
+      <div className="w-full max-w-xl flex items-center gap-3 px-4 pt-4">
         <Link
           to="/"
           aria-label="Volver al repertorio"
@@ -46,14 +46,14 @@ export default function Tema() {
         </div>
       </div>
 
-      <nav className="flex gap-1 px-3 mt-4 overflow-x-auto border-b border-borde">
+      <nav className="w-full max-w-xl flex gap-1 px-3 mt-4 border-b border-borde">
         {SECCIONES.map((s) => (
           <NavLink
             key={s.ruta}
             to={s.ruta}
             className={({ isActive }) =>
               [
-                'px-3 py-2 text-sm whitespace-nowrap rounded-t-lg transition-colors',
+                'flex-1 text-center px-2 py-3 text-sm sm:text-base whitespace-nowrap rounded-t-lg transition-colors',
                 isActive
                   ? 'text-butter border-b-2 border-teal'
                   : 'text-butter-muted hover:text-butter',
@@ -65,7 +65,7 @@ export default function Tema() {
         ))}
       </nav>
 
-      <main className="flex-1 p-4 min-h-0">
+      <main className="w-full max-w-xl flex-1 p-4 min-h-0">
         <Outlet context={{ tema, actualizarCampoLocal }} />
       </main>
     </div>
