@@ -32,6 +32,12 @@ export default function SeccionTextoEditable({
     columnas && !editando ? 'lg:columns-2 lg:gap-10' : '',
   ].join(' ')
 
+  // Altura mínima del textarea al editar: sin esto, en algunos layouts
+  // (flex anidado sin altura fija en toda la cadena de ancestros) el
+  // campo colapsaba a una sola línea visible. Con textoGrande (Letra)
+  // necesita más alto porque el texto es más grande.
+  const minAltura = textoGrande ? 'min-h-28' : 'min-h-20'
+
   return (
     <div className="flex flex-col h-full">
       <div className={`flex items-center mb-3 ${titulo ? 'justify-between' : 'justify-end'}`}>
@@ -89,7 +95,7 @@ export default function SeccionTextoEditable({
             autoFocus
             value={borrador}
             onChange={(e) => setBorrador(e.target.value)}
-            className={`${claseTexto} flex-1 bg-superficie border border-borde rounded-lg p-4 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30`}
+            className={`${claseTexto} flex-1 ${minAltura} bg-superficie border border-borde rounded-lg p-4 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30`}
           />
         )
       ) : valor ? (
