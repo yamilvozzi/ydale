@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient'
  * Maneja el ciclo completo de un campo editable de la tabla `temas`:
  * lectura -> modo edición -> guardar.
  */
-export function useCampoEditable({ temaId, campo, valor, onGuardado }) {
+export function useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar }) {
   const [editando, setEditando] = useState(false)
   const [borrador, setBorrador] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -21,9 +21,10 @@ export function useCampoEditable({ temaId, campo, valor, onGuardado }) {
 
   async function guardar() {
     setGuardando(true)
+    const valorAGuardar = serializarAlGuardar ? serializarAlGuardar(borrador) : borrador
     const { error } = await supabase
       .from('temas')
-      .update({ [campo]: borrador })
+      .update({ [campo]: valorAGuardar })
       .eq('id', temaId)
 
     setGuardando(false)
@@ -33,7 +34,7 @@ export function useCampoEditable({ temaId, campo, valor, onGuardado }) {
       return
     }
 
-    onGuardado(borrador)
+    onGuardado(valorAGuardar)
     setEditando(false)
   }
 
