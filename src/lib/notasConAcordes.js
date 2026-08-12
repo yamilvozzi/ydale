@@ -43,19 +43,33 @@ export function crearAcorde() {
     nombre: '',
     trastes: ['', '', '', ''],
     posiciones: Array.from({ length: 6 }, () => Array(4).fill('vacio')),
+    tonica: null,
   }
 }
 
 export function normalizarAcorde(acorde = {}) {
+  const posiciones = Array.from({ length: 6 }, (_, cuerda) =>
+    Array.from({ length: 4 }, (_, traste) => {
+      const estado = acorde.posiciones?.[cuerda]?.[traste]
+      return ['presionada', 'aire', 'muteada'].includes(estado) ? estado : 'vacio'
+    })
+  )
+  const cuerdaTonica = Number(acorde.tonica?.cuerda)
+  const trasteTonica = Number(acorde.tonica?.traste)
+  const tonicaValida =
+    Number.isInteger(cuerdaTonica) &&
+    cuerdaTonica >= 0 &&
+    cuerdaTonica < 6 &&
+    Number.isInteger(trasteTonica) &&
+    trasteTonica >= 0 &&
+    trasteTonica < 4 &&
+    posiciones[cuerdaTonica][trasteTonica] === 'presionada'
+
   return {
     id: acorde.id ?? globalThis.crypto?.randomUUID?.() ?? `acorde-${Date.now()}`,
     nombre: typeof acorde.nombre === 'string' ? acorde.nombre : '',
     trastes: Array.from({ length: 4 }, (_, indice) => String(acorde.trastes?.[indice] ?? '')),
-    posiciones: Array.from({ length: 6 }, (_, cuerda) =>
-      Array.from({ length: 4 }, (_, traste) => {
-        const estado = acorde.posiciones?.[cuerda]?.[traste]
-        return ['presionada', 'aire', 'muteada'].includes(estado) ? estado : 'vacio'
-      })
-    ),
+    posiciones,
+    tonica: tonicaValida ? { cuerda: cuerdaTonica, traste: trasteTonica } : null,
   }
 }
