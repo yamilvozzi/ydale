@@ -12,6 +12,7 @@ export default function SeccionTextoEditable({
   textoGrande = false,
   lineaUnica = false,
   columnas = false,
+  serializarAlGuardar,
 }) {
   const {
     editando,
@@ -21,7 +22,7 @@ export default function SeccionTextoEditable({
     empezarEdicion,
     cancelar,
     guardar,
-  } = useCampoEditable({ temaId, campo, valor, onGuardado })
+  } = useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar })
 
   const claseTexto = [
     fuenteMono ? 'font-mono' : 'font-sans',
@@ -36,10 +37,10 @@ export default function SeccionTextoEditable({
   // (flex anidado sin altura fija en toda la cadena de ancestros) el
   // campo colapsaba a una sola línea visible. Con textoGrande (Letra)
   // necesita más alto porque el texto es más grande.
-  const minAltura = textoGrande ? 'min-h-28' : 'min-h-20'
+  const minAltura = textoGrande ? 'min-h-[58dvh]' : 'min-h-20'
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       <div className={`flex items-center mb-3 ${titulo ? 'justify-between' : 'justify-end'}`}>
         {titulo && (
           <h2 className="text-sm tracking-widest text-butter-muted uppercase">
