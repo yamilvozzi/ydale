@@ -1,10 +1,11 @@
-import { Check, X } from 'lucide-react'
+import { Check, CircleDot, X } from 'lucide-react'
 import { useState } from 'react'
 import AcordeDiagrama from './AcordeDiagrama'
 import { crearAcorde, normalizarAcorde } from '../lib/notasConAcordes'
 
 export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardando = false }) {
   const [borrador, setBorrador] = useState(() => normalizarAcorde(acorde ?? crearAcorde()))
+  const [seleccionandoTonica, setSeleccionandoTonica] = useState(false)
 
   function enviar(e) {
     e.preventDefault()
@@ -41,11 +42,29 @@ export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardan
         </label>
 
         <div className="rounded-lg border border-borde bg-fondo/40 p-3 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-wide text-butter-muted">Diapasón</p>
-            <p className="text-xs text-butter-muted">Tocá una posición: vacío → pisada → al aire → X.</p>
+            <button
+              type="button"
+              onClick={() => setSeleccionandoTonica((actual) => !actual)}
+              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${seleccionandoTonica ? 'border-butter bg-butter text-fondo' : 'border-borde text-butter-muted hover:border-teal hover:text-butter'}`}
+            >
+              <CircleDot size={16} />
+              {seleccionandoTonica ? 'Elegí una nota pisada' : 'Marcar tónica'}
+            </button>
           </div>
-          <AcordeDiagrama acorde={borrador} editable onChange={setBorrador} />
+          <p className="mb-4 text-xs text-butter-muted">
+            {seleccionandoTonica
+              ? 'Tocá una nota pisada para marcarla como tónica. El marcador claro indica la tónica.'
+              : 'Tocá una posición: vacío → pisada → al aire → X.'}
+          </p>
+          <AcordeDiagrama
+            acorde={borrador}
+            editable
+            onChange={setBorrador}
+            modoTonica={seleccionandoTonica}
+            onTonicaSeleccionada={() => setSeleccionandoTonica(false)}
+          />
         </div>
 
         <div className="mt-5 flex justify-end gap-2">

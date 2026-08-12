@@ -5,18 +5,34 @@ function estadoDelMarcador(posiciones) {
   return indice === -1 ? null : { indice, estado: posiciones[indice] }
 }
 
-function clasesEstado(estado) {
-  if (estado === 'presionada') {
-    return 'after:absolute after:size-4 after:rounded-full after:bg-teal after:ring-2 after:ring-butter/80'
-  }
-  return ''
+function clasesEstado(estado, esTonica) {
+  if (estado !== 'presionada') return ''
+
+  return esTonica
+    ? 'after:absolute after:bottom-0 after:size-5 after:translate-y-1/2 after:rounded-full after:bg-butter after:ring-4 after:ring-green'
+    : 'after:absolute after:bottom-0 after:size-4 after:translate-y-1/2 after:rounded-full after:bg-teal after:ring-2 after:ring-butter/80'
 }
 
 /** Diapasón horizontal reutilizable para el editor y las fichas guardadas. */
-export default function AcordeDiagrama({ acorde, editable = false, onChange }) {
+export default function AcordeDiagrama({
+  acorde,
+  editable = false,
+  onChange,
+  modoTonica = false,
+  onTonicaSeleccionada,
+}) {
   function ciclarCelda(cuerda, traste) {
     const posiciones = acorde.posiciones.map((fila) => [...fila])
     const actual = posiciones[cuerda][traste]
+
+    if (modoTonica) {
+      if (actual !== 'presionada') return
+      const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
+      onChange({ ...acorde, tonica: esTonica ? null : { cuerda, traste } })
+      onTonicaSeleccionada?.()
+      return
+    }
+
     const siguiente = ESTADOS[(ESTADOS.indexOf(actual) + 1) % ESTADOS.length]
 
     if (siguiente === 'aire' || siguiente === 'muteada') {
@@ -29,7 +45,16 @@ export default function AcordeDiagrama({ acorde, editable = false, onChange }) {
     }
 
     posiciones[cuerda][traste] = siguiente
-    onChange({ ...acorde, posiciones })
+    const eraTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
+    const cuerdaPasaAEstadoAbierto = siguiente === 'aire' || siguiente === 'muteada'
+    const debeLimpiarTonica =
+      (eraTonica && siguiente !== 'presionada') ||
+      (cuerdaPasaAEstadoAbierto && acorde.tonica?.cuerda === cuerda)
+    onChange({
+      ...acorde,
+      posiciones,
+      tonica: debeLimpiarTonica ? null : acorde.tonica,
+    })
   }
 
   function ciclarMarcador(cuerda) {
@@ -48,7 +73,7 @@ export default function AcordeDiagrama({ acorde, editable = false, onChange }) {
         <div />
         {acorde.trastes.map((traste, indice) =>
           editable ? (
-            <label key={indice} className="flex justify-center pb-2">
+            <label key={indice} className="flex justify-center pb-3">
               <span className="sr-only">Número del traste {indice + 1}</span>
               <input
                 value={traste}
@@ -59,11 +84,11 @@ export default function AcordeDiagrama({ acorde, editable = false, onChange }) {
                 }}
                 inputMode="numeric"
                 aria-label={`Número del traste ${indice + 1}`}
-                className="w-10 rounded border border-borde bg-fondo px-1 py-1 text-center text-xs text-butter focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
+                className="w-12 rounded border border-borde bg-fondo px-1 py-1.5 text-center text-base font-semibold text-butter focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
               />
             </label>
           ) : (
-            <div key={indice} className="pb-2 text-center text-xs text-butter-muted">
+            <div key={indice} className="pb-3 text-center text-base font-semibold text-butter-muted">
               {traste}
             </div>
           )
@@ -93,14 +118,15 @@ export default function AcordeDiagrama({ acorde, editable = false, onChange }) {
               </div>
 
               {fila.map((estado, traste) => {
-                const comun = `relative flex h-10 sm:h-12 items-center justify-center border-b border-r border-butter-muted/70 ${traste === 0 ? 'border-l-[3px] border-l-butter' : ''} ${clasesEstado(estado)}`
+                const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
+                const comun = `relative flex h-10 sm:h-12 items-center justify-center border-b border-r border-butter-muted/70 ${traste === 0 ? 'border-l-[3px] border-l-butter' : ''} ${clasesEstado(estado, esTonica)}`
                 return editable ? (
                   <button
                     key={traste}
                     type="button"
                     onClick={() => ciclarCelda(cuerda, traste)}
-                    aria-label={`Cuerda ${6 - cuerda}, traste ${traste + 1}: ${estado}`}
-                    className={`${comun} hover:bg-superficie focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
+                    aria-label={`Cuerda ${6 - cuerda}, traste ${traste + 1}: ${estado}${esTonica ? ', tónica' : ''}`}
+                    className={`${comun} ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
                   />
                 ) : (
                   <div key={traste} className={comun} />
