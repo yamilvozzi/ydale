@@ -52,11 +52,11 @@ export default function Repertorio() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center px-4 pt-6 pb-8">
-      <div className="w-full max-w-xl">
+    <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      <div className="w-full">
         <div className="flex justify-center mb-6">
-          <h1 className="text-2xl tracking-widest uppercase text-butter bg-superficie border border-borde rounded-xl px-6 py-3 shadow-lg shadow-black/30">
-            Y <span className="text-teal">daaaale!</span>
+          <h1 className="relative isolate overflow-hidden text-xl sm:text-2xl font-semibold tracking-[0.16em] uppercase text-butter bg-green border border-teal/80 rounded-lg px-5 py-2.5 shadow-lg shadow-black/30 before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-teal">
+            <span className="relative">Y DAAAALE!</span>
           </h1>
         </div>
 
