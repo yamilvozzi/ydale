@@ -115,9 +115,12 @@ export default function AcordeDiagrama({
 
         {acorde.posiciones.map((fila, cuerda) => {
           const marcador = estadoDelMarcador(fila)
+          // Hay seis cuerdas y sólo cinco espacios entre ellas: la última fila
+          // dibuja la sexta cuerda, pero no agrega altura debajo del diapasón.
+          const altoFila = cuerda === acorde.posiciones.length - 1 ? 'h-px' : medidas.altoCuerda
           return (
             <div key={cuerda} className="contents">
-              <div className={`relative flex ${medidas.altoCuerda} items-start justify-center border-t border-butter-muted/70`}>
+              <div className={`relative flex ${altoFila} items-start justify-center border-t border-butter-muted/70`}>
                 {marcador && (
                   editable ? (
                     <button
@@ -139,14 +142,14 @@ export default function AcordeDiagrama({
               {fila.map((estado, traste) => {
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
                 const claseNota = esTonica ? medidas.tonica : medidas.nota
-                const comun = `relative flex ${medidas.altoCuerda} items-start justify-center border-t border-r border-butter-muted/70 ${traste === 0 ? 'border-l-[3px] border-l-butter' : ''} ${clasesEstado(estado, esTonica)} ${claseNota}`
+                const comun = `relative flex ${altoFila} items-start justify-center border-t border-r border-butter-muted/70 ${traste === 0 ? 'border-l-[3px] border-l-butter' : ''} ${clasesEstado(estado, esTonica)} ${claseNota}`
                 return editable ? (
                   <button
                     key={traste}
                     type="button"
                     onClick={() => ciclarCelda(cuerda, traste)}
                     aria-label={`Cuerda ${6 - cuerda}, traste ${traste + 1}: ${estado}${esTonica ? ', tónica' : ''}`}
-                    className={`${comun} ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
+                    className={`${comun} before:absolute before:inset-x-0 before:-top-5 before:-bottom-5 ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
                   />
                 ) : (
                   <div key={traste} className={comun} />
