@@ -67,11 +67,11 @@ export default function Notas() {
         </div>
 
         {notas.acordes.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-wrap items-start gap-3">
             {notas.acordes.map((acorde) => (
-              <article key={acorde.id} className="rounded-lg border border-borde bg-superficie p-3 sm:p-4">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h3 className="min-w-0 truncate text-lg text-butter">{acorde.nombre || 'Sin nombre'}</h3>
+              <article key={acorde.id} className="w-fit max-w-full self-start rounded-lg border border-borde bg-superficie p-3">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <h3 className="min-w-0 truncate text-base text-butter">{acorde.nombre || 'Sin nombre'}</h3>
                   <div className="flex shrink-0 gap-1">
                     <button
                       type="button"
