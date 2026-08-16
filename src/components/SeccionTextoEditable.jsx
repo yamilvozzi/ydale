@@ -10,6 +10,7 @@ export default function SeccionTextoEditable({
   placeholder = 'Todavía no hay nada acá. Tocá el lápiz para cargarlo.',
   fuenteMono = false,
   textoGrande = false,
+  editorGrande = false,
   lineaUnica = false,
   columnas = false,
   serializarAlGuardar,
@@ -35,9 +36,9 @@ export default function SeccionTextoEditable({
 
   // Altura mínima del textarea al editar: sin esto, en algunos layouts
   // (flex anidado sin altura fija en toda la cadena de ancestros) el
-  // campo colapsaba a una sola línea visible. Con textoGrande (Letra)
-  // necesita más alto porque el texto es más grande.
-  const minAltura = textoGrande ? 'min-h-[58dvh]' : 'min-h-20'
+  // campo colapsaba a una sola línea visible. Los campos pensados para
+  // contenido extenso comparten la misma altura cómoda de edición.
+  const minAltura = editorGrande ? 'min-h-[58dvh]' : 'min-h-20'
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
