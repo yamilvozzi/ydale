@@ -50,6 +50,7 @@ export default function Notas() {
         onGuardado={(valor) => actualizarCampoLocal('notas', valor)}
         serializarAlGuardar={(texto) => guardarNotas({ ...notas, texto })}
         titulo="Notas"
+        editorGrande
         placeholder="Entradas, finales, cambios, lo que vaya surgiendo en el ensayo."
       />
 

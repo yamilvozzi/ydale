@@ -11,6 +11,7 @@ export default function Letra() {
       valor={tema.letra}
       onGuardado={(v) => actualizarCampoLocal('letra', v)}
       textoGrande
+      editorGrande
       columnas
       placeholder="Todavía no hay letra cargada. Tocá el lápiz para escribirla."
     />

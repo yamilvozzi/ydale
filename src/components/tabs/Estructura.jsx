@@ -35,6 +35,7 @@ export default function Estructura() {
           onGuardado={(v) => actualizarCampoLocal('estructura', v)}
           titulo="Machete de acordes"
           fuenteMono
+          editorGrande
           placeholder={'Todavía no hay estructura cargada.\nEj:\nINTRO\nDm Bb F C'}
         />
       </div>
