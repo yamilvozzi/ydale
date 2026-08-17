@@ -8,11 +8,12 @@
   --font-sans: "Varela Round", ui-sans-serif, system-ui, sans-serif;
 
   /* Paleta: grafito oscuro + teal/green como acentos + butter como texto.
-     4 colores base, sin sumar variantes que no se pidieron. */
+     El petróleo distingue la blue note sin romper la identidad visual. */
   --color-fondo: #1a1d1c;
   --color-superficie: #222624;
   --color-borde: #313633;
   --color-teal: #00555a;
+  --color-petroleo: #1f627d;
   --color-green: #013e37;
   --color-butter: #f2ede0;
   --color-butter-muted: #a39c8a;
