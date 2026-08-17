@@ -48,15 +48,6 @@ export default defineConfig({
               expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
-          {
-            // Imágenes de escalas: una vez descargadas, se sirven de caché.
-            urlPattern: ({ url }) => url.hostname.endsWith('.supabase.co') && url.pathname.includes('/storage/'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'supabase-storage',
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 90 },
-            },
-          },
         ],
       },
     }),
