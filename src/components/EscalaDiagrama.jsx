@@ -3,16 +3,19 @@ import {
   CANTIDAD_TRASTES,
   TRASTES_DE_REFERENCIA,
   notaEnTraste,
+  obtenerNotaBlues,
   obtenerNotasEscala,
 } from '../lib/escalas'
 
-function MarcadorNota({ esTonica }) {
+function MarcadorNota({ esTonica, esNotaBlues }) {
   return (
     <span
       aria-hidden="true"
       className={`absolute top-0 z-10 size-4 -translate-y-1/2 rounded-full sm:size-5 ${
         esTonica
           ? 'bg-butter ring-4 ring-green'
+          : esNotaBlues
+            ? 'bg-petroleo ring-2 ring-butter/80'
           : 'bg-teal ring-2 ring-butter/80'
       }`}
     />
@@ -22,6 +25,7 @@ function MarcadorNota({ esTonica }) {
 /** Diapasón de 15 trastes generado a partir de una tónica y un tipo de escala. */
 export default function EscalaDiagrama({ escala }) {
   const notasEscala = new Set(obtenerNotasEscala(escala.tonica, escala.tipo))
+  const notaBlues = escala.tipo === 'blues' ? obtenerNotaBlues(escala.tonica) : null
   const trastes = Array.from({ length: CANTIDAD_TRASTES }, (_, indice) => indice + 1)
 
   return (
@@ -34,7 +38,7 @@ export default function EscalaDiagrama({ escala }) {
         {trastes.map((traste) => (
           <div
             key={traste}
-            className="text-center text-xs font-semibold text-butter-muted"
+            className="text-center text-sm font-bold text-butter-muted sm:text-base"
           >
             {TRASTES_DE_REFERENCIA.includes(traste) ? traste : null}
           </div>
@@ -45,6 +49,7 @@ export default function EscalaDiagrama({ escala }) {
         {AFINACION.map((notaAlAire, cuerda) => {
           const notaAbiertaPertenece = notasEscala.has(notaAlAire)
           const esTonicaAbierta = notaAlAire === escala.tonica
+          const esNotaBluesAbierta = notaAlAire === notaBlues
           const altoFila = cuerda === AFINACION.length - 1 ? 'h-px' : 'h-9 sm:h-11'
 
           return (
@@ -52,28 +57,48 @@ export default function EscalaDiagrama({ escala }) {
               <div
                 className={`relative flex ${altoFila} items-start justify-center border-t border-butter-muted/70`}
                 aria-label={`Cuerda ${cuerda + 1}, ${notaAlAire} al aire${
-                  notaAbiertaPertenece ? (esTonicaAbierta ? ', tónica' : ', en la escala') : ''
+                  notaAbiertaPertenece
+                    ? esTonicaAbierta
+                      ? ', tónica'
+                      : esNotaBluesAbierta
+                        ? ', blue note'
+                        : ', en la escala'
+                    : ''
                 }`}
               >
-                {notaAbiertaPertenece && <MarcadorNota esTonica={esTonicaAbierta} />}
+                {notaAbiertaPertenece && (
+                  <MarcadorNota
+                    esTonica={esTonicaAbierta}
+                    esNotaBlues={esNotaBluesAbierta}
+                  />
+                )}
               </div>
 
               {trastes.map((traste) => {
                 const nota = notaEnTraste(notaAlAire, traste)
                 const pertenece = notasEscala.has(nota)
                 const esTonica = nota === escala.tonica
+                const esNotaBlues = nota === notaBlues
 
                 return (
                   <div
                     key={traste}
                     aria-label={`Cuerda ${cuerda + 1}, traste ${traste}, ${nota}${
-                      pertenece ? (esTonica ? ', tónica' : ', en la escala') : ''
+                      pertenece
+                        ? esTonica
+                          ? ', tónica'
+                          : esNotaBlues
+                            ? ', blue note'
+                            : ', en la escala'
+                        : ''
                     }`}
                     className={`relative flex ${altoFila} items-start justify-center border-r border-t border-butter-muted/70 ${
                       traste === 1 ? 'border-l-[3px] border-l-butter' : ''
                     }`}
                   >
-                    {pertenece && <MarcadorNota esTonica={esTonica} />}
+                    {pertenece && (
+                      <MarcadorNota esTonica={esTonica} esNotaBlues={esNotaBlues} />
+                    )}
                   </div>
                 )
               })}

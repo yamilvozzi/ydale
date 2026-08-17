@@ -63,7 +63,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
             <legend className="mb-2 text-xs uppercase tracking-wide text-butter-muted">
               Tipo
             </legend>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {TIPOS_ESCALA.map((tipo) => {
                 const seleccionado = borrador.tipo === tipo.valor
                 return (
