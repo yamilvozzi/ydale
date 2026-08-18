@@ -9,6 +9,8 @@ export const TIPOS_ESCALA = [
   { valor: 'mayor', etiqueta: 'Mayor' },
   { valor: 'menor', etiqueta: 'Menor' },
   { valor: 'blues', etiqueta: 'Blues' },
+  { valor: 'pentatonica_mayor', etiqueta: 'Pentatónica Mayor' },
+  { valor: 'pentatonica_menor', etiqueta: 'Pentatónica Menor' },
 ]
 
 // Distancias sucesivas expresadas en semitonos (un semitono equivale a un traste).
@@ -16,6 +18,8 @@ export const INTERVALOS_ESCALA = {
   mayor: [2, 2, 1, 2, 2, 2, 1],
   menor: [2, 1, 2, 2, 1, 2, 2],
   blues: [3, 2, 1, 1, 3, 2],
+  pentatonica_mayor: [2, 2, 3, 2, 3],
+  pentatonica_menor: [3, 2, 2, 3, 2],
 }
 
 export function crearEscala() {
