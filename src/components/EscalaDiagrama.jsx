@@ -7,18 +7,20 @@ import {
   obtenerNotasEscala,
 } from '../lib/escalas'
 
-function MarcadorNota({ esTonica, esNotaBlues }) {
+function MarcadorNota({ nota, esTonica, esNotaBlues }) {
   return (
     <span
       aria-hidden="true"
-      className={`absolute top-0 z-10 size-4 -translate-y-1/2 rounded-full sm:size-5 ${
+      className={`absolute top-0 z-10 grid size-4 -translate-y-1/2 place-items-center rounded-full text-[7px] font-bold leading-none tracking-[-0.08em] sm:size-5 sm:text-[9px] ${
         esTonica
-          ? 'bg-butter ring-4 ring-green'
+          ? 'bg-butter text-fondo ring-4 ring-green'
           : esNotaBlues
-            ? 'bg-petroleo ring-2 ring-butter/80'
-          : 'bg-teal ring-2 ring-butter/80'
+            ? 'bg-petroleo text-fondo ring-2 ring-butter/80'
+            : 'bg-teal text-butter ring-2 ring-butter/80'
       }`}
-    />
+    >
+      {nota}
+    </span>
   )
 }
 
@@ -38,7 +40,7 @@ export default function EscalaDiagrama({ escala }) {
         {trastes.map((traste) => (
           <div
             key={traste}
-            className="text-center text-sm font-bold text-butter-muted sm:text-base"
+            className="-translate-y-1 text-center text-sm font-bold text-butter-muted sm:text-base"
           >
             {TRASTES_DE_REFERENCIA.includes(traste) ? traste : null}
           </div>
@@ -68,6 +70,7 @@ export default function EscalaDiagrama({ escala }) {
               >
                 {notaAbiertaPertenece && (
                   <MarcadorNota
+                    nota={notaAlAire}
                     esTonica={esTonicaAbierta}
                     esNotaBlues={esNotaBluesAbierta}
                   />
@@ -97,7 +100,11 @@ export default function EscalaDiagrama({ escala }) {
                     }`}
                   >
                     {pertenece && (
-                      <MarcadorNota esTonica={esTonica} esNotaBlues={esNotaBlues} />
+                      <MarcadorNota
+                        nota={nota}
+                        esTonica={esTonica}
+                        esNotaBlues={esNotaBlues}
+                      />
                     )}
                   </div>
                 )

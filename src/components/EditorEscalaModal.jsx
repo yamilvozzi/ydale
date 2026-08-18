@@ -63,7 +63,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
             <legend className="mb-2 text-xs uppercase tracking-wide text-butter-muted">
               Tipo
             </legend>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-6 gap-2">
               {TIPOS_ESCALA.map((tipo) => {
                 const seleccionado = borrador.tipo === tipo.valor
                 return (
@@ -73,6 +73,8 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
                     aria-pressed={seleccionado}
                     onClick={() => setBorrador({ ...borrador, tipo: tipo.valor })}
                     className={`rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                      tipo.valor.startsWith('pentatonica') ? 'col-span-3' : 'col-span-2'
+                    } ${
                       seleccionado
                         ? 'border-teal bg-teal text-butter'
                         : 'border-borde bg-fondo text-butter-muted hover:border-teal hover:text-butter'
