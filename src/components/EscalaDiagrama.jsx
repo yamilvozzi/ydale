@@ -20,7 +20,7 @@ export default function EscalaDiagrama({ escala }) {
       className="w-full min-w-[760px] pb-3"
       aria-label={`Diapasón de la escala ${escala.tonica} ${escala.tipo}`}
     >
-      <div className="mb-4 grid grid-cols-[2.75rem_repeat(15,minmax(2.25rem,1fr))]">
+      <div className="mb-6 grid grid-cols-[2.75rem_repeat(15,minmax(2.25rem,1fr))]">
         <div />
         {trastes.map((traste) => (
           <div

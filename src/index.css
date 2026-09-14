@@ -19,7 +19,7 @@
   --color-butter-muted: #a39c8a;
 
   /* Verde azulado suave, derivado de la paleta y distinto de la blue note. */
-  --color-nota-tonica: color-mix(in srgb, var(--color-teal) 45%, var(--color-butter));
+  --color-nota-tonica: color-mix(in srgb, var(--color-teal) 30%, var(--color-butter));
 }
 
 body {
@@ -68,8 +68,8 @@ body {
 }
 
 .diagrama-nota {
-  width: 22px;
-  height: 22px;
+  width: var(--diametro-nota, 22px);
+  height: var(--diametro-nota, 22px);
   z-index: 10;
   fill: var(--color-teal);
   stroke: color-mix(in srgb, var(--color-butter) 80%, transparent);
@@ -100,7 +100,7 @@ body {
 
 @media (min-width: 40rem) {
   .diagrama-nota {
-    width: 24px;
-    height: 24px;
+    width: var(--diametro-nota, 24px);
+    height: var(--diametro-nota, 24px);
   }
 }

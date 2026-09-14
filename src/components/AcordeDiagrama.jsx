@@ -69,21 +69,23 @@ export default function AcordeDiagrama({
         altoCuerda: 'h-7',
         numero: 'text-xs',
         marcador: 'size-5 text-sm',
+        nota: '[--diametro-nota:16px]',
       }
     : {
         grilla: 'grid-cols-[2.35rem_repeat(4,minmax(3rem,1fr))] sm:grid-cols-[2.7rem_repeat(4,minmax(4.25rem,1fr))]',
         altoCuerda: 'h-10 sm:h-12',
         numero: 'text-base',
         marcador: 'size-7 text-lg',
+        nota: '[--diametro-nota:20px]',
       }
 
   return (
-    <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
+    <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} ${medidas.nota} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
       <div className={`grid ${medidas.grilla} items-end`}>
         <div />
         {acorde.trastes.map((traste, indice) =>
           editable ? (
-            <label key={indice} className="flex justify-center pb-3">
+            <label key={indice} className="flex justify-center pb-4">
               <span className="sr-only">Número del traste {indice + 1}</span>
               <input
                 value={traste}
@@ -98,7 +100,7 @@ export default function AcordeDiagrama({
               />
             </label>
           ) : (
-            <div key={indice} className={`pb-3 text-center font-semibold text-butter ${medidas.numero}`}>
+            <div key={indice} className={`pb-4 text-center font-semibold text-butter ${medidas.numero}`}>
               {traste}
             </div>
           )
