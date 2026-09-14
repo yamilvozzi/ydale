@@ -17,9 +17,90 @@
   --color-green: #013e37;
   --color-butter: #f2ede0;
   --color-butter-muted: #a39c8a;
+
+  /* Verde azulado suave, derivado de la paleta y distinto de la blue note. */
+  --color-nota-tonica: color-mix(in srgb, var(--color-teal) 45%, var(--color-butter));
 }
 
 body {
   background-color: var(--color-fondo);
   color: var(--color-butter);
+}
+
+/* Cuerdas y notas comparten el eje y=0 de la fila. Los trastes no suman
+   bordes al área usada para centrar los marcadores y sus referencias. */
+.diagrama-cuerda {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--color-butter-muted) 70%, transparent);
+  pointer-events: none;
+}
+
+.diagrama-traste,
+.diagrama-cejuela {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-butter-muted) 70%, transparent);
+  pointer-events: none;
+}
+
+.diagrama-cejuela {
+  left: 0;
+  right: auto;
+  width: 3px;
+  transform: translateX(-50%);
+  background: var(--color-butter);
+}
+
+.diagrama-marcador {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.diagrama-nota {
+  width: 22px;
+  height: 22px;
+  z-index: 10;
+  fill: var(--color-teal);
+  stroke: color-mix(in srgb, var(--color-butter) 80%, transparent);
+  stroke-width: 1;
+  color: var(--color-butter);
+  pointer-events: none;
+}
+
+.diagrama-nota text {
+  fill: currentColor;
+  stroke: none;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.diagrama-nota-tonica {
+  fill: var(--color-nota-tonica);
+  stroke: var(--color-nota-tonica);
+  color: var(--color-fondo);
+}
+
+.diagrama-nota-blues {
+  fill: var(--color-petroleo);
+  color: var(--color-fondo);
+}
+
+@media (min-width: 40rem) {
+  .diagrama-nota {
+    width: 24px;
+    height: 24px;
+  }
 }

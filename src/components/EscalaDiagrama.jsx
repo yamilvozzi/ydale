@@ -1,3 +1,5 @@
+import MarcadorNota from './MarcadorNota'
+import LineasDiapason from './LineasDiapason'
 import {
   AFINACION,
   CANTIDAD_TRASTES,
@@ -6,23 +8,6 @@ import {
   obtenerNotaBlues,
   obtenerNotasEscala,
 } from '../lib/escalas'
-
-function MarcadorNota({ nota, esTonica, esNotaBlues }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`absolute top-0 z-10 grid size-4 -translate-y-1/2 place-items-center rounded-full text-[7px] font-bold leading-none tracking-[-0.08em] sm:size-5 sm:text-[9px] ${
-        esTonica
-          ? 'bg-butter text-fondo ring-4 ring-green'
-          : esNotaBlues
-            ? 'bg-petroleo text-fondo ring-2 ring-butter/80'
-            : 'bg-teal text-butter ring-2 ring-butter/80'
-      }`}
-    >
-      {nota}
-    </span>
-  )
-}
 
 /** Diapasón de 15 trastes generado a partir de una tónica y un tipo de escala. */
 export default function EscalaDiagrama({ escala }) {
@@ -40,7 +25,7 @@ export default function EscalaDiagrama({ escala }) {
         {trastes.map((traste) => (
           <div
             key={traste}
-            className="-translate-y-1 text-center text-sm font-bold text-butter-muted sm:text-base"
+            className="-translate-y-1 text-center text-sm font-bold text-butter sm:text-base"
           >
             {TRASTES_DE_REFERENCIA.includes(traste) ? traste : null}
           </div>
@@ -52,12 +37,12 @@ export default function EscalaDiagrama({ escala }) {
           const notaAbiertaPertenece = notasEscala.has(notaAlAire)
           const esTonicaAbierta = notaAlAire === escala.tonica
           const esNotaBluesAbierta = notaAlAire === notaBlues
-          const altoFila = cuerda === AFINACION.length - 1 ? 'h-px' : 'h-9 sm:h-11'
+          const altoFila = cuerda === AFINACION.length - 1 ? 'h-0' : 'h-9 sm:h-11'
 
           return (
             <div key={`${notaAlAire}-${cuerda}`} className="contents">
               <div
-                className={`relative flex ${altoFila} items-start justify-center border-t border-butter-muted/70`}
+                className={`relative ${altoFila}`}
                 aria-label={`Cuerda ${cuerda + 1}, ${notaAlAire} al aire${
                   notaAbiertaPertenece
                     ? esTonicaAbierta
@@ -68,6 +53,7 @@ export default function EscalaDiagrama({ escala }) {
                     : ''
                 }`}
               >
+                <LineasDiapason />
                 {notaAbiertaPertenece && (
                   <MarcadorNota
                     nota={notaAlAire}
@@ -95,10 +81,9 @@ export default function EscalaDiagrama({ escala }) {
                             : ', en la escala'
                         : ''
                     }`}
-                    className={`relative flex ${altoFila} items-start justify-center border-r border-t border-butter-muted/70 ${
-                      traste === 1 ? 'border-l-[3px] border-l-butter' : ''
-                    }`}
+                    className={`relative ${altoFila}`}
                   >
+                    <LineasDiapason traste cejuela={traste === 1} />
                     {pertenece && (
                       <MarcadorNota
                         nota={nota}

@@ -1,16 +1,11 @@
+import MarcadorNota from './MarcadorNota'
+import LineasDiapason from './LineasDiapason'
+
 const ESTADOS = ['vacio', 'presionada', 'aire', 'muteada']
 
 function estadoDelMarcador(posiciones) {
   const indice = posiciones.findIndex((estado) => estado === 'aire' || estado === 'muteada')
   return indice === -1 ? null : { indice, estado: posiciones[indice] }
-}
-
-function clasesEstado(estado, esTonica) {
-  if (estado !== 'presionada') return ''
-
-  return esTonica
-    ? 'after:absolute after:top-0 after:-translate-y-1/2 after:rounded-full after:bg-butter after:ring-4 after:ring-green'
-    : 'after:absolute after:top-0 after:-translate-y-1/2 after:rounded-full after:bg-teal after:ring-2 after:ring-butter/80'
 }
 
 /** Diapasón horizontal reutilizable para el editor y las fichas guardadas. */
@@ -74,20 +69,16 @@ export default function AcordeDiagrama({
         altoCuerda: 'h-7',
         numero: 'text-xs',
         marcador: 'size-5 text-sm',
-        nota: 'after:size-3',
-        tonica: 'after:size-4',
       }
     : {
         grilla: 'grid-cols-[2.35rem_repeat(4,minmax(3rem,1fr))] sm:grid-cols-[2.7rem_repeat(4,minmax(4.25rem,1fr))]',
         altoCuerda: 'h-10 sm:h-12',
         numero: 'text-base',
         marcador: 'size-7 text-lg',
-        nota: 'after:size-4',
-        tonica: 'after:size-5',
       }
 
   return (
-    <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} min-w-0`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
+    <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
       <div className={`grid ${medidas.grilla} items-end`}>
         <div />
         {acorde.trastes.map((traste, indice) =>
@@ -107,7 +98,7 @@ export default function AcordeDiagrama({
               />
             </label>
           ) : (
-            <div key={indice} className={`pb-2 text-center font-semibold text-butter-muted ${medidas.numero}`}>
+            <div key={indice} className={`pb-3 text-center font-semibold text-butter ${medidas.numero}`}>
               {traste}
             </div>
           )
@@ -120,19 +111,20 @@ export default function AcordeDiagrama({
           const altoFila = cuerda === acorde.posiciones.length - 1 ? 'h-px' : medidas.altoCuerda
           return (
             <div key={cuerda} className="contents">
-              <div className={`relative flex ${altoFila} items-start justify-center border-t border-butter-muted/70`}>
+              <div className={`relative ${altoFila}`}>
+                <LineasDiapason />
                 {marcador && (
                   editable ? (
                     <button
                       type="button"
                       onClick={() => ciclarMarcador(cuerda)}
                       aria-label={`Cambiar estado de la cuerda ${6 - cuerda}: ${marcador.estado}`}
-                      className={`absolute top-0 grid ${medidas.marcador} -translate-y-1/2 place-items-center rounded-full font-semibold text-butter hover:bg-superficie focus:outline-none focus:ring-2 focus:ring-teal`}
+                      className={`diagrama-marcador ${medidas.marcador} rounded-full font-semibold text-butter hover:bg-superficie focus:outline-none focus:ring-2 focus:ring-teal`}
                     >
                       {marcador.estado === 'aire' ? '○' : '×'}
                     </button>
                   ) : (
-                    <span className={`absolute top-0 -translate-y-1/2 font-semibold text-butter ${medidas.marcador}`}>
+                    <span className={`diagrama-marcador font-semibold text-butter ${medidas.marcador}`}>
                       {marcador.estado === 'aire' ? '○' : '×'}
                     </span>
                   )
@@ -141,8 +133,13 @@ export default function AcordeDiagrama({
 
               {fila.map((estado, traste) => {
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
-                const claseNota = esTonica ? medidas.tonica : medidas.nota
-                const comun = `relative flex ${altoFila} items-start justify-center border-t border-r border-butter-muted/70 ${traste === 0 ? 'border-l-[3px] border-l-butter' : ''} ${clasesEstado(estado, esTonica)} ${claseNota}`
+                const comun = `relative ${altoFila}`
+                const contenido = (
+                  <>
+                    <LineasDiapason traste cejuela={traste === 0} />
+                    {estado === 'presionada' && <MarcadorNota esTonica={esTonica} />}
+                  </>
+                )
                 return editable ? (
                   <button
                     key={traste}
@@ -150,9 +147,11 @@ export default function AcordeDiagrama({
                     onClick={() => ciclarCelda(cuerda, traste)}
                     aria-label={`Cuerda ${6 - cuerda}, traste ${traste + 1}: ${estado}${esTonica ? ', tónica' : ''}`}
                     className={`${comun} before:absolute before:inset-x-0 before:-top-5 before:-bottom-5 ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
-                  />
+                  >
+                    {contenido}
+                  </button>
                 ) : (
-                  <div key={traste} className={comun} />
+                  <div key={traste} className={comun}>{contenido}</div>
                 )
               })}
             </div>

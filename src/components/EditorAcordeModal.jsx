@@ -55,7 +55,7 @@ export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardan
           </div>
           <p className="mb-4 text-xs text-butter-muted">
             {seleccionandoTonica
-              ? 'Tocá una nota pisada para marcarla como tónica. El marcador claro indica la tónica.'
+              ? 'Tocá una nota pisada para marcarla como tónica. El marcador verde claro indica la tónica.'
               : 'Tocá una posición: vacío → pisada → al aire → X.'}
           </p>
           <AcordeDiagrama
