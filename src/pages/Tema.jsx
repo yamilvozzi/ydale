@@ -46,19 +46,12 @@ export default function Tema() {
         </div>
       </div>
 
-      <nav className="w-full flex gap-1 px-3 sm:px-5 lg:px-7 mt-4 border-b border-borde">
+      <nav aria-label="Secciones del tema" className="w-full flex gap-1 px-3 sm:px-5 lg:px-7 mt-4 border-b border-borde overflow-x-auto">
         {SECCIONES.map((s) => (
           <NavLink
             key={s.ruta}
             to={s.ruta}
-            className={({ isActive }) =>
-              [
-                'flex-1 text-center px-2 py-3 text-sm sm:text-base whitespace-nowrap rounded-t-lg transition-colors',
-                isActive
-                  ? 'text-butter border-b-2 border-teal'
-                  : 'text-butter-muted hover:text-butter',
-              ].join(' ')
-            }
+            className="pestana-tema flex-1 text-center px-2 py-3 text-sm sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
           >
             {s.etiqueta}
           </NavLink>

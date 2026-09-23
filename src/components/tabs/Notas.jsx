@@ -78,17 +78,17 @@ export default function Notas() {
                       type="button"
                       onClick={() => setEditor(acorde)}
                       aria-label={`Editar ${acorde.nombre || 'acorde'}`}
-                      className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"
+                      className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
                     >
-                      <Pencil size={16} />
+                      <Pencil />
                     </button>
                     <button
                       type="button"
                       onClick={() => eliminarAcorde(acorde)}
                       aria-label={`Eliminar ${acorde.nombre || 'acorde'}`}
-                      className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"
+                      className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 />
                     </button>
                   </div>
                 </div>

@@ -67,18 +67,18 @@ export default function Escala() {
                     type="button"
                     onClick={() => setEditor(escala)}
                     aria-label={`Editar escala ${escala.tonica} ${etiquetaTipo(escala.tipo)}`}
-                    className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"
+                    className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
                   >
-                    <Pencil size={16} />
+                    <Pencil />
                   </button>
                   <button
                     type="button"
                     onClick={() => alEliminar(escala)}
                     disabled={guardando}
                     aria-label={`Eliminar escala ${escala.tonica} ${etiquetaTipo(escala.tipo)}`}
-                    className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter disabled:opacity-50"
+                    className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter disabled:opacity-50"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 />
                   </button>
                 </div>
               </div>

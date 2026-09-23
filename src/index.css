@@ -27,6 +27,64 @@ body {
   color: var(--color-butter);
 }
 
+/* NavLink aporta aria-current; todas las secciones comparten este estado. */
+.pestana-tema {
+  position: relative;
+  isolation: isolate;
+  border-bottom: 2px solid transparent;
+  color: var(--color-butter-muted);
+}
+
+.pestana-tema:hover {
+  color: var(--color-butter);
+}
+
+.pestana-tema[aria-current="page"] {
+  color: #fff;
+}
+
+.pestana-tema[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 32% 0 -2px;
+  pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-teal) 48%, transparent), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+.pestana-tema[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 8% -2px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(to right, transparent, var(--color-teal) 15%, var(--color-teal) 85%, transparent);
+  pointer-events: none;
+}
+
+/* Separar el dibujo secundario del área táctil, sin cambiar sus acciones. */
+.accion-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.accion-icono > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.accion-icono:focus-visible,
+.pestana-tema:focus-visible {
+  outline: 2px solid var(--color-butter-muted);
+  outline-offset: -2px;
+}
+
 /* Cuerdas y notas comparten el eje y=0 de la fila. Los trastes no suman
    bordes al área usada para centrar los marcadores y sus referencias. */
 .diagrama-cuerda {

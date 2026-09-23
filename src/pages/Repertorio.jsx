@@ -55,8 +55,15 @@ export default function Repertorio() {
     <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
       <div className="w-full">
         <div className="flex justify-center mb-6">
-          <h1 className="relative isolate overflow-hidden text-xl sm:text-2xl font-semibold tracking-[0.16em] uppercase text-butter bg-green border border-teal/80 rounded-lg px-5 py-2.5 shadow-lg shadow-black/30 before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-teal">
-            <span className="relative">Y DAAAALE!</span>
+          <h1>
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="YDALE / Y daaaale!"
+              width={1254}
+              height={1254}
+              fetchPriority="high"
+              className="block h-auto w-36 max-w-full sm:w-44 lg:w-48"
+            />
           </h1>
         </div>
 
@@ -107,17 +114,17 @@ export default function Repertorio() {
                     setTemaEditando(t)
                   }}
                   aria-label={`Editar ${t.nombre}`}
-                  className="shrink-0 px-3 rounded-lg bg-superficie hover:bg-borde transition-colors"
+                  className="accion-icono rounded-lg bg-superficie hover:bg-borde transition-colors"
                 >
-                  <Pencil size={16} className="text-butter-muted" />
+                  <Pencil className="text-butter-muted" />
                 </button>
 
                 <button
                   onClick={(e) => eliminarTema(t, e)}
                   aria-label={`Eliminar ${t.nombre}`}
-                  className="shrink-0 px-3 rounded-lg bg-superficie hover:bg-borde transition-colors"
+                  className="accion-icono rounded-lg bg-superficie hover:bg-borde transition-colors"
                 >
-                  <Trash2 size={16} className="text-butter-muted" />
+                  <Trash2 className="text-butter-muted" />
                 </button>
               </li>
             ))}

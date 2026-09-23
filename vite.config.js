@@ -10,29 +10,49 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png', 'logo.png'],
       manifest: {
-        name: 'Y daaaale!',
-        short_name: 'Y daaaale!',
+        name: 'YDALE',
+        short_name: 'YDALE',
+        lang: 'es',
+        id: '/',
+        start_url: '/',
+        scope: '/',
         description: 'Cuaderno digital de la banda',
-        theme_color: '#161a19',
-        background_color: '#161a19',
+        theme_color: '#1a1d1c',
+        background_color: '#1a1d1c',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'icons/ydale-192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: 'icon-512.png',
+            src: 'icons/ydale-512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'icons/ydale-maskable-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: 'icons/ydale-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },
       workbox: {
+        // Conservar logo.png original (2,38 MB) y disponible también sin conexión.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // Precachea todo el bundle de la app (JS, CSS, HTML) para que
         // abra sin conexión una vez visitada al menos una vez.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],

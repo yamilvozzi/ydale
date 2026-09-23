@@ -55,10 +55,9 @@ export default function SeccionTextoEditable({
           <button
             onClick={empezarEdicion}
             aria-label={`Editar ${titulo || 'sección'}`}
-            className="group p-1.5 -mr-1 rounded-lg hover:bg-superficie transition-colors"
+            className="accion-icono group -mr-1 rounded-lg hover:bg-superficie transition-colors"
           >
             <Pencil
-              size={14}
               className="text-butter-muted/60 group-hover:text-teal transition-colors"
             />
           </button>
