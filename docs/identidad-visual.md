@@ -1,8 +1,13 @@
 # Identidad visual y PWA
 
-`public/logo.png` y `public/icon.png` son los originales. El logo se muestra
-completo, sin transformaciones, a 144 / 176 / 192 px según el ancho de pantalla.
-Los atributos de tamaño reservan su relación de aspecto antes de descargarlo.
+`public/logo.png` y `public/icon.png` son los originales y no se modifican.
+Home y Login comparten `src/components/Logo.jsx`. La presentación del logo usa
+una ventana de proporción 1,35:1 y ancho adaptable de 176 a 216 px (altura de
+aproximadamente 130 a 160 px). `object-fit: cover` recorta el fondo superior e
+inferior sin deformar las letras; la posición vertical al 54% conserva el nombre
+y su subrayado. El contenedor reserva la proporción antes de descargar la imagen.
+Los bordes tienen radios ligeramente asimétricos y un desvanecido de 4–5 px,
+con una sombra exterior tenue. El centro conserva los colores de la fuente.
 
 Para regenerar los iconos después de actualizar la imagen maestra:
 

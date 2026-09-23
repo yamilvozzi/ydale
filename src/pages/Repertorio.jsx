@@ -4,6 +4,7 @@ import { Search, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTemas } from '../hooks/useTemas'
 import { supabase } from '../lib/supabaseClient'
 import NuevoTemaModal from '../components/NuevoTemaModal'
+import Logo from '../components/Logo'
 
 export default function Repertorio() {
   const { temas, cargando, recargar } = useTemas()
@@ -56,14 +57,7 @@ export default function Repertorio() {
       <div className="w-full">
         <div className="flex justify-center mb-6">
           <h1>
-            <img
-              src={`${import.meta.env.BASE_URL}logo.png`}
-              alt="YDALE / Y daaaale!"
-              width={1254}
-              height={1254}
-              fetchPriority="high"
-              className="block h-auto w-36 max-w-full sm:w-44 lg:w-48"
-            />
+            <Logo />
           </h1>
         </div>
 

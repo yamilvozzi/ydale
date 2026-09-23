@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { usePin } from '../context/PinContext'
+import Logo from './Logo'
 
 export default function PinGate({ children }) {
   const { desbloqueado, intentarDesbloquear } = usePin()
@@ -18,9 +19,11 @@ export default function PinGate({ children }) {
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-fondo px-6">
+    <div className="min-h-dvh flex items-center justify-center bg-fondo px-6 py-6">
       <form onSubmit={manejarEnvio} className="w-full max-w-xs flex flex-col gap-4">
-        <h1 className="text-2xl text-center mb-2 text-butter">Y daaaale!</h1>
+        <h1 className="mb-2">
+          <Logo />
+        </h1>
         <input
           type="password"
           inputMode="numeric"
