@@ -6,17 +6,27 @@ export const CANTIDAD_TRASTES = 15
 export const TRASTES_DE_REFERENCIA = [3, 5, 7, 9, 12, 15]
 
 export const TIPOS_ESCALA = [
-  { valor: 'mayor', etiqueta: 'Mayor' },
-  { valor: 'menor', etiqueta: 'Menor' },
+  { valor: 'mayor', etiqueta: 'Jónico (Mayor)' },
+  { valor: 'lidio', etiqueta: 'Lidio' },
+  { valor: 'mixolidio', etiqueta: 'Mixolidio' },
+  { valor: 'pentatonica_mayor', etiqueta: 'Pent. Mayor' },
+  { valor: 'locrio', etiqueta: 'Locrio' },
+  { valor: 'menor', etiqueta: 'Eólico (Menor)' },
+  { valor: 'dorico', etiqueta: 'Dórico' },
+  { valor: 'frigio', etiqueta: 'Frigio' },
+  { valor: 'pentatonica_menor', etiqueta: 'Pent. Menor' },
   { valor: 'blues', etiqueta: 'Blues' },
-  { valor: 'pentatonica_mayor', etiqueta: 'Pentatónica Mayor' },
-  { valor: 'pentatonica_menor', etiqueta: 'Pentatónica Menor' },
 ]
 
 // Distancias sucesivas expresadas en semitonos (un semitono equivale a un traste).
 export const INTERVALOS_ESCALA = {
   mayor: [2, 2, 1, 2, 2, 2, 1],
   menor: [2, 1, 2, 2, 1, 2, 2],
+  dorico: [2, 1, 2, 2, 2, 1, 2],
+  frigio: [1, 2, 2, 2, 1, 2, 2],
+  lidio: [2, 2, 2, 1, 2, 2, 1],
+  mixolidio: [2, 2, 1, 2, 2, 1, 2],
+  locrio: [1, 2, 2, 1, 2, 2, 2],
   blues: [3, 2, 1, 1, 3, 2],
   pentatonica_mayor: [2, 2, 3, 2, 3],
   pentatonica_menor: [3, 2, 2, 3, 2],
@@ -36,7 +46,7 @@ export function normalizarEscala(escala = {}) {
 }
 
 export function etiquetaTipo(tipo) {
-  return TIPOS_ESCALA.find((opcion) => opcion.valor === tipo)?.etiqueta ?? 'Mayor'
+  return TIPOS_ESCALA.find((opcion) => opcion.valor === tipo)?.etiqueta ?? TIPOS_ESCALA[0].etiqueta
 }
 
 export function obtenerNotasEscala(tonica, tipo) {

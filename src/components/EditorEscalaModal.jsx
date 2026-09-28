@@ -31,12 +31,12 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
           </button>
         </div>
 
-        <div className="mb-5 grid gap-5 lg:grid-cols-[2fr_1fr]">
-          <fieldset>
+        <div className="mb-5 grid gap-5 lg:grid-cols-[1fr_2fr]">
+          <fieldset className="min-w-0">
             <legend className="mb-2 text-xs uppercase tracking-wide text-butter-muted">
               Tónica
             </legend>
-            <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+            <div className="grid grid-cols-6 gap-2">
               {NOTAS.map((nota) => {
                 const seleccionada = borrador.tonica === nota
                 return (
@@ -59,11 +59,11 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
             </div>
           </fieldset>
 
-          <fieldset>
+          <fieldset className="min-w-0">
             <legend className="mb-2 text-xs uppercase tracking-wide text-butter-muted">
-              Tipo
+              Escala / Modo
             </legend>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-5 gap-1 sm:gap-2">
               {TIPOS_ESCALA.map((tipo) => {
                 const seleccionado = borrador.tipo === tipo.valor
                 return (
@@ -72,9 +72,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
                     type="button"
                     aria-pressed={seleccionado}
                     onClick={() => setBorrador({ ...borrador, tipo: tipo.valor })}
-                    className={`rounded-lg border px-3 py-2.5 text-sm transition-colors ${
-                      tipo.valor.startsWith('pentatonica') ? 'col-span-3' : 'col-span-2'
-                    } ${
+                    className={`rounded-lg border px-1 py-2.5 text-[10px] transition-colors sm:px-3 sm:text-sm ${
                       seleccionado
                         ? 'border-teal bg-teal text-butter'
                         : 'border-borde bg-fondo text-butter-muted hover:border-teal hover:text-butter'

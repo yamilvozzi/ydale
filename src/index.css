@@ -18,8 +18,8 @@
   --color-butter: #f2ede0;
   --color-butter-muted: #a39c8a;
 
-  /* Verde azulado suave, derivado de la paleta y distinto de la blue note. */
-  --color-nota-tonica: color-mix(in srgb, var(--color-teal) 30%, var(--color-butter));
+  /* Naranja suave compartido por Escala y Notas, distinto de la blue note. */
+  --color-nota-tonica: #d9824b;
 }
 
 body {
@@ -129,7 +129,7 @@ body {
   top: 0;
   bottom: 0;
   right: 0;
-  width: 1px;
+  width: 1.5px;
   background: color-mix(in srgb, var(--color-butter-muted) 70%, transparent);
   pointer-events: none;
 }
@@ -174,7 +174,6 @@ body {
 
 .diagrama-nota-tonica {
   fill: var(--color-nota-tonica);
-  stroke: var(--color-nota-tonica);
   color: var(--color-fondo);
 }
 
