@@ -22,7 +22,7 @@ export default function Tema() {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center gap-4 text-butter-muted">
         <p>No se encontró el tema.</p>
-        <Link to="/" className="text-teal">Volver al repertorio</Link>
+        <Link to="/repertorio" className="text-teal">Volver al repertorio</Link>
       </div>
     )
   }
@@ -32,7 +32,7 @@ export default function Tema() {
       {/* Volver: jerarquía visual distinta a las pestañas, no es "una más". */}
       <div className="w-full flex items-center gap-3 px-4 sm:px-6 lg:px-8 pt-4">
         <Link
-          to="/"
+          to="/repertorio"
           aria-label="Volver al repertorio"
           className="p-2 -ml-2 rounded-lg hover:bg-superficie transition-colors"
         >

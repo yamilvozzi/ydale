@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import EditorEscalaModal from '../EditorEscalaModal'
 import EscalaDiagrama from '../EscalaDiagrama'
+import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
 import { useEscalas } from '../../hooks/useEscalas'
 import { etiquetaTipo } from '../../lib/escalas'
 
@@ -11,15 +12,10 @@ export default function Escala() {
   const { escalas, cargando, guardando, error, guardarEscala, eliminarEscala } =
     useEscalas(tema.id)
   const [editor, setEditor] = useState(null)
+  const [escalaAEliminar, setEscalaAEliminar] = useState(null)
 
   async function alGuardar(escala) {
     if (await guardarEscala(escala)) setEditor(null)
-  }
-
-  async function alEliminar(escala) {
-    const nombre = `${escala.tonica} ${etiquetaTipo(escala.tipo)}`
-    if (!window.confirm(`¿Eliminar la escala ${nombre}?`)) return
-    await eliminarEscala(escala)
   }
 
   return (
@@ -73,7 +69,7 @@ export default function Escala() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => alEliminar(escala)}
+                    onClick={() => setEscalaAEliminar(escala)}
                     disabled={guardando}
                     aria-label={`Eliminar escala ${escala.tonica} ${etiquetaTipo(escala.tipo)}`}
                     className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter disabled:opacity-50"
@@ -91,6 +87,12 @@ export default function Escala() {
           <p className="text-sm italic text-butter-muted">Todavía no hay escalas cargadas.</p>
         )}
       </section>
+
+      {escalaAEliminar && <ConfirmarEliminacionModal
+        mensaje={`¿Eliminar la escala ${escalaAEliminar.tonica} ${etiquetaTipo(escalaAEliminar.tipo)}?`}
+        onCancelar={() => setEscalaAEliminar(null)}
+        onConfirmar={() => eliminarEscala(escalaAEliminar)}
+      />}
 
       {editor && (
         <EditorEscalaModal

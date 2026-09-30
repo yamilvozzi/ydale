@@ -3,7 +3,7 @@ import { useState } from 'react'
 import EscalaDiagrama from './EscalaDiagrama'
 import { crearEscala, normalizarEscala, NOTAS, TIPOS_ESCALA } from '../lib/escalas'
 
-export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardando = false }) {
+export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardando = false, errorGuardado = '' }) {
   const [borrador, setBorrador] = useState(() =>
     normalizarEscala(escala ?? crearEscala())
   )
@@ -98,6 +98,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
           </div>
         </div>
 
+        {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"

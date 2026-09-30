@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import AcordeDiagrama from './AcordeDiagrama'
 import { crearAcorde, normalizarAcorde } from '../lib/notasConAcordes'
 
-export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardando = false }) {
+export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardando = false, errorGuardado = '' }) {
   const [borrador, setBorrador] = useState(() => normalizarAcorde(acorde ?? crearAcorde()))
   const [seleccionandoTonica, setSeleccionandoTonica] = useState(false)
   const dialogo = useRef(null)
@@ -88,6 +88,7 @@ export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardan
         </div>
 
         </fieldset>
+        {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"

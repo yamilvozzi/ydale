@@ -68,20 +68,20 @@ export function useEscalas(temaId) {
 
   async function eliminarEscala(escala) {
     setGuardando(true)
-    const { error: errorEliminacion } = await supabase
-      .from('escalas')
-      .delete()
-      .eq('id', escala.id)
-      .eq('tema_id', temaId)
-    setGuardando(false)
+    try {
+      const { error: errorEliminacion } = await supabase
+        .from('escalas')
+        .delete()
+        .eq('id', escala.id)
+        .eq('tema_id', temaId)
 
-    if (errorEliminacion) {
-      alert('No se pudo eliminar la escala. Revisá la conexión e intentá de nuevo.')
-      return false
+      if (errorEliminacion) return false
+
+      await recargar()
+      return true
+    } finally {
+      setGuardando(false)
     }
-
-    await recargar()
-    return true
   }
 
   return { escalas, cargando, guardando, error, guardarEscala, eliminarEscala }

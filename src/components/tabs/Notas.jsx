@@ -4,6 +4,7 @@ import { useOutletContext } from 'react-router-dom'
 import AcordeDiagrama from '../AcordeDiagrama'
 import EditorAcordeModal from '../EditorAcordeModal'
 import GeneradorAcordesModal from '../GeneradorAcordesModal'
+import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
 import SeccionTextoEditable from '../SeccionTextoEditable'
 import { guardarNotas, leerNotas } from '../../lib/notasConAcordes'
 import { supabase } from '../../lib/supabaseClient'
@@ -14,11 +15,12 @@ export default function Notas() {
   const notas = leerNotas(tema.notas)
   const [editor, setEditor] = useState(null)
   const [generadorAbierto, setGeneradorAbierto] = useState(false)
+  const [acordeAEliminar, setAcordeAEliminar] = useState(null)
   const [guardandoAcorde, setGuardandoAcorde] = useState(false)
   const [guardandoTexto, setGuardandoTexto] = useState(false)
   const ocupado = guardandoAcorde || guardandoTexto
 
-  async function persistirAcordes(acordes) {
+  async function persistirAcordes(acordes, mostrarError = true) {
     if (ocupado) return false
     setGuardandoAcorde(true)
     try {
@@ -27,7 +29,7 @@ export default function Notas() {
       actualizarCampoLocal('notas', valor)
       return true
     } catch {
-      alert('No se pudo guardar el acorde. Revisá la conexión e intentá de nuevo.')
+      if (mostrarError) alert('No se pudo guardar el acorde. Revisá la conexión e intentá de nuevo.')
       return false
     } finally {
       setGuardandoAcorde(false)
@@ -43,9 +45,7 @@ export default function Notas() {
   }
 
   async function eliminarAcorde(acorde) {
-    if (ocupado) return
-    if (!window.confirm(`¿Eliminar el acorde ${acorde.nombre || 'sin nombre'}?`)) return
-    await persistirAcordes(notas.acordes.filter((actual) => actual.id !== acorde.id))
+    return persistirAcordes(notas.acordes.filter((actual) => actual.id !== acorde.id), false)
   }
 
   return (
@@ -106,7 +106,7 @@ export default function Notas() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => eliminarAcorde(acorde)}
+                      onClick={() => setAcordeAEliminar(acorde)}
                       disabled={ocupado}
                       aria-label={`Eliminar ${acorde.nombre || 'acorde'}`}
                       className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
@@ -123,6 +123,12 @@ export default function Notas() {
           <p className="text-sm italic text-butter-muted">Todavía no hay diagramas cargados.</p>
         )}
       </section>
+
+      {acordeAEliminar && <ConfirmarEliminacionModal
+        mensaje={`¿Eliminar el acorde ${acordeAEliminar.nombre || 'sin nombre'}?`}
+        onCancelar={() => setAcordeAEliminar(null)}
+        onConfirmar={() => eliminarAcorde(acordeAEliminar)}
+      />}
 
       {generadorAbierto && <GeneradorAcordesModal
         onCerrar={() => setGeneradorAbierto(false)}

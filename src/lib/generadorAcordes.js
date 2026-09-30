@@ -71,7 +71,12 @@ function comparar(a, b) {
 }
 
 function generarGrupo(acorde, grupo, zona, conBajo) {
-  const [desde, hasta] = ZONAS[zona]
+  const [preferidoDesde, preferidoHasta] = ZONAS[zona]
+  const desde = Math.max(0, preferidoDesde - 2)
+  const hasta = Math.min(CANTIDAD_TRASTES, preferidoHasta + 2)
+  const distanciaZona = (notas) => Math.max(...notas.map(({ traste }) =>
+    Math.max(0, preferidoDesde - traste, traste - preferidoHasta)
+  ))
   const candidatas = grupo.map((cuerda) => posicionesEnCuerda(cuerda, acorde.voces, desde, hasta, acorde.raiz))
   const resultados = []
   for (const a of candidatas[0]) for (const b of candidatas[1]) for (const c of candidatas[2]) {
@@ -88,7 +93,7 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
           if (posicion.midi < c.midi && extension([...principal, posicion]) <= 4) bajos.push({ ...posicion, esBajo: true })
         }
       }
-      bajos.sort((x, y) => extension([...principal, x]) - extension([...principal, y]) || x.midi - y.midi)
+      bajos.sort((x, y) => distanciaZona([...principal, x]) - distanciaZona([...principal, y]) || extension([...principal, x]) - extension([...principal, y]) || x.midi - y.midi)
       if (!bajos.length) continue
       bajo = bajos[0]
     }
@@ -99,8 +104,8 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
       id: notas.map(({ cuerda, traste }) => `${cuerda}:${traste}`).join('-'),
       principal, bajo,
       cuerdaTonica: principal.find(({ esTonica }) => esTonica).cuerda,
-      // Posición cerrada, compacidad, dedos estimados, extensión y altura.
-      ranking: [amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
+      // Primero la zona original; la tolerancia solo completa alternativas.
+      ranking: [distanciaZona(notas), amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
     })
   }
   resultados.sort(comparar)
@@ -118,9 +123,9 @@ export function generarPosiciones(acorde, { cuerdas = 'AUTO', zona = 'TODAS', ba
   if (cuerdas === 'AUTO') return [
     ...generarGrupo(interpretado, GRUPOS_CUERDAS['1–2–3'], zona, conBajo),
     ...generarGrupo(interpretado, GRUPOS_CUERDAS['2–3–4'], zona, conBajo).sort(comparar).slice(0, 1),
-  ]
+  ].sort((a, b) => a.ranking[0] - b.ranking[0])
   if (!GRUPOS_CUERDAS[cuerdas]) return []
-  return generarGrupo(interpretado, GRUPOS_CUERDAS[cuerdas], zona, conBajo)
+  return generarGrupo(interpretado, GRUPOS_CUERDAS[cuerdas], zona, conBajo).sort((a, b) => a.ranking[0] - b.ranking[0])
 }
 
 /** Pasa la propuesta al editor existente, sin guardar hasta su confirmación. */

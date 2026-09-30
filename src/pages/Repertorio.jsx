@@ -5,12 +5,15 @@ import { useTemas } from '../hooks/useTemas'
 import { supabase } from '../lib/supabaseClient'
 import NuevoTemaModal from '../components/NuevoTemaModal'
 import Logo from '../components/Logo'
+import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
+import VolverInicio from '../components/VolverInicio'
 
 export default function Repertorio() {
   const { temas, cargando, recargar } = useTemas()
   const [busqueda, setBusqueda] = useState('')
   const [modalAbierto, setModalAbierto] = useState(false)
   const [temaEditando, setTemaEditando] = useState(null)
+  const [temaAEliminar, setTemaAEliminar] = useState(null)
   const navegar = useNavigate()
 
   // Ocho temas: filtrar en el cliente es más simple que una consulta
@@ -37,23 +40,18 @@ export default function Repertorio() {
     if (eraCreacion && id) navegar(`/tema/${id}`)
   }
 
-  async function eliminarTema(t, e) {
-    e.stopPropagation()
-    const confirmado = window.confirm(
-      `¿Eliminar "${t.nombre}" del repertorio? Esta acción no se puede deshacer.`
-    )
-    if (!confirmado) return
-
+  async function eliminarTema(t) {
     const { error } = await supabase.from('temas').delete().eq('id', t.id)
     if (error) {
-      alert('No se pudo eliminar el tema. Probá de nuevo.')
-      return
+      return false
     }
-    recargar()
+    await recargar()
+    return true
   }
 
   return (
     <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      <VolverInicio />
       <div className="w-full">
         <div className="flex justify-center mb-6">
           <h1>
@@ -114,7 +112,7 @@ export default function Repertorio() {
                 </button>
 
                 <button
-                  onClick={(e) => eliminarTema(t, e)}
+                  onClick={(e) => { e.stopPropagation(); setTemaAEliminar(t) }}
                   aria-label={`Eliminar ${t.nombre}`}
                   className="accion-icono rounded-lg bg-superficie hover:bg-borde transition-colors"
                 >
@@ -125,6 +123,12 @@ export default function Repertorio() {
           </ul>
         )}
       </div>
+
+      {temaAEliminar && <ConfirmarEliminacionModal
+        mensaje={`¿Eliminar "${temaAEliminar.nombre}" del repertorio?`}
+        onCancelar={() => setTemaAEliminar(null)}
+        onConfirmar={() => eliminarTema(temaAEliminar)}
+      />}
 
       {(modalAbierto || temaEditando) && (
         <NuevoTemaModal

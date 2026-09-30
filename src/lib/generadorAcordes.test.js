@@ -55,7 +55,7 @@ test('todo resultado cumple notas, cuerdas, zonas, altura y máximo cuatro trast
           const trastes = notas.map((n) => n.traste)
           assert.ok(Math.max(...trastes) - Math.min(...trastes) <= 4)
           for (const n of notas) {
-            assert.ok(n.traste >= desde && n.traste <= hasta)
+            assert.ok(n.traste >= Math.max(0, desde - 2) && n.traste <= Math.min(15, hasta + 2))
             assert.equal(n.clase, NOTAS.indexOf(notaEnTraste(AFINACION[n.cuerda], n.traste)))
           }
           assert.equal(Boolean(p.bajo), bajo)
@@ -65,6 +65,25 @@ test('todo resultado cumple notas, cuerdas, zonas, altura y máximo cuatro trast
             assert.ok(p.principal.every((n) => n.midi > p.bajo.midi))
           }
         }
+      }
+    }
+  }
+})
+
+test('las zonas conservan primero las posiciones originales y completan con tolerancia de dos trastes', () => {
+  const trastes = (zona) => generarPosiciones('C', { cuerdas: '1–2–3', zona }).map((p) => p.principal.map((n) => n.traste))
+  assert.deepEqual(trastes('ABIERTA'), [[0, 1, 0], [3, 5, 5]])
+  assert.deepEqual(trastes('MEDIA'), [[8, 8, 9], [3, 5, 5]])
+  assert.deepEqual(trastes('AGUDA'), [[12, 13, 12], [8, 8, 9]])
+  assert.deepEqual(trastes('TODAS'), [[8, 8, 9], [0, 1, 0], [3, 5, 5]])
+  for (const zona of ['ABIERTA', 'MEDIA', 'AGUDA']) {
+    const [desde, hasta] = ZONAS[zona]
+    for (const nombre of ['C', 'Cm', 'A7', 'D/F#', 'Bb/Db']) {
+      for (const cuerdas of ['AUTO', ...Object.keys(GRUPOS_CUERDAS)]) {
+        const resultados = generarPosiciones(nombre, { cuerdas, zona, bajo: true })
+        const distancias = resultados.map((p) => Math.max(...[...p.principal, ...(p.bajo ? [p.bajo] : [])].map(({ traste }) => Math.max(0, desde - traste, traste - hasta))))
+        assert.deepEqual(distancias, [...distancias].sort((a, b) => a - b))
+        assert.ok(distancias.every((distancia) => distancia <= 2))
       }
     }
   }
