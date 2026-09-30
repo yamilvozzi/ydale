@@ -1,7 +1,7 @@
-import { createContext, useContext, useState } from 'react'
+import { useState } from 'react'
+import { PinContext } from './pin'
 
 const CLAVE_STORAGE = 'ydaaaale_desbloqueado'
-const PinContext = createContext(null)
 
 export function PinProvider({ children }) {
   const [desbloqueado, setDesbloqueado] = useState(
@@ -22,10 +22,4 @@ export function PinProvider({ children }) {
       {children}
     </PinContext.Provider>
   )
-}
-
-export function usePin() {
-  const contexto = useContext(PinContext)
-  if (!contexto) throw new Error('usePin debe usarse dentro de <PinProvider>')
-  return contexto
 }

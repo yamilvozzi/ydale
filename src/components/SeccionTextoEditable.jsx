@@ -14,6 +14,8 @@ export default function SeccionTextoEditable({
   lineaUnica = false,
   columnas = false,
   serializarAlGuardar,
+  bloqueado = false,
+  onGuardandoChange,
 }) {
   const {
     editando,
@@ -23,7 +25,7 @@ export default function SeccionTextoEditable({
     empezarEdicion,
     cancelar,
     guardar,
-  } = useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar })
+  } = useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar, bloqueado, onGuardandoChange })
 
   const claseTexto = [
     fuenteMono ? 'font-mono' : 'font-sans',
@@ -54,6 +56,7 @@ export default function SeccionTextoEditable({
           // no debe competir con el contenido de la sección.
           <button
             onClick={empezarEdicion}
+            disabled={bloqueado}
             aria-label={`Editar ${titulo || 'sección'}`}
             className="accion-icono group -mr-1 rounded-lg hover:bg-superficie transition-colors"
           >
@@ -65,6 +68,7 @@ export default function SeccionTextoEditable({
           <div className="flex gap-1">
             <button
               onClick={cancelar}
+              disabled={guardando || bloqueado}
               aria-label="Cancelar"
               className="group p-2 rounded-lg hover:bg-superficie transition-colors"
             >
@@ -72,7 +76,7 @@ export default function SeccionTextoEditable({
             </button>
             <button
               onClick={guardar}
-              disabled={guardando}
+              disabled={guardando || bloqueado}
               aria-label="Guardar"
               className="p-2 rounded-lg bg-teal hover:bg-green transition-colors disabled:opacity-50"
             >
@@ -86,6 +90,7 @@ export default function SeccionTextoEditable({
         lineaUnica ? (
           <input
             autoFocus
+            disabled={guardando || bloqueado}
             value={borrador}
             onChange={(e) => setBorrador(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && guardar()}
@@ -94,6 +99,7 @@ export default function SeccionTextoEditable({
         ) : (
           <textarea
             autoFocus
+            disabled={guardando || bloqueado}
             value={borrador}
             onChange={(e) => setBorrador(e.target.value)}
             className={`${claseTexto} flex-1 ${minAltura} bg-superficie border border-borde rounded-lg p-4 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30`}

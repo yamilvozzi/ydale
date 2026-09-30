@@ -1,5 +1,6 @@
 import MarcadorNota from './MarcadorNota'
 import LineasDiapason from './LineasDiapason'
+import { AFINACION, notaEnTraste } from '../lib/escalas'
 
 const ESTADOS = ['vacio', 'presionada', 'aire', 'muteada']
 
@@ -17,6 +18,7 @@ export default function AcordeDiagrama({
   onTonicaSeleccionada,
   compacto = !editable,
 }) {
+  const columnas = acorde.trastes.length
   function ciclarCelda(cuerda, traste) {
     const posiciones = acorde.posiciones.map((fila) => [...fila])
     const actual = posiciones[cuerda][traste]
@@ -32,7 +34,7 @@ export default function AcordeDiagrama({
     const siguiente = ESTADOS[(ESTADOS.indexOf(actual) + 1) % ESTADOS.length]
 
     if (siguiente === 'aire' || siguiente === 'muteada') {
-      posiciones[cuerda] = Array(4).fill('vacio')
+      posiciones[cuerda] = Array(columnas).fill('vacio')
     } else if (siguiente === 'presionada') {
       // Una cuerda al aire o muteada no puede tener a la vez un traste pisado.
       posiciones[cuerda] = posiciones[cuerda].map((estado) =>
@@ -58,6 +60,14 @@ export default function AcordeDiagrama({
     const marcador = estadoDelMarcador(posiciones[cuerda])
     if (!marcador) return
 
+    if (modoTonica) {
+      if (marcador.estado !== 'aire') return
+      const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === marcador.indice
+      onChange({ ...acorde, tonica: esTonica ? null : { cuerda, traste: marcador.indice } })
+      onTonicaSeleccionada?.()
+      return
+    }
+
     const siguiente = marcador.estado === 'aire' ? 'muteada' : 'vacio'
     posiciones[cuerda][marcador.indice] = siguiente
     onChange({ ...acorde, posiciones })
@@ -65,14 +75,14 @@ export default function AcordeDiagrama({
 
   const medidas = compacto
     ? {
-        grilla: 'grid-cols-[1.85rem_repeat(4,2.6rem)]',
+        grilla: `1.85rem repeat(${columnas}, 2.6rem)`,
         altoCuerda: 'h-7',
         numero: 'text-xs',
         marcador: 'size-5 text-sm',
         nota: '[--diametro-nota:16px]',
       }
     : {
-        grilla: 'grid-cols-[2.35rem_repeat(4,minmax(3rem,1fr))] sm:grid-cols-[2.7rem_repeat(4,minmax(4.25rem,1fr))]',
+        grilla: `2.35rem repeat(${columnas}, minmax(2.75rem, 1fr))`,
         altoCuerda: 'h-10 sm:h-12',
         numero: 'text-base',
         marcador: 'size-7 text-lg',
@@ -81,7 +91,7 @@ export default function AcordeDiagrama({
 
   return (
     <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} ${medidas.nota} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
-      <div className={`grid ${medidas.grilla} items-end`}>
+      <div className="grid items-end" style={{ gridTemplateColumns: medidas.grilla }}>
         <div />
         {acorde.trastes.map((traste, indice) =>
           editable ? (
@@ -108,6 +118,9 @@ export default function AcordeDiagrama({
 
         {acorde.posiciones.map((fila, cuerda) => {
           const marcador = estadoDelMarcador(fila)
+          const tonicaAbierta = marcador?.estado === 'aire' && acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === marcador.indice
+          const contenidoAbierto = marcador?.estado === 'aire'
+            ? <MarcadorNota nota={AFINACION[cuerda]} esTonica={tonicaAbierta} /> : '×'
           // Hay seis cuerdas y sólo cinco espacios entre ellas: la última fila
           // dibuja la sexta cuerda, pero no agrega altura debajo del diapasón.
           const altoFila = cuerda === acorde.posiciones.length - 1 ? 'h-px' : medidas.altoCuerda
@@ -120,14 +133,14 @@ export default function AcordeDiagrama({
                     <button
                       type="button"
                       onClick={() => ciclarMarcador(cuerda)}
-                      aria-label={`Cambiar estado de la cuerda ${6 - cuerda}: ${marcador.estado}`}
+                      aria-label={`Cuerda ${cuerda + 1}, al aire: ${marcador.estado}${tonicaAbierta ? ', tónica' : ''}`}
                       className={`diagrama-marcador ${medidas.marcador} rounded-full font-semibold text-butter hover:bg-superficie focus:outline-none focus:ring-2 focus:ring-teal`}
                     >
-                      {marcador.estado === 'aire' ? '○' : '×'}
+                      {contenidoAbierto}
                     </button>
                   ) : (
                     <span className={`diagrama-marcador font-semibold text-butter ${medidas.marcador}`}>
-                      {marcador.estado === 'aire' ? '○' : '×'}
+                      {contenidoAbierto}
                     </span>
                   )
                 )}
@@ -135,11 +148,14 @@ export default function AcordeDiagrama({
 
               {fila.map((estado, traste) => {
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
+                const esBajo = acorde.bajo?.cuerda === cuerda && acorde.bajo?.traste === traste
+                const numero = acorde.trastes[traste].trim()
+                const nota = /^\d+$/.test(numero) ? notaEnTraste(AFINACION[cuerda], Number(numero)) : null
                 const comun = `relative ${altoFila}`
                 const contenido = (
                   <>
                     <LineasDiapason traste cejuela={traste === 0} />
-                    {estado === 'presionada' && <MarcadorNota esTonica={esTonica} />}
+                    {estado === 'presionada' && <MarcadorNota nota={nota} esTonica={esTonica} />}
                   </>
                 )
                 return editable ? (
@@ -147,7 +163,7 @@ export default function AcordeDiagrama({
                     key={traste}
                     type="button"
                     onClick={() => ciclarCelda(cuerda, traste)}
-                    aria-label={`Cuerda ${6 - cuerda}, traste ${traste + 1}: ${estado}${esTonica ? ', tónica' : ''}`}
+                    aria-label={`Cuerda ${cuerda + 1}, traste ${numero || `sin definir (${traste + 1})`}: ${estado}${esTonica ? ', tónica' : ''}${esBajo ? ', bajo' : ''}`}
                     className={`${comun} before:absolute before:inset-x-0 before:-top-5 before:-bottom-5 ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
                   >
                     {contenido}

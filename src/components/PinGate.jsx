@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { usePin } from '../context/PinContext'
+import { usePin } from '../hooks/usePin'
 import Logo from './Logo'
 
 export default function PinGate({ children }) {

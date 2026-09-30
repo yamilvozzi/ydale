@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { actualizarTema } from '../lib/actualizarTema'
 
 /**
  * Maneja el ciclo completo de un campo editable de la tabla `temas`:
  * lectura -> modo edición -> guardar.
  */
-export function useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar }) {
+export function useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar, bloqueado = false, onGuardandoChange }) {
   const [editando, setEditando] = useState(false)
   const [borrador, setBorrador] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -20,22 +21,20 @@ export function useCampoEditable({ temaId, campo, valor, onGuardado, serializarA
   }
 
   async function guardar() {
+    if (guardando || bloqueado) return
     setGuardando(true)
-    const valorAGuardar = serializarAlGuardar ? serializarAlGuardar(borrador) : borrador
-    const { error } = await supabase
-      .from('temas')
-      .update({ [campo]: valorAGuardar })
-      .eq('id', temaId)
-
-    setGuardando(false)
-
-    if (error) {
+    onGuardandoChange?.(true)
+    try {
+      const valorAGuardar = serializarAlGuardar ? serializarAlGuardar(borrador) : borrador
+      await actualizarTema(supabase, temaId, { [campo]: valorAGuardar })
+      onGuardado(valorAGuardar)
+      setEditando(false)
+    } catch {
       alert('No se pudo guardar. Revisá la conexión e intentá de nuevo.')
-      return
+    } finally {
+      setGuardando(false)
+      onGuardandoChange?.(false)
     }
-
-    onGuardado(valorAGuardar)
-    setEditando(false)
   }
 
   return {

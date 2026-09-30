@@ -172,6 +172,11 @@ body {
   letter-spacing: normal;
 }
 
+/* El botón al aire ya está centrado en la cuerda; su círculo usa ese centro. */
+.diagrama-marcador > .diagrama-nota {
+  top: 50%;
+}
+
 .diagrama-nota-tonica {
   fill: var(--color-nota-tonica);
   color: var(--color-fondo);

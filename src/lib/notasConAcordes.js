@@ -19,7 +19,7 @@ export function leerNotas(valor) {
       return {
         version: VERSION,
         texto: datos.texto,
-        acordes: datos.acordes.map(normalizarAcorde),
+        acordes: datos.acordes.filter((acorde) => acorde && typeof acorde === 'object' && !Array.isArray(acorde)).map(normalizarAcorde),
       }
     }
   } catch {
@@ -44,32 +44,35 @@ export function crearAcorde() {
     trastes: ['', '', '', ''],
     posiciones: Array.from({ length: 6 }, () => Array(4).fill('vacio')),
     tonica: null,
+    bajo: null,
   }
 }
 
 export function normalizarAcorde(acorde = {}) {
+  if (!acorde || typeof acorde !== 'object') acorde = {}
+  // Los diagramas históricos tienen cuatro columnas. Una extensión de cuatro
+  // trastes puede necesitar cinco columnas consecutivas, incluidos sus extremos.
+  const columnas = acorde.trastes?.length === 5 ? 5 : 4
   const posiciones = Array.from({ length: 6 }, (_, cuerda) =>
-    Array.from({ length: 4 }, (_, traste) => {
+    Array.from({ length: columnas }, (_, traste) => {
       const estado = acorde.posiciones?.[cuerda]?.[traste]
       return ['presionada', 'aire', 'muteada'].includes(estado) ? estado : 'vacio'
     })
   )
-  const cuerdaTonica = Number(acorde.tonica?.cuerda)
-  const trasteTonica = Number(acorde.tonica?.traste)
-  const tonicaValida =
-    Number.isInteger(cuerdaTonica) &&
-    cuerdaTonica >= 0 &&
-    cuerdaTonica < 6 &&
-    Number.isInteger(trasteTonica) &&
-    trasteTonica >= 0 &&
-    trasteTonica < 4 &&
-    posiciones[cuerdaTonica][trasteTonica] === 'presionada'
+  function referenciaValida(referencia) {
+    if (!referencia) return null
+    const { cuerda, traste } = referencia
+    return Number.isInteger(cuerda) && Number.isInteger(traste) &&
+      ['presionada', 'aire'].includes(posiciones[cuerda]?.[traste])
+      ? { cuerda, traste } : null
+  }
 
   return {
     id: acorde.id ?? globalThis.crypto?.randomUUID?.() ?? `acorde-${Date.now()}`,
     nombre: typeof acorde.nombre === 'string' ? acorde.nombre : '',
-    trastes: Array.from({ length: 4 }, (_, indice) => String(acorde.trastes?.[indice] ?? '')),
+    trastes: Array.from({ length: columnas }, (_, indice) => String(acorde.trastes?.[indice] ?? '')),
     posiciones,
-    tonica: tonicaValida ? { cuerda: cuerdaTonica, traste: trasteTonica } : null,
+    tonica: referenciaValida(acorde.tonica),
+    bajo: referenciaValida(acorde.bajo),
   }
 }
