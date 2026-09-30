@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
-export default function ConfirmarEliminacionModal({ mensaje, onCancelar, onConfirmar }) {
+export default function ConfirmarEliminacionModal({ mensaje, onCancelar, onConfirmar, preguntaComoTitulo = false }) {
   const dialogo = useRef(null)
   const cancelar = useRef(null)
   const enviando = useRef(false)
@@ -44,13 +44,13 @@ export default function ConfirmarEliminacionModal({ mensaje, onCancelar, onConfi
       ref={dialogo}
       role="alertdialog"
       aria-labelledby={`${id}-titulo`}
-      aria-describedby={`${id}-mensaje`}
+      aria-describedby={preguntaComoTitulo ? undefined : `${id}-mensaje`}
       aria-busy={ocupado}
       onCancel={(evento) => { evento.preventDefault(); if (!enviando.current) onCancelar() }}
       className="fixed inset-0 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-sm overflow-y-auto rounded-xl border border-borde bg-superficie p-5 text-butter shadow-2xl backdrop:bg-black/70"
     >
-      <h2 id={`${id}-titulo`} className="mb-3 text-lg">Confirmar eliminación</h2>
-      <p id={`${id}-mensaje`} className="break-words text-sm text-butter-muted">{mensaje}</p>
+      <h2 id={`${id}-titulo`} className="break-words text-lg">{preguntaComoTitulo ? mensaje : 'Confirmar eliminación'}</h2>
+      {!preguntaComoTitulo && <p id={`${id}-mensaje`} className="mt-3 break-words text-sm text-butter-muted">{mensaje}</p>}
       {error && <p role="alert" className="mt-3 text-sm text-butter-muted">No se pudo eliminar. Intentá de nuevo.</p>}
       <div className="mt-5 flex justify-end gap-2">
         <button ref={cancelar} type="button" disabled={ocupado} onClick={onCancelar} className="rounded-lg border border-borde bg-fondo px-4 py-2 text-xs text-butter-muted hover:text-butter disabled:opacity-50">CANCELAR</button>

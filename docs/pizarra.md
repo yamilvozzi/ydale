@@ -9,7 +9,7 @@
 
 ## Pizarra
 
-`+ ESCALA` usa el editor y diapasón actuales. `+ ACORDE` abre el generador y ELEGIR transfiere la posición al editor manual. `Manual` permite dibujar directamente. Se pueden agregar varias escalas y acordes, editarlos y eliminarlos individualmente. VACIAR PIZARRA pide confirmación con el modal existente.
+`+ Escala` usa el editor y diapasón actuales. `+ Acorde` permite dibujar directamente en el editor manual. `Generador` abre el generador y ELEGIR transfiere la posición al editor manual. Los tres botones comparten el color principal. Las escalas aparecen siempre arriba, en orden de incorporación; los acordes debajo, en filas que se ajustan al ancho disponible. Los diagramas conservan sus componentes y proporciones. Se pueden editar y eliminar individualmente. Las confirmaciones de eliminación y VACIAR PIZARRA muestran la pregunta como título y los botones de cancelar/eliminar.
 
 El contenido se guarda en `localStorage` bajo `ydaaaale_pizarra_v1`. Permanece tras recargar y reabrir la aplicación en el mismo navegador y origen. No se sincroniza entre dispositivos; borrar los datos del navegador también borra la pizarra. Los errores de almacenamiento se muestran sin cerrar el editor ni descartar su borrador. Si no se puede leer el contenido guardado, no se sobrescribe automáticamente.
 
@@ -36,7 +36,7 @@ No requiere cambios en Supabase: ni tablas, columnas, RLS, índices, funciones, 
 2. Configurar `.env` a partir de `.env.example` con las variables existentes: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_APP_PIN`. No se requieren variables nuevas.
 3. Ejecutar `npm run dev` y abrir el URL indicado por Vite, normalmente `http://localhost:5173`. Ingresar el PIN configurado.
 4. Abrir REPERTORIO, buscar y abrir un tema existente, comprobar sus pestañas y volver al listado y luego a Inicio. No hace falta modificar ni eliminar temas para comprobar la navegación.
-5. Abrir PIZARRA y agregar dos escalas diferentes, un acorde desde el generador y otro con Manual. Comprobar su edición y que todos permanezcan visibles.
+5. Abrir PIZARRA y agregar un acorde desde Generador, dos escalas diferentes y otro acorde con + Acorde. Comprobar su edición, que las escalas estén arriba y los acordes se distribuyan en filas debajo.
 6. Recargar la página; cerrar y volver a abrir el mismo URL. Confirmar que el contenido se conserva.
 7. Eliminar un elemento y verificar que los demás siguen presentes. Probar CANCELAR en VACIAR PIZARRA y luego confirmar el vaciado; recargar para verificarlo.
 8. Revisar a ancho móvil y desktop. Los gráficos mantienen sus proporciones y permiten desplazarse horizontalmente.
