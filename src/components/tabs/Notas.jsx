@@ -50,20 +50,7 @@ export default function Notas() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SeccionTextoEditable
-        temaId={tema.id}
-        campo="notas"
-        valor={notas.texto}
-        onGuardado={(valor) => actualizarCampoLocal('notas', valor)}
-        serializarAlGuardar={(texto) => guardarNotas({ ...notas, texto })}
-        bloqueado={guardandoAcorde}
-        onGuardandoChange={setGuardandoTexto}
-        titulo="Notas"
-        editorGrande
-        placeholder="Entradas, finales, cambios, lo que vaya surgiendo en el ensayo."
-      />
-
-      <section className="border-t border-borde pt-5">
+      <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm uppercase tracking-widest text-butter-muted">Acordes</h2>
           <div className="flex flex-wrap gap-2">
@@ -124,6 +111,22 @@ export default function Notas() {
         )}
       </section>
 
+      <div className="border-t border-borde pt-5">
+        <SeccionTextoEditable
+          temaId={tema.id}
+          campo="notas"
+          valor={notas.texto}
+          onGuardado={(valor) => actualizarCampoLocal('notas', valor)}
+          serializarAlGuardar={(texto) => guardarNotas({ ...notas, texto })}
+          bloqueado={guardandoAcorde}
+          onGuardandoChange={setGuardandoTexto}
+          titulo="Notas"
+          editorGrande
+          columnas
+          placeholder="Entradas, finales, cambios, lo que vaya surgiendo en el ensayo."
+        />
+      </div>
+
       {acordeAEliminar && <ConfirmarEliminacionModal
         mensaje={`¿Eliminar el acorde ${acordeAEliminar.nombre || 'sin nombre'}?`}
         onCancelar={() => setAcordeAEliminar(null)}
@@ -132,7 +135,11 @@ export default function Notas() {
 
       {generadorAbierto && <GeneradorAcordesModal
         onCerrar={() => setGeneradorAbierto(false)}
-        onElegir={(acorde) => {
+        guardando={ocupado}
+        onElegir={async (acorde) => {
+          if (await persistirAcordes([...notas.acordes, acorde])) setGeneradorAbierto(false)
+        }}
+        onEditar={(acorde) => {
           setGeneradorAbierto(false)
           setEditor({ ...acorde, esNuevo: true })
         }}

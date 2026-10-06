@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { generarPosiciones, interpretarAcorde, propuestaAEditable, ZONAS, GRUPOS_CUERDAS } from './generadorAcordes.js'
+import { generarPosiciones, interpretarAcorde, propuestaAEditable, ZONAS, GRUPOS_CUERDAS, GRUPOS_CUERDAS_4 } from './generadorAcordes.js'
 import { RAICES_ACORDES, SUFIJOS_ACORDES } from './catalogoAcordes.js'
 import { AFINACION, NOTAS, notaEnTraste } from './escalas.js'
 import { guardarNotas, leerNotas, crearAcorde, normalizarAcorde } from './notasConAcordes.js'
@@ -44,11 +44,15 @@ test('todo resultado cumple notas, cuerdas, zonas, altura y máximo cuatro trast
     for (const [zona, [desde, hasta]] of Object.entries(ZONAS)) {
       for (const cuerdas of ['AUTO', ...Object.keys(GRUPOS_CUERDAS)]) for (const bajo of [false, true]) {
         const propuestas = generarPosiciones(acorde, { zona, cuerdas, bajo })
-        assert.ok(propuestas.length <= (cuerdas === 'AUTO' ? 4 : 3))
+        assert.ok(propuestas.length <= (cuerdas === 'AUTO' ? 5 : 4))
         assert.equal(new Set(propuestas.map((p) => p.id)).size, propuestas.length)
         for (const p of propuestas) {
           assert.equal(p.principal.length, 3)
-          assert.deepEqual(p.principal.map((n) => n.clase).sort((a, b) => a - b), acorde.voces.map((n) => n.clase).sort((a, b) => a - b))
+          const clases = new Set(p.principal.map((n) => n.clase))
+          assert.equal(clases.size, 3)
+          assert.ok(p.principal.every((n) => acorde.notas.some((nota) => nota.clase === n.clase)))
+          const requeridas = acorde.notas.length === 3 ? acorde.notas : [acorde.notas[1], acorde.notas[3]]
+          assert.ok(requeridas.every((n) => clases.has(n.clase)))
           if (cuerdas !== 'AUTO') assert.deepEqual(p.principal.map((n) => n.cuerda), GRUPOS_CUERDAS[cuerdas])
           const notas = p.bajo ? [...p.principal, p.bajo] : p.principal
           assert.equal(new Set(notas.map((n) => n.cuerda)).size, notas.length)
@@ -107,20 +111,21 @@ test('el slash activa automáticamente su bajo independiente, aun si es ajeno a 
   assert.deepEqual(generarPosiciones('H'), [])
 })
 
-test('ELEGIR conserva todas las cuerdas, trastes, tónica y bajo al pasar al editor y serializar', () => {
+test('ELEGIR y EDITAR conservan cuerdas, trastes, tónica, bajo y sugerencia al serializar', () => {
   for (const nombre of ['C', 'D/F#', 'Am7', 'Caug', 'E', 'G', 'Bb/Db']) {
     const acorde = interpretarAcorde(nombre)
     for (const zona of Object.keys(ZONAS)) for (const p of generarPosiciones(acorde, { zona })) {
       const editable = propuestaAEditable(acorde, p)
       const guardado = leerNotas(guardarNotas({ texto: 'ensayo', acordes: [editable] })).acordes[0]
       assert.equal(guardado.nombre, nombre)
-      assert.equal(guardado.posiciones.flat().filter((estado) => estado === 'aire' || estado === 'presionada').length, p.bajo ? 4 : 3)
+      assert.equal(guardado.posiciones.flat().filter((estado) => estado === 'aire' || estado === 'presionada').length, p.principal.length + Number(Boolean(p.bajo)) + Number(Boolean(p.opcional)))
       assert.ok(guardado.trastes.every((traste, i) => Number(traste) === Number(guardado.trastes[0]) + i))
-      for (const nota of [...p.principal, ...(p.bajo ? [p.bajo] : [])]) {
+      for (const nota of [...p.principal, ...(p.bajo ? [p.bajo] : []), ...(p.opcional ? [p.opcional] : [])]) {
         const columna = nota.traste === 0 ? 0 : guardado.trastes.indexOf(String(nota.traste))
         assert.equal(guardado.posiciones[nota.cuerda][columna], nota.traste === 0 ? 'aire' : 'presionada')
         if (nota.esTonica && !nota.esBajo) assert.deepEqual(guardado.tonica, { cuerda: nota.cuerda, traste: columna })
         if (nota.esBajo) assert.deepEqual(guardado.bajo, { cuerda: nota.cuerda, traste: columna })
+        if (nota.esOpcional) assert.deepEqual(guardado.opcional, { cuerda: nota.cuerda, traste: columna })
       }
     }
   }
@@ -158,4 +163,114 @@ test('el formato manual histórico sigue conservando sus cuatro columnas y notas
   assert.deepEqual(guardado.posiciones, manual.posiciones)
   assert.equal(guardado.trastes.length, 4)
   assert.equal(leerNotas('Texto histórico').texto, 'Texto histórico')
+})
+
+test('A7 admite E–G–C# sin raíz y su complemento cercano es opcional', () => {
+  const propuestas = generarPosiciones('A7', { cuerdas: '2–3–4', zona: 'ABIERTA' })
+  const forma = propuestas.find((p) => p.principal.map((n) => n.traste).join(',') === '2,0,2')
+  assert.ok(forma)
+  assert.deepEqual(forma.principal.map((n) => n.nota), ['C#', 'G', 'E'])
+  assert.equal(forma.cuerdaTonica, null)
+  assert.equal(forma.opcional.nota, 'A')
+  assert.equal(forma.opcional.esOpcional, true)
+  assert.equal(forma.opcional.cuerda, 4)
+  assert.equal(forma.opcional.traste, 0)
+  assert.ok(generarPosiciones('A7', { zona: 'ABIERTA' }).some((p) => p.id === forma.id))
+  // El mismo criterio vale para las otras séptimas y sextas del catálogo.
+  for (const nombre of ['C7', 'Cm7', 'Cmaj7', 'C6', 'Cm6']) {
+    const acorde = interpretarAcorde(nombre)
+    const formas = generarPosiciones(nombre, { cuerdas: '2–3–4' })
+    assert.ok(formas.some((p) => p.cuerdaTonica === null), nombre)
+    for (const p of formas) {
+      assert.ok([acorde.notas[1], acorde.notas[3]].every((n) => p.principal.some((voz) => voz.clase === n.clase)))
+    }
+  }
+})
+
+test('la sugerencia no duplica voces ni bajo, respeta zona y extensión y no aparece en tríadas o cuatro cuerdas', () => {
+  let conSugerencia = 0
+  let sinSugerencia = 0
+  for (const nombre of ['C', 'Cm', 'C7', 'A7', 'Am7', 'Cmaj7', 'Cm6']) {
+    for (const zona of Object.keys(ZONAS)) for (const bajo of [false, true]) {
+      for (const cuerdas of ['AUTO', ...Object.keys(GRUPOS_CUERDAS)]) {
+        for (const p of generarPosiciones(nombre, { zona, bajo, cuerdas })) {
+          if (!p.opcional) { sinSugerencia++; continue }
+          conSugerencia++
+          assert.equal(p.cuerdaTonica, null)
+          const notas = [...p.principal, ...(p.bajo ? [p.bajo] : []), p.opcional].sort((a, b) => a.cuerda - b.cuerda)
+          assert.equal(new Set(notas.map((n) => n.cuerda)).size, notas.length)
+          assert.ok(notas.every((n, i) => i === 0 || notas[i - 1].midi > n.midi))
+          const trastes = notas.map((n) => n.traste)
+          assert.ok(Math.max(...trastes) - Math.min(...trastes) <= 4)
+          const [desde, hasta] = ZONAS[zona]
+          assert.ok(p.opcional.traste >= Math.max(0, desde - 2) && p.opcional.traste <= Math.min(15, hasta + 2))
+          assert.equal(p.opcional.esTonica, true)
+          assert.ok(!p.bajo?.esTonica)
+        }
+      }
+    }
+    if (interpretarAcorde(nombre).notas.length === 3) assert.ok(generarPosiciones(nombre).every((p) => !p.opcional))
+    assert.ok(generarPosiciones(nombre, { cantidadCuerdas: 4 }).every((p) => !p.opcional))
+  }
+  assert.ok(conSugerencia > 0 && sinSugerencia > conSugerencia)
+})
+
+test('cuatro cuerdas conservan calidad, grupos, zona, bajo y tocabilidad en todo el catálogo', () => {
+  for (const raiz of RAICES_ACORDES) for (const sufijo of SUFIJOS_ACORDES) {
+    const acorde = interpretarAcorde(raiz + sufijo)
+    for (const [zona, [desde, hasta]] of Object.entries(ZONAS)) {
+      for (const cuerdas of ['AUTO', ...Object.keys(GRUPOS_CUERDAS_4)]) for (const bajo of [false, true]) {
+        const propuestas = generarPosiciones(acorde, { cantidadCuerdas: 4, zona, cuerdas, bajo })
+        assert.equal(new Set(propuestas.map((p) => p.id)).size, propuestas.length)
+        for (const p of propuestas) {
+          assert.equal(p.principal.length, 4)
+          if (cuerdas !== 'AUTO') assert.deepEqual(p.principal.map((n) => n.cuerda), GRUPOS_CUERDAS_4[cuerdas])
+          const clases = new Set(p.principal.map((n) => n.clase))
+          assert.ok(clases.size >= 3)
+          assert.ok(p.principal.every((n) => acorde.notas.some((nota) => nota.clase === n.clase)))
+          const requeridas = acorde.notas.length === 3 ? acorde.notas : [acorde.notas[1], acorde.notas[3]]
+          assert.ok(requeridas.every((n) => clases.has(n.clase)))
+          assert.equal(Boolean(p.bajo), bajo)
+          const notas = [...p.principal, ...(p.bajo ? [p.bajo] : [])]
+          assert.equal(new Set(notas.map((n) => n.cuerda)).size, notas.length)
+          assert.ok(notas.every((n, i) => i === 0 || notas[i - 1].midi > n.midi))
+          const trastes = notas.map((n) => n.traste)
+          assert.ok(Math.max(...trastes) - Math.min(...trastes) <= 4)
+          for (const n of notas) {
+            assert.ok(n.traste >= Math.max(0, desde - 2) && n.traste <= Math.min(15, hasta + 2))
+            assert.equal(n.clase, NOTAS.indexOf(notaEnTraste(AFINACION[n.cuerda], n.traste)))
+          }
+          assert.equal(p.opcional, null)
+        }
+      }
+    }
+    assert.ok(generarPosiciones(acorde, { cantidadCuerdas: 4 }).length > 0, acorde.nombre)
+  }
+  for (const nombre of ['C', 'Cm', 'A7', 'Am7', 'Amaj7']) {
+    const p = generarPosiciones(nombre, { cantidadCuerdas: 4, zona: 'ABIERTA' })[0]
+    assert.equal(new Set(p.principal.map((n) => n.clase)).size, interpretarAcorde(nombre).notas.length)
+  }
+  for (const nombre of ['D/F#', 'C/F#', 'Bb/Db', 'Am7/G']) {
+    const propuestas = generarPosiciones(nombre, { cantidadCuerdas: 4 })
+    assert.ok(propuestas.length > 0)
+    assert.ok(propuestas.every((p) => p.bajo.clase === interpretarAcorde(nombre).bajo.clase))
+  }
+  assert.deepEqual(generarPosiciones('C', { cantidadCuerdas: 4, cuerdas: '3–4–5–6', bajo: true }), [])
+  assert.deepEqual(generarPosiciones('C', { cantidadCuerdas: 5 }), [])
+  assert.deepEqual(generarPosiciones('C', { cantidadCuerdas: 4, cuerdas: '1–2–3' }), [])
+})
+
+test('el guardado de cuatro voces y la nota opcional conservan formato y referencias válidas', () => {
+  for (const cantidadCuerdas of [3, 4]) {
+    for (const p of generarPosiciones('A7', { cantidadCuerdas, zona: 'ABIERTA' })) {
+      const editable = propuestaAEditable(interpretarAcorde('A7'), p)
+      const guardado = leerNotas(guardarNotas({ texto: 'Notas intactas', acordes: [editable] }))
+      assert.equal(guardado.texto, 'Notas intactas')
+      assert.deepEqual(guardado.acordes[0], editable)
+      if (editable.opcional) {
+        editable.posiciones[editable.opcional.cuerda][editable.opcional.traste] = 'vacio'
+        assert.equal(normalizarAcorde(editable).opcional, null)
+      }
+    }
+  }
 })

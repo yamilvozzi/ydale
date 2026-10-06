@@ -74,5 +74,7 @@ export function normalizarAcorde(acorde = {}) {
     posiciones,
     tonica: referenciaValida(acorde.tonica),
     bajo: referenciaValida(acorde.bajo),
+    // Metadato opcional del mismo JSON; los acordes históricos no cambian.
+    ...(acorde.opcional ? { opcional: referenciaValida(acorde.opcional) } : {}),
   }
 }

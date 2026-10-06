@@ -1,6 +1,6 @@
 /* Varela Round: única tipografía de marca del proyecto.
-   La fuente monoespaciada de ESTRUCTURA usa el stack "font-mono"
-   nativo de Tailwind (system UI), no suma una segunda fuente. */
+   El editor de ESTRUCTURA conserva el stack "font-mono" nativo de
+   Tailwind; su contenido renderizado usa la tipografía de marca. */
 @import url("https://fonts.googleapis.com/css2?family=Varela+Round&display=swap");
 @import "tailwindcss";
 
@@ -18,7 +18,7 @@
   --color-butter: #f2ede0;
   --color-butter-muted: #a39c8a;
 
-  /* Naranja suave compartido por Escala y Notas, distinto de la blue note. */
+  /* Naranja suave compartido por Escala y Acordes, distinto de la blue note. */
   --color-nota-tonica: #d9824b;
 }
 
@@ -185,6 +185,18 @@ body {
 .diagrama-nota-blues {
   fill: var(--color-petroleo);
   color: var(--color-fondo);
+}
+
+/* Las sugerencias conservan el color del acorde y se distinguen sin relleno. */
+.diagrama-nota-opcional {
+  fill: none;
+  stroke: var(--color-teal);
+  stroke-width: 2;
+}
+
+.diagrama-nota-opcional.diagrama-nota-tonica {
+  stroke: var(--color-nota-tonica);
+  color: var(--color-nota-tonica);
 }
 
 @media (min-width: 40rem) {

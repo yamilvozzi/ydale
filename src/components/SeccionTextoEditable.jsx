@@ -9,6 +9,7 @@ export default function SeccionTextoEditable({
   titulo,
   placeholder = 'Todavía no hay nada acá. Tocá el lápiz para cargarlo.',
   fuenteMono = false,
+  fuenteMonoSoloEditor = false,
   textoGrande = false,
   editorGrande = false,
   lineaUnica = false,
@@ -28,7 +29,7 @@ export default function SeccionTextoEditable({
   } = useCampoEditable({ temaId, campo, valor, onGuardado, serializarAlGuardar, bloqueado, onGuardandoChange })
 
   const claseTexto = [
-    fuenteMono ? 'font-mono' : 'font-sans',
+    fuenteMono || (fuenteMonoSoloEditor && editando) ? 'font-mono' : 'font-sans',
     textoGrande ? 'text-2xl lg:text-xl leading-relaxed' : 'text-base leading-relaxed',
     'whitespace-pre-wrap',
     // Dos columnas en pantallas grandes: reduce el scroll vertical

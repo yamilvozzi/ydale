@@ -6,8 +6,8 @@ const SECCIONES = [
   { ruta: 'letra', etiqueta: 'Letra' },
   { ruta: 'estructura', etiqueta: 'Estructura' },
   { ruta: 'escala', etiqueta: 'Escala' },
+  { ruta: 'notas', etiqueta: 'Acordes' },
   { ruta: 'percusion', etiqueta: 'Percusión' },
-  { ruta: 'notas', etiqueta: 'Notas' },
 ]
 
 export default function Tema() {

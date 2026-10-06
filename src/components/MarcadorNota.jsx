@@ -1,12 +1,12 @@
 /** El círculo y su texto comparten centro y escala en todos los diapasones. */
-export default function MarcadorNota({ nota, esTonica = false, esNotaBlues = false }) {
+export default function MarcadorNota({ nota, esTonica = false, esNotaBlues = false, esOpcional = false }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
       className={`diagrama-marcador diagrama-nota ${
         esTonica ? 'diagrama-nota-tonica' : esNotaBlues ? 'diagrama-nota-blues' : ''
-      }`}
+      } ${esOpcional ? 'diagrama-nota-opcional' : ''}`}
     >
       <circle cx="12" cy="12" r="11.5" />
       {nota && (

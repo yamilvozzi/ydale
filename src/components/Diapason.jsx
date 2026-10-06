@@ -40,7 +40,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
             <div key={`${notaAlAire}-${cuerda}`} className="contents">
               <div
                 className={`relative ${altoFila}`}
-                aria-label={`Cuerda ${cuerda + 1}, ${marcadorAbierto?.nota ?? notaAlAire} al aire${marcadorAbierto?.esBajo ? ', bajo' : ''}${
+                aria-label={`Cuerda ${cuerda + 1}, ${marcadorAbierto?.nota ?? notaAlAire} al aire${marcadorAbierto?.esBajo ? ', bajo' : ''}${marcadorAbierto?.esOpcional ? ', opcional' : ''}${
                   notaAbiertaPertenece
                     ? esTonicaAbierta
                       ? ', tónica'
@@ -56,6 +56,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
                     nota={marcadorAbierto.nota ?? notaAlAire}
                     esTonica={esTonicaAbierta}
                     esNotaBlues={esNotaBluesAbierta}
+                    esOpcional={marcadorAbierto.esOpcional}
                   />
                 )}
               </div>
@@ -70,7 +71,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
                 return (
                   <div
                     key={traste}
-                    aria-label={`Cuerda ${cuerda + 1}, traste ${traste}, ${marcador?.nota ?? nota}${marcador?.esBajo ? ', bajo' : ''}${
+                    aria-label={`Cuerda ${cuerda + 1}, traste ${traste}, ${marcador?.nota ?? nota}${marcador?.esBajo ? ', bajo' : ''}${marcador?.esOpcional ? ', opcional' : ''}${
                       pertenece
                         ? esTonica
                           ? ', tónica'
@@ -87,6 +88,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
                         nota={marcador.nota ?? nota}
                         esTonica={esTonica}
                         esNotaBlues={esNotaBlues}
+                        esOpcional={marcador.esOpcional}
                       />
                     )}
                   </div>

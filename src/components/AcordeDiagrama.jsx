@@ -119,8 +119,9 @@ export default function AcordeDiagrama({
         {acorde.posiciones.map((fila, cuerda) => {
           const marcador = estadoDelMarcador(fila)
           const tonicaAbierta = marcador?.estado === 'aire' && acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === marcador.indice
+          const opcionalAbierta = marcador?.estado === 'aire' && acorde.opcional?.cuerda === cuerda && acorde.opcional?.traste === marcador.indice
           const contenidoAbierto = marcador?.estado === 'aire'
-            ? <MarcadorNota nota={AFINACION[cuerda]} esTonica={tonicaAbierta} /> : '×'
+            ? <MarcadorNota nota={AFINACION[cuerda]} esTonica={tonicaAbierta} esOpcional={opcionalAbierta} /> : '×'
           // Hay seis cuerdas y sólo cinco espacios entre ellas: la última fila
           // dibuja la sexta cuerda, pero no agrega altura debajo del diapasón.
           const altoFila = cuerda === acorde.posiciones.length - 1 ? 'h-px' : medidas.altoCuerda
@@ -133,13 +134,13 @@ export default function AcordeDiagrama({
                     <button
                       type="button"
                       onClick={() => ciclarMarcador(cuerda)}
-                      aria-label={`Cuerda ${cuerda + 1}, al aire: ${marcador.estado}${tonicaAbierta ? ', tónica' : ''}`}
+                      aria-label={`Cuerda ${cuerda + 1}, al aire: ${marcador.estado}${tonicaAbierta ? ', tónica' : ''}${opcionalAbierta ? ', opcional' : ''}`}
                       className={`diagrama-marcador ${medidas.marcador} rounded-full font-semibold text-butter hover:bg-superficie focus:outline-none focus:ring-2 focus:ring-teal`}
                     >
                       {contenidoAbierto}
                     </button>
                   ) : (
-                    <span className={`diagrama-marcador font-semibold text-butter ${medidas.marcador}`}>
+                    <span aria-label={opcionalAbierta ? 'Nota al aire opcional' : undefined} className={`diagrama-marcador font-semibold text-butter ${medidas.marcador}`}>
                       {contenidoAbierto}
                     </span>
                   )
@@ -149,13 +150,14 @@ export default function AcordeDiagrama({
               {fila.map((estado, traste) => {
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
                 const esBajo = acorde.bajo?.cuerda === cuerda && acorde.bajo?.traste === traste
+                const esOpcional = acorde.opcional?.cuerda === cuerda && acorde.opcional?.traste === traste
                 const numero = acorde.trastes[traste].trim()
                 const nota = /^\d+$/.test(numero) ? notaEnTraste(AFINACION[cuerda], Number(numero)) : null
                 const comun = `relative ${altoFila}`
                 const contenido = (
                   <>
                     <LineasDiapason traste cejuela={traste === 0} />
-                    {estado === 'presionada' && <MarcadorNota nota={nota} esTonica={esTonica} />}
+                    {estado === 'presionada' && <MarcadorNota nota={nota} esTonica={esTonica} esOpcional={esOpcional} />}
                   </>
                 )
                 return editable ? (
@@ -163,13 +165,13 @@ export default function AcordeDiagrama({
                     key={traste}
                     type="button"
                     onClick={() => ciclarCelda(cuerda, traste)}
-                    aria-label={`Cuerda ${cuerda + 1}, traste ${numero || `sin definir (${traste + 1})`}: ${estado}${esTonica ? ', tónica' : ''}${esBajo ? ', bajo' : ''}`}
+                    aria-label={`Cuerda ${cuerda + 1}, traste ${numero || `sin definir (${traste + 1})`}: ${estado}${esTonica ? ', tónica' : ''}${esBajo ? ', bajo' : ''}${esOpcional ? ', opcional' : ''}`}
                     className={`${comun} before:absolute before:inset-x-0 before:-top-5 before:-bottom-5 ${modoTonica && estado !== 'presionada' ? 'cursor-not-allowed opacity-60' : 'hover:bg-superficie'} focus:z-10 focus:outline-none focus:ring-2 focus:ring-teal`}
                   >
                     {contenido}
                   </button>
                 ) : (
-                  <div key={traste} className={comun}>{contenido}</div>
+                  <div key={traste} aria-label={esOpcional ? `Nota ${nota || ''} opcional` : undefined} className={comun}>{contenido}</div>
                 )
               })}
             </div>
