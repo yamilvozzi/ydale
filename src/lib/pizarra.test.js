@@ -88,3 +88,25 @@ test('Pizarra y Repertorio conservan el mismo voicing de tres/cuatro cuerdas, no
   assert.ok(pizarra.elementos.some(({ datos }) => datos.bajo))
   assert.equal(storage.getItem('otro-dato'), 'conservar')
 })
+
+test('los acordes completos conservan las mismas voces y cuerdas muteadas en ambas pantallas', () => {
+  const storage = almacenamiento()
+  let pizarra = pizarraVacia()
+  for (const nombre of ['E9', 'E13', 'Am7b5', 'Cdim7', 'E9/F#']) {
+    const acorde = interpretarAcorde(nombre)
+    for (const propuesta of generarPosiciones(acorde, { completo: true })) {
+      const datos = propuestaAEditable(acorde, propuesta)
+      pizarra = ponerElemento(pizarra, 'acorde', datos)
+      guardarPizarra(storage, pizarra)
+      const guardado = leerPizarra(storage).elementos.at(-1).datos
+      const repertorio = leerNotas(guardarNotas({ texto: 'Conservar', acordes: [datos] })).acordes[0]
+      assert.deepEqual(guardado, repertorio)
+      assert.equal(guardado.posiciones.flat().filter(e => ['presionada', 'aire'].includes(e)).length, propuesta.principal.length)
+      assert.equal(guardado.posiciones.flat().filter(e => e === 'muteada').length, 6 - propuesta.principal.length)
+      const editada = ponerElemento(pizarra, 'acorde', { ...guardado, nombre: `${nombre} editado` })
+      assert.equal(editada.elementos.length, pizarra.elementos.length)
+      assert.deepEqual(editada.elementos.at(-1).datos.posiciones, repertorio.posiciones)
+    }
+  }
+  assert.equal(storage.getItem('otro-dato'), 'conservar')
+})

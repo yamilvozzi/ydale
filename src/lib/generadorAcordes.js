@@ -1,20 +1,7 @@
 import { AFINACION, CANTIDAD_TRASTES, NOTAS, notaEnTraste } from './escalas.js'
 import { crearAcorde } from './notasConAcordes.js'
+import { FORMULAS_ACORDES } from './formulasAcordes.js'
 
-// Intervalo cromático y grado diatónico: conserva E# en C# y Gb en Ebm.
-const FORMULAS = {
-  '': [[0, 0], [4, 2], [7, 4]],
-  m: [[0, 0], [3, 2], [7, 4]],
-  '7': [[0, 0], [4, 2], [7, 4], [10, 6]],
-  m7: [[0, 0], [3, 2], [7, 4], [10, 6]],
-  maj7: [[0, 0], [4, 2], [7, 4], [11, 6]],
-  sus2: [[0, 0], [2, 1], [7, 4]],
-  sus4: [[0, 0], [5, 3], [7, 4]],
-  '6': [[0, 0], [4, 2], [7, 4], [9, 5]],
-  m6: [[0, 0], [3, 2], [7, 4], [9, 5]],
-  dim: [[0, 0], [3, 2], [6, 4]],
-  aug: [[0, 0], [4, 2], [8, 4]],
-}
 const NATURALES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
 const LETRAS = Object.keys(NATURALES)
 const MIDI_AL_AIRE = [64, 59, 55, 50, 45, 40]
@@ -31,20 +18,24 @@ function interpretarNota(texto) {
 export function interpretarAcorde(texto) {
   if (typeof texto !== 'string') return null
   const partes = texto.trim().replaceAll('♯', '#').replaceAll('♭', 'b')
-    .match(/^([A-Ga-g][#b]?)(maj7|m7|sus2|sus4|m6|dim|aug|m|7|6)?(?:\/([A-Ga-g][#b]?))?$/)
+    .match(/^([A-Ga-g][#b]?)([^/]*)(?:\/([A-Ga-g][#b]?))?$/)
   if (!partes) return null
   const raiz = interpretarNota(partes[1])
   const calidad = partes[2] ?? ''
+  if (!Object.hasOwn(FORMULAS_ACORDES, calidad)) return null
+  const formula = FORMULAS_ACORDES[calidad]
   const bajo = partes[3] ? interpretarNota(partes[3]) : null
-  const notas = FORMULAS[calidad].map(([intervalo, grado]) => {
+  const notas = formula.grados.map(([intervalo, grado]) => {
     const clase = modulo(raiz.clase + intervalo)
     const letra = LETRAS[(LETRAS.indexOf(raiz.nombre[0]) + grado) % 7]
     const diferencia = modulo(clase - NATURALES[letra] + 6) - 6
-    return { clase, nombre: letra + (diferencia < 0 ? 'b'.repeat(-diferencia) : '#'.repeat(diferencia)) }
+    const esencial = formula.esenciales.includes(intervalo)
+    const prioridad = esencial ? 100 : intervalo === 0 ? 80 : intervalo === 7 ? 10 : intervalo === 17 ? 20 : 40
+    return { clase, nombre: letra + (diferencia < 0 ? 'b'.repeat(-diferencia) : '#'.repeat(diferencia)), intervalo, grado, esencial, prioridad }
   })
   return {
     nombre: raiz.nombre + calidad + (bajo ? `/${bajo.nombre}` : ''), raiz, calidad, bajo, notas,
-    voces: notas.length === 4 ? [notas[0], notas[1], notas[3]] : notas,
+    voces: notas.filter(nota => nota.esencial || (formula.esenciales.length < 3 && nota.intervalo === 0)),
   }
 }
 
@@ -71,13 +62,106 @@ function comparar(a, b) {
   return a.id.localeCompare(b.id)
 }
 
-// Tríadas completas; en séptimas/sextas se preservan la tercera y la
-// nota característica. La voz restante puede ser la raíz o la quinta.
+// Las notas esenciales vienen de la fórmula: guías, alteraciones y extensión
+// principal. Las voces restantes completan la identidad sin exigir la raíz.
 function representaAcorde(acorde, principal) {
   const clases = new Set(principal.map(({ clase }) => clase))
-  const requeridas = acorde.notas.length === 3
-    ? acorde.notas : [acorde.notas[1], acorde.notas[3]]
+  const requeridas = acorde.notas.filter(nota => nota.esencial)
   return clases.size >= 3 && requeridas.every(({ clase }) => clases.has(clase))
+}
+
+function notasOmitidas(acorde, principal) {
+  const clases = new Set(principal.map(nota => nota.clase))
+  return acorde.notas.filter(nota => !clases.has(nota.clase))
+}
+
+function perdidaMusical(acorde, principal) {
+  return notasOmitidas(acorde, principal).reduce((total, nota) => total + nota.prioridad, 0)
+}
+
+/** Mínimo de dedos incluyendo cejillas posibles, sin tapar cuerdas al aire
+ * ni cuerdas que deberían quedar muteadas. Máximo seis notas: DP acotada. */
+export function dedosNecesarios(notas) {
+  const pisadas = notas.filter(nota => nota.traste > 0)
+  const coberturas = pisadas.map((_, i) => 1 << i)
+  for (let i = 0; i < pisadas.length; i++) for (let j = i + 1; j < pisadas.length; j++) {
+    const a = pisadas[i], b = pisadas[j]
+    if (a.traste !== b.traste) continue
+    const desde = Math.min(a.cuerda, b.cuerda), hasta = Math.max(a.cuerda, b.cuerda)
+    let posible = true
+    for (let cuerda = desde; cuerda <= hasta; cuerda++) {
+      const actual = notas.find(nota => nota.cuerda === cuerda)
+      if (!actual || actual.traste < a.traste) { posible = false; break }
+    }
+    if (posible) coberturas.push(pisadas.reduce((mask, nota, indice) =>
+      nota.traste === a.traste && nota.cuerda >= desde && nota.cuerda <= hasta ? mask | (1 << indice) : mask, 0))
+  }
+  const limite = 1 << pisadas.length
+  const dedos = Array(limite).fill(Infinity)
+  dedos[0] = 0
+  for (let mask = 0; mask < limite; mask++) for (const cobertura of coberturas) {
+    const siguiente = mask | cobertura
+    dedos[siguiente] = Math.min(dedos[siguiente], dedos[mask] + 1)
+  }
+  return dedos.at(-1)
+}
+
+function generarCompleto(acorde, zona) {
+  const [preferidoDesde, preferidoHasta] = ZONAS[zona]
+  const desde = Math.max(0, preferidoDesde - 2), hasta = Math.min(CANTIDAD_TRASTES, preferidoHasta + 2)
+  const notasDisponibles = acorde.bajo && !acorde.notas.some(nota => nota.clase === acorde.bajo.clase)
+    ? [...acorde.notas, acorde.bajo] : acorde.notas
+  const requeridas = new Set([acorde.raiz.clase, ...acorde.notas.filter(nota => nota.esencial).map(nota => nota.clase)])
+  const candidatas = AFINACION.map((_, cuerda) => posicionesEnCuerda(cuerda, notasDisponibles, desde, hasta, acorde.raiz))
+  const resultados = []
+
+  function buscar(cuerda, principal) {
+    const clases = new Set(principal.map(nota => nota.clase))
+    const pendientes = [...requeridas].filter(clase => !clases.has(clase)).length
+    if (pendientes > 6 - cuerda || principal.length + 6 - cuerda < 3) return
+    if (cuerda < 6) {
+      // Puede dejar una cuerda sin tocar; se preserva como × al guardar.
+      buscar(cuerda + 1, principal)
+      for (const nota of candidatas[cuerda]) {
+        if (principal.length && principal.at(-1).midi <= nota.midi) continue
+        const siguientes = [...principal, nota]
+        if (extension(siguientes) <= 4) buscar(cuerda + 1, siguientes)
+      }
+      return
+    }
+    if (clases.size < 3) return
+    const ultima = principal.at(-1)
+    if (acorde.bajo && ultima.clase !== acorde.bajo.clase) return
+    const dedos = dedosNecesarios(principal)
+    if (dedos > 4) return
+    const distancia = Math.max(...principal.map(({ traste }) => Math.max(0, preferidoDesde - traste, traste - preferidoHasta)))
+    const omitidas = notasOmitidas(acorde, principal)
+    const notas = principal.map(nota => acorde.bajo && nota === ultima ? { ...nota, esBajo: true } : nota)
+    const pisadas = principal.filter(nota => nota.traste > 0).map(nota => nota.traste)
+    resultados.push({
+      id: principal.map(({ cuerda, traste }) => `${cuerda}:${traste}`).join('-'),
+      principal: notas, bajo: null, opcional: null, completo: true, omitidas, dedos,
+      cuerdaTonica: principal.find(nota => nota.esTonica)?.cuerda ?? null,
+      ancla: pisadas.length ? Math.min(...pisadas) : 0,
+      // Cobertura e identidad primero. La zona y las digitaciones sencillas
+      // ordenan únicamente las formas que ya superaron el filtro físico.
+      ranking: [omitidas.length, perdidaMusical(acorde, principal), distancia,
+        ultima.esTonica ? 0 : 1, -principal.length, dedos, extension(principal), Math.max(...principal.map(nota => nota.traste))],
+    })
+  }
+  buscar(0, [])
+  resultados.sort(comparar)
+  if (!resultados.length) return []
+  // No mezcla formas con menos grados si ya hay una cobertura mayor tocable.
+  const mejorCobertura = resultados[0].omitidas.length
+  const lugares = new Set()
+  return resultados.filter(propuesta => {
+    if (propuesta.omitidas.length !== mejorCobertura) return false
+    const lugar = Math.floor(propuesta.ancla / 3)
+    if (lugares.has(lugar)) return false
+    lugares.add(lugar)
+    return true
+  })
 }
 
 function combinaciones(candidatas, principal = []) {
@@ -145,7 +229,7 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
       principal, bajo,
       cuerdaTonica: principal.find(({ esTonica }) => esTonica)?.cuerda ?? null,
       // Primero la zona original; la tolerancia solo completa alternativas.
-      ranking: [distanciaZona(notas), grupo.length === 4 ? faltantes : 0, amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
+      ranking: [distanciaZona(notas), grupo.length === 4 ? faltantes : 0, acorde.notas.length > 4 ? perdidaMusical(acorde, principal) : 0, amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
     })
   }
   resultados.sort(comparar)
@@ -157,9 +241,11 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
   })
 }
 
-export function generarPosiciones(acorde, { cuerdas = 'AUTO', cantidadCuerdas = 3, zona = 'TODAS', bajo = false } = {}) {
+export function generarPosiciones(acorde, { cuerdas = 'AUTO', cantidadCuerdas = 3, zona = 'TODAS', bajo = false, completo = false } = {}) {
   const interpretado = typeof acorde === 'string' ? interpretarAcorde(acorde) : acorde
-  if (!interpretado || !ZONAS[zona] || ![3, 4].includes(cantidadCuerdas)) return []
+  if (!interpretado || !ZONAS[zona]) return []
+  if (completo) return generarCompleto(interpretado, zona)
+  if (![3, 4].includes(cantidadCuerdas)) return []
   const conBajo = bajo || Boolean(interpretado.bajo)
   const grupos = cantidadCuerdas === 4 ? GRUPOS_CUERDAS_4 : GRUPOS_CUERDAS
   if (cantidadCuerdas === 4 && cuerdas === 'AUTO') {
@@ -185,6 +271,11 @@ export function propuestaAEditable(acorde, propuesta) {
   editable.nombre = acorde.nombre
   editable.trastes = trastes.map(String)
   editable.posiciones = Array.from({ length: 6 }, () => Array(columnas).fill('vacio'))
+  if (propuesta.completo) {
+    for (let cuerda = 0; cuerda < 6; cuerda++) {
+      if (!notas.some(nota => nota.cuerda === cuerda)) editable.posiciones[cuerda][0] = 'muteada'
+    }
+  }
   for (const nota of notas) {
     const columna = nota.traste === 0 ? 0 : trastes.indexOf(nota.traste)
     editable.posiciones[nota.cuerda][columna] = nota.traste === 0 ? 'aire' : 'presionada'

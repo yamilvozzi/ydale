@@ -23,6 +23,17 @@ function Selector({ titulo, opciones, valor, onChange, className = '', compacto 
   )
 }
 
+function Interruptor({ etiqueta, activo, onChange, disabled = false, className = '' }) {
+  return (
+    <button type="button" role="switch" aria-checked={activo} disabled={disabled} onClick={onChange} className={`${estiloSelector(activo)} flex items-center gap-2 ${className}`}>
+      <span aria-hidden="true" className={`flex h-3.5 w-6 items-center rounded-full px-0.5 ${activo ? 'bg-butter' : 'bg-borde'}`}>
+        <span className={`h-2.5 w-2.5 rounded-full transition-transform ${activo ? 'translate-x-2.5 bg-teal' : 'bg-butter-muted'}`} />
+      </span>
+      {etiqueta}
+    </button>
+  )
+}
+
 export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false, errorGuardado = '' }) {
   const dialogo = useRef(null)
   const lista = useRef(null)
@@ -35,6 +46,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   const [cuerdas, setCuerdas] = useState('AUTO')
   const [cantidadCuerdas, setCantidadCuerdas] = useState(3)
   const [bajo, setBajo] = useState(false)
+  const [completo, setCompleto] = useState(false)
   const [zona, setZona] = useState('TODAS')
   const [posicion, setPosicion] = useState(0)
   const interpretado = useMemo(() => interpretarAcorde(consulta), [consulta])
@@ -42,7 +54,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   const opciones = interpretado && !catalogo.some(({ nombre }) => nombre === interpretado.nombre)
     ? [interpretado, ...catalogo] : catalogo
   const bajoActivo = bajo || Boolean(interpretado?.bajo)
-  const propuestas = useMemo(() => generarPosiciones(interpretado, { cuerdas, cantidadCuerdas, zona, bajo }), [interpretado, cuerdas, cantidadCuerdas, zona, bajo])
+  const propuestas = useMemo(() => generarPosiciones(interpretado, { cuerdas, cantidadCuerdas, zona, bajo, completo }), [interpretado, cuerdas, cantidadCuerdas, zona, bajo, completo])
   const propuesta = propuestas[posicion]
 
   function cambiarFiltro(setter, valor) {
@@ -117,6 +129,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
       </div>
 
       <fieldset disabled={guardando} className="mb-3 flex min-w-0 flex-wrap items-end gap-x-4 gap-y-3">
+        <Interruptor etiqueta="ACORDE COMPLETO" activo={completo} onChange={() => cambiarFiltro(setCompleto, !completo)} className="order-0" />
         <div className="relative order-1 w-36 shrink-0 sm:w-44" onBlur={(evento) => {
           if (!evento.currentTarget.contains(evento.relatedTarget)) setAbierto(false)
         }}>
@@ -159,7 +172,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
             </div>
           )}
         </div>
-        <div className="order-3 grid w-full grid-cols-2 gap-3 sm:w-auto lg:order-2">
+        {!completo && <div className="order-3 grid w-full grid-cols-2 gap-3 sm:w-auto lg:order-2">
           {[3, 4].map((cantidad) => (
             <Selector
               key={cantidad}
@@ -170,20 +183,15 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
               onChange={(valor) => { setCantidadCuerdas(cantidad); cambiarFiltro(setCuerdas, valor) }}
             />
           ))}
-        </div>
-        <button type="button" role="switch" aria-checked={bajoActivo} disabled={Boolean(interpretado?.bajo)} onClick={() => cambiarFiltro(setBajo, !bajo)} className={`${estiloSelector(bajoActivo)} order-2 flex items-center gap-2 lg:order-3`}>
-          <span aria-hidden="true" className={`flex h-3.5 w-6 items-center rounded-full px-0.5 ${bajoActivo ? 'bg-butter' : 'bg-borde'}`}>
-            <span className={`h-2.5 w-2.5 rounded-full transition-transform ${bajoActivo ? 'translate-x-2.5 bg-teal' : 'bg-butter-muted'}`} />
-          </span>
-          BAJO
-        </button>
+        </div>}
+        {!completo && <Interruptor etiqueta="BAJO" activo={bajoActivo} disabled={Boolean(interpretado?.bajo)} onChange={() => cambiarFiltro(setBajo, !bajo)} className="order-2 lg:order-3" />}
         <Selector className="order-4" filaMovil titulo="ZONA" opciones={['ABIERTA', 'MEDIA', 'AGUDA', 'TODAS']} valor={zona} onChange={(valor) => cambiarFiltro(setZona, valor)} />
       </fieldset>
 
       <div className="rounded-lg border border-borde bg-fondo/40 p-3 sm:p-5">
         <div ref={diapasón} className="overflow-x-auto pb-2 pt-3" tabIndex={0} role="region" aria-label="Diapasón de la propuesta">
           <Diapason
-            etiqueta={interpretado ? `Diapasón de ${interpretado.nombre}` : `Diapasón para posiciones de ${cantidadCuerdas} cuerdas`}
+            etiqueta={interpretado ? `Diapasón de ${interpretado.nombre}` : completo ? 'Diapasón para acordes completos' : `Diapasón para posiciones de ${cantidadCuerdas} cuerdas`}
             obtenerMarcador={(cuerda, traste) => {
               if (!propuesta) return null
               if (propuesta.bajo?.cuerda === cuerda && propuesta.bajo.traste === traste) return propuesta.bajo
@@ -193,8 +201,9 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
           />
         </div>
         {consulta.trim() && !interpretado && <p role="status" className="mt-2 text-center text-sm text-butter-muted">Acorde no reconocido</p>}
-        {interpretado && !propuesta && <p role="status" className="mt-2 text-center text-sm text-butter-muted">Sin posiciones para estos filtros</p>}
+        {interpretado && !propuesta && <p role="status" className="mt-2 text-center text-sm text-butter-muted">{completo ? 'Sin formas tocables en esta zona' : 'Sin posiciones para estos filtros'}</p>}
         {propuesta?.opcional && <p className="mt-2 text-center text-xs text-butter-muted">Círculo sin relleno: tónica opcional para completar el acorde.</p>}
+        {propuesta?.omitidas?.length > 0 && <p className="mt-2 text-center text-xs text-butter-muted">Grados omitidos para esta digitación: {propuesta.omitidas.map(nota => `${nota.nombre} (${nota.grado + 1}ª)`).join(', ')}.</p>}
       </div>
       {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
