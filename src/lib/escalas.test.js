@@ -7,6 +7,7 @@ import {
   notaEnTraste,
   obtenerNotaBlues,
   obtenerNotasEscala,
+  obtenerMarcadoresEscala,
 } from './escalas.js'
 
 // Referencia cromática independiente del cálculo por intervalos sucesivos.
@@ -27,7 +28,14 @@ test('los diez modos coinciden con sus offsets en las doce tónicas', () => {
   for (const [tipo, offsets] of Object.entries(OFFSETS_ESPERADOS)) {
     for (const [indice, tonica] of NOTAS.entries()) {
       const esperadas = offsets.map((offset) => NOTAS[(indice + offset) % 12])
-      assert.deepEqual(obtenerNotasEscala(tonica, tipo), esperadas, `${tonica} ${tipo}`)
+      const marcadores = obtenerMarcadoresEscala(tonica, tipo)
+      assert.deepEqual([...marcadores.keys()], esperadas, `${tonica} ${tipo}`)
+      // Decodificar los nombres independientemente: misma altura, otra grafía.
+      for (const [cromatica, { nota }] of marcadores) {
+        const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[nota[0]]
+        const alteracion = [...nota.slice(1)].reduce((n, signo) => n + (signo === '#' ? 1 : -1), 0)
+        assert.equal((natural + alteracion + 12) % 12, NOTAS.indexOf(cromatica))
+      }
     }
   }
 })
@@ -44,7 +52,7 @@ test('la normalización conserva los tipos anteriores y nuevos al guardar y edit
 
 test('la escala mayor respeta el patrón tono-tono-semitono', () => {
   assert.deepEqual(obtenerNotasEscala('C', 'mayor'), ['C', 'D', 'E', 'F', 'G', 'A', 'B'])
-  assert.deepEqual(obtenerNotasEscala('F#', 'mayor'), ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'F'])
+  assert.deepEqual(obtenerNotasEscala('F#', 'mayor'), ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'])
 })
 
 test('la escala menor natural respeta sus siete grados', () => {
@@ -52,14 +60,14 @@ test('la escala menor natural respeta sus siete grados', () => {
   assert.deepEqual(obtenerNotasEscala('C#', 'menor'), ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B'])
 })
 
-test('la escala Blues menor incluye seis notas y usa sostenidos', () => {
-  assert.deepEqual(obtenerNotasEscala('C', 'blues'), ['C', 'D#', 'F', 'F#', 'G', 'A#'])
-  assert.deepEqual(obtenerNotasEscala('A', 'blues'), ['A', 'C', 'D', 'D#', 'E', 'G'])
+test('la escala Blues menor escribe tercera, quinta y séptima rebajadas', () => {
+  assert.deepEqual(obtenerNotasEscala('C', 'blues'), ['C', 'Eb', 'F', 'Gb', 'G', 'Bb'])
+  assert.deepEqual(obtenerNotasEscala('A', 'blues'), ['A', 'C', 'D', 'Eb', 'E', 'G'])
 })
 
 test('la blue note está seis semitonos por encima de la tónica', () => {
-  assert.equal(obtenerNotaBlues('C'), 'F#')
-  assert.equal(obtenerNotaBlues('A'), 'D#')
+  assert.equal(obtenerNotaBlues('C'), 'Gb')
+  assert.equal(obtenerNotaBlues('A'), 'Eb')
 })
 
 test('la pentatónica mayor usa los grados 1, 2, 3, 5 y 6', () => {
@@ -69,7 +77,26 @@ test('la pentatónica mayor usa los grados 1, 2, 3, 5 y 6', () => {
 
 test('la pentatónica menor usa los grados 1, ♭3, 4, 5 y ♭7', () => {
   assert.deepEqual(obtenerNotasEscala('A', 'pentatonica_menor'), ['A', 'C', 'D', 'E', 'G'])
-  assert.deepEqual(obtenerNotasEscala('C', 'pentatonica_menor'), ['C', 'D#', 'F', 'G', 'A#'])
+  assert.deepEqual(obtenerNotasEscala('C', 'pentatonica_menor'), ['C', 'Eb', 'F', 'G', 'Bb'])
+})
+
+test('las grafías respetan los grados de cada modo y conservan los marcadores del diapasón', () => {
+  for (const [tipo, esperadas] of Object.entries({
+    mayor: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    dorico: ['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'],
+    frigio: ['C', 'Db', 'Eb', 'F', 'G', 'Ab', 'Bb'],
+    lidio: ['C', 'D', 'E', 'F#', 'G', 'A', 'B'],
+    mixolidio: ['C', 'D', 'E', 'F', 'G', 'A', 'Bb'],
+    menor: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'],
+    locrio: ['C', 'Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb'],
+  })) assert.deepEqual(obtenerNotasEscala('C', tipo), esperadas)
+  assert.deepEqual(obtenerNotasEscala('F', 'mayor'), ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'])
+  assert.deepEqual(obtenerNotasEscala('G#', 'mayor'), ['G#', 'A#', 'B#', 'C#', 'D#', 'E#', 'F##'])
+  const blues = obtenerMarcadoresEscala('C', 'blues')
+  assert.deepEqual(blues.get(notaEnTraste('D', 1)), { nota: 'Eb', esTonica: false, esNotaBlues: false })
+  assert.deepEqual(blues.get(notaEnTraste('E', 2)), { nota: 'Gb', esTonica: false, esNotaBlues: true })
+  assert.deepEqual(blues.get(notaEnTraste('B', 1)), { nota: 'C', esTonica: true, esNotaBlues: false })
+  assert.equal(blues.get(notaEnTraste('E', 0)), undefined)
 })
 
 test('el diapasón parte de E, B, G, D, A, E y avanza por semitonos', () => {

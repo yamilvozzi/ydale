@@ -30,7 +30,7 @@ export function interpretarAcorde(texto) {
     const letra = LETRAS[(LETRAS.indexOf(raiz.nombre[0]) + grado) % 7]
     const diferencia = modulo(clase - NATURALES[letra] + 6) - 6
     const esencial = formula.esenciales.includes(intervalo)
-    const prioridad = esencial ? 100 : intervalo === 0 ? 80 : intervalo === 7 ? 10 : intervalo === 17 ? 20 : 40
+    const prioridad = esencial ? 100 : (formula.prioridades[intervalo] ?? (intervalo === 0 ? 80 : intervalo === 7 ? 10 : intervalo === 17 ? 20 : 40))
     return { clase, nombre: letra + (diferencia < 0 ? 'b'.repeat(-diferencia) : '#'.repeat(diferencia)), intervalo, grado, esencial, prioridad }
   })
   return {
@@ -185,7 +185,7 @@ function sugerirTonica(acorde, principal, bajo, desde, hasta) {
     return posicionesEnCuerda(cuerda, [acorde.notas[0]], desde, hasta, acorde.raiz)
       .filter((nota) => {
         const notas = [...actuales, nota].sort((a, b) => a.cuerda - b.cuerda)
-        return extension(notas) <= 4 &&
+        return extension(notas) <= 4 && dedosNecesarios(notas) <= 4 &&
           Math.min(...principal.map((actual) => Math.abs(actual.traste - nota.traste))) <= 2 &&
           notas.every((actual, i) => i === 0 || notas[i - 1].midi > actual.midi) &&
           (!bajo || nota.midi > bajo.midi)
@@ -213,7 +213,8 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
       const bajos = []
       for (let cuerda = Math.max(3, grupo.at(-1) + 1); cuerda < 6; cuerda++) {
         for (const posicion of posicionesEnCuerda(cuerda, [notaBajo], desde, hasta, acorde.raiz)) {
-          if (posicion.midi < ultima.midi && extension([...principal, posicion]) <= 4) bajos.push({ ...posicion, esBajo: true })
+          const notas = [...principal, posicion]
+          if (posicion.midi < ultima.midi && extension(notas) <= 4 && dedosNecesarios(notas) <= 4) bajos.push({ ...posicion, esBajo: true })
         }
       }
       bajos.sort((x, y) => distanciaZona([...principal, x]) - distanciaZona([...principal, y]) || extension([...principal, x]) - extension([...principal, y]) || x.midi - y.midi)
@@ -222,14 +223,16 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
     }
     const notas = bajo ? [...principal, bajo] : principal
     const amplitud = principal[0].midi - ultima.midi
-    const faltantes = acorde.notas.length - new Set(principal.map(({ clase }) => clase)).size
+    // El bajo también aporta un grado: no premiar duplicar su tónica arriba
+    // a costa de perder una quinta, novena u otra voz que todavía falta.
+    const faltantes = notasOmitidas(acorde, notas).length
     const trastesPisados = notas.filter(({ traste }) => traste > 0).map(({ traste }) => traste)
     resultados.push({
       id: notas.map(({ cuerda, traste }) => `${cuerda}:${traste}`).join('-'),
       principal, bajo,
       cuerdaTonica: principal.find(({ esTonica }) => esTonica)?.cuerda ?? null,
       // Primero la zona original; la tolerancia solo completa alternativas.
-      ranking: [distanciaZona(notas), grupo.length === 4 ? faltantes : 0, acorde.notas.length > 4 ? perdidaMusical(acorde, principal) : 0, amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
+      ranking: [distanciaZona(notas), grupo.length === 4 ? faltantes : 0, acorde.notas.length > 4 ? perdidaMusical(acorde, notas) : 0, amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
     })
   }
   resultados.sort(comparar)

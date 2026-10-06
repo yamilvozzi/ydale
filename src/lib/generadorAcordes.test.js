@@ -301,7 +301,7 @@ test('las nuevas fórmulas se transponen a las doce tónicas conservando interva
 test('las voces reducidas mantienen tercera, séptima y extensión o alteración característica', () => {
   for (const [nombre, esenciales] of Object.entries({
     E9: [8, 2, 6], Em9: [7, 2, 6], E7b9: [8, 2, 5], 'E7#9': [8, 2, 7],
-    E11: [8, 2, 9], E13: [8, 2, 1], Am7b5: [0, 3, 7], Cdim7: [3, 6, 9],
+    E11: [2, 9], E13: [8, 2, 1], Am7b5: [0, 3, 7], Cdim7: [3, 6, 9],
   })) {
     for (const cantidadCuerdas of [3, 4]) {
       const propuestas = generarPosiciones(nombre, { cantidadCuerdas })
@@ -314,6 +314,27 @@ test('las voces reducidas mantienen tercera, séptima y extensión o alteración
   }
 })
 
+test('11 y 13 priorizan sus grados por familia en distintas tonalidades', () => {
+  const esenciales = { '9': [4, 10, 14], '11': [10, 17], m11: [3, 10, 17], '13': [4, 10, 21], m13: [3, 10, 21] }
+  for (const raiz of ['C', 'E', 'Bb']) for (const [familia, intervalos] of Object.entries(esenciales)) {
+    const acorde = interpretarAcorde(raiz + familia)
+    assert.deepEqual(acorde.notas.filter(n => n.esencial).map(n => n.intervalo), intervalos)
+    for (const modo of [{ cantidadCuerdas: 3 }, { cantidadCuerdas: 4 }, { completo: true }]) {
+      const propuestas = generarPosiciones(acorde, modo)
+      assert.ok(propuestas.length > 0)
+      for (const p of propuestas) {
+        assert.ok(intervalos.every(i => p.principal.some(n => n.clase === (acorde.raiz.clase + i) % 12)))
+      }
+      if (familia === '11' && !modo.completo) {
+        assert.ok(!propuestas[0].principal.some(n => n.clase === (acorde.raiz.clase + 4) % 12))
+      }
+      if (familia === '13' && modo.completo) {
+        assert.deepEqual(propuestas[0].omitidas.map(n => n.intervalo), [17])
+      }
+    }
+  }
+})
+
 test('la estimación de dedos reconoce cejillas reales y rechaza tapar cuerdas al aire o muteadas', () => {
   const notas = trastes => trastes.flatMap((traste, cuerda) => traste === null ? [] : [{ cuerda, traste }])
   assert.equal(dedosNecesarios(notas([0, 0, 1, 2, 2, 0])), 2) // E abierto: cejilla corta en 4/5.
@@ -322,6 +343,36 @@ test('la estimación de dedos reconoce cejillas reales y rechaza tapar cuerdas a
   assert.equal(dedosNecesarios(notas([1, 2, 3, 4, 2, 3])), 5)
   assert.equal(dedosNecesarios(notas([2, null, 2])), 2)
   assert.equal(dedosNecesarios(notas([0, 0, 0])), 0)
+})
+
+test('los modos reducidos también limitan a cuatro dedos al agregar bajo o tónica opcional', () => {
+  for (const nombre of ['C7', 'Cmaj7', 'Cm9', 'C13', 'E9', 'Bb13', 'F#m7', 'C/F#']) {
+    for (const cantidadCuerdas of [3, 4]) for (const zona of Object.keys(ZONAS)) {
+      const propuestas = generarPosiciones(nombre, { cantidadCuerdas, zona, bajo: true })
+      assert.ok(propuestas.length > 0, `${nombre}/${cantidadCuerdas}/${zona}`)
+      for (const p of propuestas) {
+        const notas = [...p.principal, p.bajo, ...(p.opcional ? [p.opcional] : [])]
+        assert.ok(dedosNecesarios(notas) <= 4, `${nombre}: ${p.id}`)
+      }
+    }
+  }
+  // Esta forma de C7 necesitaba cinco dedos aun contando cejillas.
+  assert.ok(!generarPosiciones('C7', { cantidadCuerdas: 4, bajo: true, zona: 'ABIERTA' })
+    .some(p => p.id === '0:3-1:1-2:3-3:2-4:3'))
+})
+
+test('el ranking cuenta el bajo y evita duplicar la raíz a costa de otros grados', () => {
+  for (const nombre of ['C9', 'E9', 'Bb9', 'F#9', 'C13']) {
+    const acorde = interpretarAcorde(nombre)
+    const propuestas = generarPosiciones(acorde, { cantidadCuerdas: 4, bajo: true })
+    const primera = propuestas[0]
+    const clases = new Set([...primera.principal, primera.bajo].map(n => n.clase))
+    assert.equal(clases.size, 5, nombre)
+    assert.ok(!primera.principal.some(n => n.esTonica), nombre)
+    assert.ok(acorde.notas.filter(n => n.esencial || n.intervalo === 14).every(n => clases.has(n.clase)))
+  }
+  // Un bajo ajeno a la fórmula no cuenta como un grado adicional del acorde.
+  for (const p of generarPosiciones('C/F#', { cantidadCuerdas: 4 })) assert.equal(p.ranking[1], 0)
 })
 
 test('los casos pedidos funcionan en tres, cuatro y acorde completo en cada zona', () => {

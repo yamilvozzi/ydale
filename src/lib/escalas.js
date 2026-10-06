@@ -49,26 +49,47 @@ export function etiquetaTipo(tipo) {
   return TIPOS_ESCALA.find((opcion) => opcion.valor === tipo)?.etiqueta ?? TIPOS_ESCALA[0].etiqueta
 }
 
-export function obtenerNotasEscala(tonica, tipo) {
+const NATURALES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
+const LETRAS = Object.keys(NATURALES)
+// Grados desde cero. En blues, la quinta disminuida y la justa comparten letra.
+const GRADOS_ESCALA = {
+  pentatonica_mayor: [0, 1, 2, 4, 5],
+  pentatonica_menor: [0, 2, 3, 4, 6],
+  blues: [0, 2, 3, 4, 4, 6],
+}
+
+/** Claves cromáticas para ubicar las notas; nombres diatónicos para mostrarlas. */
+export function obtenerMarcadoresEscala(tonica, tipo) {
   const escala = normalizarEscala({ tonica, tipo })
   const indiceTonica = NOTAS.indexOf(escala.tonica)
-  const notas = [escala.tonica]
+  const grados = GRADOS_ESCALA[escala.tipo] ?? [0, 1, 2, 3, 4, 5, 6]
+  const notas = new Map()
   let distancia = 0
 
-  // El último intervalo vuelve a la octava de la tónica; no se duplica esa nota.
-  for (const intervalo of INTERVALOS_ESCALA[escala.tipo].slice(0, -1)) {
+  for (const [indice, intervalo] of INTERVALOS_ESCALA[escala.tipo].entries()) {
+    const clase = (indiceTonica + distancia) % 12
+    const letra = LETRAS[(LETRAS.indexOf(escala.tonica[0]) + grados[indice]) % 7]
+    const alteracion = (clase - NATURALES[letra] + 18) % 12 - 6
+    const nota = letra + (alteracion < 0 ? 'b'.repeat(-alteracion) : '#'.repeat(alteracion))
+    notas.set(NOTAS[clase], {
+      nota,
+      esTonica: indice === 0,
+      esNotaBlues: escala.tipo === 'blues' && indice === 3,
+    })
+    // El último intervalo vuelve a la octava, que no se duplica.
     distancia += intervalo
-    notas.push(NOTAS[(indiceTonica + distancia) % NOTAS.length])
   }
 
   return notas
 }
 
-/** La ♭5 que distingue a la Blues menor, representada sólo con sostenidos. */
+export function obtenerNotasEscala(tonica, tipo) {
+  return [...obtenerMarcadoresEscala(tonica, tipo).values()].map(({ nota }) => nota)
+}
+
+/** La quinta disminuida que distingue a la Blues menor. */
 export function obtenerNotaBlues(tonica) {
-  const { tonica: tonicaNormalizada } = normalizarEscala({ tonica, tipo: 'blues' })
-  const indiceTonica = NOTAS.indexOf(tonicaNormalizada)
-  return NOTAS[(indiceTonica + 6) % NOTAS.length]
+  return obtenerNotasEscala(tonica, 'blues')[3]
 }
 
 export function notaEnTraste(notaAlAire, traste) {

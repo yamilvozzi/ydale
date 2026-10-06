@@ -4,7 +4,7 @@ const R = [0, 0], T = [4, 2], t = [3, 2], Q = [7, 4]
 const b5 = [6, 4], a5 = [8, 4], S = [9, 5]
 const s7 = [10, 6], M7 = [11, 6], d7 = [9, 6]
 const N = [14, 8], b9 = [13, 8], a9 = [15, 8], O = [17, 10], X = [21, 12], b13 = [20, 12]
-const formula = (grados, esenciales) => ({ grados, esenciales })
+const formula = (grados, esenciales, prioridades = {}) => ({ grados, esenciales, prioridades })
 
 export const FORMULAS_ACORDES = {
   '': formula([R, T, Q], [0, 4, 7]),
@@ -33,9 +33,10 @@ export const FORMULAS_ACORDES = {
   '7b9': formula([R, T, Q, s7, b9], [4, 10, 13]),
   '7#9': formula([R, T, Q, s7, a9], [4, 10, 15]),
   '7b13': formula([R, T, Q, s7, b13], [4, 10, 20]),
-  '11': formula([R, T, Q, s7, N, O], [4, 10, 17]),
+  // La tercera mayor es prescindible frente a la oncena natural.
+  '11': formula([R, T, Q, s7, N, O], [10, 17], { 4: 0 }),
   m11: formula([R, t, Q, s7, N, O], [3, 10, 17]),
-  '13': formula([R, T, Q, s7, N, O, X], [4, 10, 21]),
+  '13': formula([R, T, Q, s7, N, O, X], [4, 10, 21], { 17: 0 }),
   m13: formula([R, t, Q, s7, N, O, X], [3, 10, 21]),
   maj13: formula([R, T, Q, M7, N, O, X], [4, 11, 21]),
 }
