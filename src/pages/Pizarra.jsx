@@ -62,7 +62,12 @@ export default function Pizarra() {
         </section>
       })}
       {editor?.tipo === 'escala' && <EditorEscalaModal key={editor.datos?.id ?? 'nueva'} escala={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('escala', datos)} errorGuardado={error} />}
-      {editor?.tipo === 'generador' && <GeneradorAcordesModal onCerrar={() => setEditor(null)} onElegir={(datos) => setEditor({ tipo: 'acorde', datos: { ...datos, esNuevo: true } })} />}
+      {editor?.tipo === 'generador' && <GeneradorAcordesModal
+        onCerrar={() => setEditor(null)}
+        onElegir={(datos) => alGuardar('acorde', datos)}
+        onEditar={(datos) => setEditor({ tipo: 'acorde', datos: { ...datos, esNuevo: true } })}
+        errorGuardado={error}
+      />}
       {editor?.tipo === 'acorde' && <EditorAcordeModal key={editor.datos?.id ?? 'nuevo'} acorde={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('acorde', datos)} errorGuardado={error} />}
       {confirmacion && <ConfirmarEliminacionModal
         preguntaComoTitulo

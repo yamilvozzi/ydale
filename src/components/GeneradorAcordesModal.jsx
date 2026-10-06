@@ -23,7 +23,7 @@ function Selector({ titulo, opciones, valor, onChange, className = '', compacto 
   )
 }
 
-export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false }) {
+export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false, errorGuardado = '' }) {
   const dialogo = useRef(null)
   const lista = useRef(null)
   const diapasón = useRef(null)
@@ -196,6 +196,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
         {interpretado && !propuesta && <p role="status" className="mt-2 text-center text-sm text-butter-muted">Sin posiciones para estos filtros</p>}
         {propuesta?.opcional && <p className="mt-2 text-center text-xs text-butter-muted">Círculo sin relleno: tónica opcional para completar el acorde.</p>}
       </div>
+      {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-1 sm:gap-2">
           <button type="button" disabled={guardando || !propuesta || posicion === 0} onClick={() => setPosicion((actual) => actual - 1)} aria-label="Posición anterior" className="rounded-lg border border-borde p-1.5 text-butter-muted hover:bg-fondo disabled:opacity-40 sm:p-2"><ChevronLeft size={20} /></button>

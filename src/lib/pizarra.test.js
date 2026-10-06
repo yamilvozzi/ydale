@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { CLAVE_PIZARRA, guardarPizarra, leerPizarra, pizarraVacia, ponerElemento } from './pizarra.js'
 import { generarPosiciones, interpretarAcorde, propuestaAEditable } from './generadorAcordes.js'
+import { guardarNotas, leerNotas } from './notasConAcordes.js'
 
 function almacenamiento() {
   const valores = new Map([['ydaaaale_desbloqueado', 'true'], ['otro-dato', 'conservar']])
@@ -52,4 +53,38 @@ test('leer contenido corrupto no lo sobrescribe y los errores de almacenamiento 
   assert.throws(() => leerPizarra(storage))
   assert.equal(storage.getItem(CLAVE_PIZARRA), 'contenido inválido')
   assert.throws(() => guardarPizarra({ setItem: () => { throw new Error('Cuota agotada') } }, pizarraVacia()))
+})
+
+test('Pizarra y Repertorio conservan el mismo voicing de tres/cuatro cuerdas, nota opcional, zona y bajo', () => {
+  const storage = almacenamiento()
+  const casos = [
+    { cantidadCuerdas: 3, cuerdas: '2–3–4', zona: 'ABIERTA' },
+    { cantidadCuerdas: 3, zona: 'MEDIA', bajo: true },
+    { cantidadCuerdas: 4, zona: 'AGUDA' },
+    { cantidadCuerdas: 4, cuerdas: '1–2–3–4', zona: 'ABIERTA', bajo: true },
+  ]
+  let pizarra = pizarraVacia()
+  for (const opciones of casos) {
+    const acorde = interpretarAcorde('A7')
+    const propuestas = generarPosiciones(acorde, opciones)
+    assert.ok(propuestas.length > 0)
+    for (const propuesta of propuestas) {
+      const datos = propuestaAEditable(acorde, propuesta)
+      pizarra = ponerElemento(pizarra, 'acorde', datos)
+      guardarPizarra(storage, pizarra)
+      const guardado = leerPizarra(storage).elementos.at(-1).datos
+      const repertorio = leerNotas(guardarNotas({ texto: 'Conservar', acordes: [datos] })).acordes[0]
+      assert.deepEqual(guardado, repertorio)
+      assert.equal(guardado.posiciones.flat().filter((estado) => ['presionada', 'aire'].includes(estado)).length,
+        opciones.cantidadCuerdas + Number(Boolean(propuesta.bajo)) + Number(Boolean(propuesta.opcional)))
+      const editada = { ...guardado, nombre: 'A7 editado' }
+      const cantidadAntes = pizarra.elementos.length
+      pizarra = ponerElemento(pizarra, 'acorde', editada)
+      assert.equal(pizarra.elementos.length, cantidadAntes)
+      assert.deepEqual(pizarra.elementos.at(-1).datos, { ...repertorio, nombre: 'A7 editado' })
+    }
+  }
+  assert.ok(pizarra.elementos.some(({ datos }) => datos.opcional))
+  assert.ok(pizarra.elementos.some(({ datos }) => datos.bajo))
+  assert.equal(storage.getItem('otro-dato'), 'conservar')
 })
