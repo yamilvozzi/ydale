@@ -5,6 +5,40 @@ import { RAICES_ACORDES, SUFIJOS_ACORDES } from './catalogoAcordes.js'
 import { AFINACION, NOTAS, notaEnTraste } from './escalas.js'
 import { guardarNotas, leerNotas, crearAcorde, normalizarAcorde } from './notasConAcordes.js'
 
+test('acorde completo prioriza cejillas A/E mayores, menores y séptimas transportadas', () => {
+  const familias = {
+    '': [[null, 0, 2, 2, 2, 0], [0, 2, 2, 1, 0, 0]],
+    m: [[null, 0, 2, 2, 1, 0], [0, 2, 2, 0, 0, 0]],
+    '7': [[null, 0, 2, 0, 2, 0], [0, 2, 0, 1, 0, 0]],
+    m7: [[null, 0, 2, 0, 1, 0], [0, 2, 0, 0, 0, 0]],
+    maj7: [[null, 0, 2, 1, 2, 0], [0, 2, 1, 1, 0, 0]],
+  }
+  for (const raiz of NOTAS) for (const [calidad, formas] of Object.entries(familias)) {
+    const nombre = raiz + calidad
+    const propuestas = generarPosiciones(nombre, { completo: true })
+    for (const [i, forma] of formas.entries()) {
+      const traslado = (NOTAS.indexOf(raiz) - (i === 0 ? 9 : 4) + 12) % 12
+      const esperada = forma.map(traste => traste === null ? null : traste + traslado)
+      const indice = propuestas.findIndex(p => esperada.every((traste, cuerda) =>
+        (p.principal.find(n => n.cuerda === 5 - cuerda)?.traste ?? null) === traste))
+      assert.ok(indice >= 0 && indice <= 2, `${nombre}: ${esperada}`)
+    }
+  }
+})
+
+test('la preferencia de formas completas respeta la zona y admite posiciones sin referencia', () => {
+  let alternativas = 0
+  for (const nombre of ['C', 'Cm', 'C7', 'Cm7', 'Cmaj7', 'C9', 'C/F#']) {
+    for (const [zona, [desde, hasta]] of Object.entries(ZONAS)) {
+      const propuestas = generarPosiciones(nombre, { completo: true, zona })
+      const distancias = propuestas.map(p => Math.max(...p.principal.map(n => Math.max(0, desde - n.traste, n.traste - hasta))))
+      assert.deepEqual(distancias, [...distancias].sort((a, b) => a - b))
+      alternativas += propuestas.filter(p => p.ranking[3] === 0).length
+    }
+  }
+  assert.ok(alternativas > 0)
+})
+
 test('construye todas las calidades y conserva las tres voces características', () => {
   const esperadas = {
     C: ['C', 'E', 'G'], Cm: ['C', 'Eb', 'G'], C7: ['C', 'E', 'G', 'Bb'],

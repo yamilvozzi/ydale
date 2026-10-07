@@ -36,6 +36,8 @@ function Interruptor({ etiqueta, activo, onChange, disabled = false, className =
 
 export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false, errorGuardado = '' }) {
   const dialogo = useRef(null)
+  const buscador = useRef(null)
+  const opcionTactil = useRef(null)
   const lista = useRef(null)
   const diapasón = useRef(null)
   const id = useId()
@@ -79,6 +81,20 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   }, [indice, abierto])
 
   useEffect(() => {
+    if (!abierto) return
+    const cerrarDesdeFuera = (evento) => {
+      if (buscador.current && !buscador.current.contains(evento.target)) setAbierto(false)
+    }
+    // Pointer cubre mouse, touch y lápiz, incluido el scrollbar nativo.
+    // El foco puede volver al diálogo al tocar una opción o el scrollbar;
+    // ese cambio de foco no implica una interacción fuera del buscador.
+    document.addEventListener('pointerdown', cerrarDesdeFuera, true)
+    return () => {
+      document.removeEventListener('pointerdown', cerrarDesdeFuera, true)
+    }
+  }, [abierto])
+
+  useEffect(() => {
     const contenedor = diapasón.current
     if (!propuesta || !contenedor) return
     const marcadores = [...contenedor.querySelectorAll('.diagrama-nota')]
@@ -98,7 +114,9 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   }
 
   function manejarTecla(evento) {
-    if (evento.key === 'ArrowDown' || evento.key === 'ArrowUp') {
+    if (evento.key === 'Tab') {
+      setAbierto(false)
+    } else if (evento.key === 'ArrowDown' || evento.key === 'ArrowUp') {
       evento.preventDefault()
       setAbierto(true)
       const paso = evento.key === 'ArrowDown' ? 1 : -1
@@ -120,7 +138,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
       tabIndex={-1}
       autoFocus
       aria-labelledby={`${id}-titulo`}
-      onCancel={(evento) => { evento.preventDefault(); if (!guardando) onCerrar() }}
+      onCancel={(evento) => { evento.preventDefault(); if (abierto) setAbierto(false); else if (!guardando) onCerrar() }}
       className="fixed inset-0 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-6xl overflow-y-auto rounded-xl border border-borde bg-superficie p-4 text-butter shadow-2xl backdrop:bg-black/70 sm:max-h-[calc(100dvh-3rem)] sm:w-[calc(100%-3rem)] sm:p-6"
     >
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -130,9 +148,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
 
       <fieldset disabled={guardando} className="mb-3 flex min-w-0 flex-wrap items-end gap-x-4 gap-y-3">
         <Interruptor etiqueta="ACORDE COMPLETO" activo={completo} onChange={() => cambiarFiltro(setCompleto, !completo)} className="order-0" />
-        <div className="relative order-1 w-36 shrink-0 sm:w-44" onBlur={(evento) => {
-          if (!evento.currentTarget.contains(evento.relatedTarget)) setAbierto(false)
-        }}>
+        <div ref={buscador} className="relative order-1 w-36 shrink-0 sm:w-44" onKeyDown={manejarTecla}>
           <div className="relative">
             <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
             <input
@@ -149,7 +165,6 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
               onFocus={() => setAbierto(true)}
               onClick={() => setAbierto(true)}
               onChange={(evento) => { setConsulta(evento.target.value); setAcorde(null); setIndice(0); setPosicion(0); setAbierto(true) }}
-              onKeyDown={manejarTecla}
               className="w-full rounded-lg border border-borde bg-fondo py-2 pl-9 pr-3 text-sm text-butter placeholder:text-butter-muted focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal/30"
             />
           </div>
@@ -162,7 +177,18 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
                     id={`${id}-opcion-${i}`}
                     role="option"
                     aria-selected={acorde?.nombre === opcion.nombre}
-                    onPointerDown={(evento) => evento.preventDefault()}
+                    onPointerDown={(evento) => {
+                      if (evento.pointerType === 'touch') opcionTactil.current = opcion
+                    }}
+                    onPointerCancel={() => { opcionTactil.current = null }}
+                    onTouchEnd={(evento) => {
+                      // El scroll nativo cancela el pointer. Un tap selecciona
+                      // sin depender del click sintético ni enviarlo al fondo.
+                      if (opcionTactil.current !== opcion) return
+                      evento.preventDefault()
+                      opcionTactil.current = null
+                      seleccionar(opcion)
+                    }}
                     onClick={() => seleccionar(opcion)}
                     className={`cursor-pointer rounded-md px-3 py-2 text-sm hover:bg-teal ${i === indice ? 'bg-teal text-butter' : 'text-butter-muted'}`}
                   >{opcion.nombre}</li>

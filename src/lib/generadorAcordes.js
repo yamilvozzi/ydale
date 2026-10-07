@@ -106,6 +106,29 @@ export function dedosNecesarios(notas) {
   return dedos.at(-1)
 }
 
+// Referencias de 6ª a 1ª cuerda; null conserva la cuerda muteada.
+// Sólo reconocen candidatos existentes, nunca generan ni excluyen posiciones.
+const FORMAS_CONOCIDAS = {
+  '': [[0, 2, 2, 1, 0, 0], [null, 0, 2, 2, 2, 0], [null, 3, 2, 0, 1, 0], [3, 2, 0, 0, 0, 3], [null, null, 0, 2, 3, 2]],
+  m: [[0, 2, 2, 0, 0, 0], [null, 0, 2, 2, 1, 0], [null, null, 0, 2, 3, 1]],
+  '7': [[0, 2, 0, 1, 0, 0], [null, 0, 2, 0, 2, 0], [null, 3, 2, 3, 1, 0], [null, null, 0, 2, 1, 2]],
+  m7: [[0, 2, 0, 0, 0, 0], [null, 0, 2, 0, 1, 0], [null, null, 0, 2, 1, 1]],
+  maj7: [[0, 2, 1, 1, 0, 0], [null, 0, 2, 1, 2, 0], [null, 3, 2, 0, 0, 0], [null, null, 0, 2, 2, 2]],
+}
+
+function bonusFormaConocida(acorde, principal) {
+  const trastes = Array(6).fill(null)
+  for (const nota of principal) trastes[5 - nota.cuerda] = nota.traste
+  const indice = (FORMAS_CONOCIDAS[acorde.calidad] ?? []).findIndex(forma => {
+    const primera = forma.findIndex(traste => traste !== null)
+    const traslado = trastes[primera] - forma[primera]
+    return traslado >= 0 && forma.every((traste, i) => traste === null
+      ? trastes[i] === null : trastes[i] !== null && trastes[i] === traste + traslado)
+  })
+  // Las cejillas E/A son más habituales y cómodas que trasladar C/G/D.
+  return indice < 0 ? 0 : indice < 2 ? -2 : -1
+}
+
 function generarCompleto(acorde, zona) {
   const [preferidoDesde, preferidoHasta] = ZONAS[zona]
   const desde = Math.max(0, preferidoDesde - 2), hasta = Math.min(CANTIDAD_TRASTES, preferidoHasta + 2)
@@ -143,9 +166,10 @@ function generarCompleto(acorde, zona) {
       principal: notas, bajo: null, opcional: null, completo: true, omitidas, dedos,
       cuerdaTonica: principal.find(nota => nota.esTonica)?.cuerda ?? null,
       ancla: pisadas.length ? Math.min(...pisadas) : 0,
-      // Cobertura e identidad primero. La zona y las digitaciones sencillas
-      // ordenan únicamente las formas que ya superaron el filtro físico.
+      // Cobertura, identidad y zona primero. La preferencia por formas
+      // conocidas sólo ordena candidatos que ya superaron el filtro físico.
       ranking: [omitidas.length, perdidaMusical(acorde, principal), distancia,
+        bonusFormaConocida(acorde, principal),
         ultima.esTonica ? 0 : 1, -principal.length, dedos, extension(principal), Math.max(...principal.map(nota => nota.traste))],
     })
   }
