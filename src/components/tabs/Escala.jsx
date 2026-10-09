@@ -1,15 +1,15 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import EditorEscalaModal from '../EditorEscalaModal'
-import EscalaDiagrama from '../EscalaDiagrama'
+import TarjetasOrdenables from '../TarjetasOrdenables'
 import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
 import { useEscalas } from '../../hooks/useEscalas'
 import { etiquetaTipo } from '../../lib/escalas'
 
 export default function Escala() {
   const { tema } = useOutletContext()
-  const { escalas, cargando, guardando, error, guardarEscala, eliminarEscala } =
+  const { escalas, cargando, guardando, error, guardarEscala, eliminarEscala, reordenarEscalas } =
     useEscalas(tema.id)
   const [editor, setEditor] = useState(null)
   const [escalaAEliminar, setEscalaAEliminar] = useState(null)
@@ -35,6 +35,7 @@ export default function Escala() {
           <button
             type="button"
             onClick={() => setEditor({})}
+            disabled={guardando}
             className="flex items-center gap-2 rounded-lg border border-borde bg-superficie px-3 py-2 text-sm text-butter transition-colors hover:border-teal hover:bg-fondo"
           >
             <Plus size={17} />
@@ -49,40 +50,14 @@ export default function Escala() {
             No se pudieron cargar las escalas. Verificá la conexión y que la migración esté aplicada.
           </p>
         ) : escalas.length > 0 ? (
-          escalas.map((escala) => (
-            <article
-              key={escala.id}
-              className="rounded-lg border border-borde bg-superficie p-3 sm:p-5"
-            >
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <h3 className="min-w-0 truncate text-base text-butter sm:text-lg">
-                  {escala.tonica} · {etiquetaTipo(escala.tipo)}
-                </h3>
-                <div className="flex shrink-0 gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setEditor(escala)}
-                    aria-label={`Editar escala ${escala.tonica} ${etiquetaTipo(escala.tipo)}`}
-                    className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
-                  >
-                    <Pencil />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEscalaAEliminar(escala)}
-                    disabled={guardando}
-                    aria-label={`Eliminar escala ${escala.tonica} ${etiquetaTipo(escala.tipo)}`}
-                    className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter disabled:opacity-50"
-                  >
-                    <Trash2 />
-                  </button>
-                </div>
-              </div>
-              <div className="overflow-x-auto pb-2">
-                <EscalaDiagrama escala={escala} />
-              </div>
-            </article>
-          ))
+          <TarjetasOrdenables
+            tipo="escala"
+            items={escalas}
+            disabled={guardando}
+            onReordenar={reordenarEscalas}
+            onEditar={setEditor}
+            onEliminar={setEscalaAEliminar}
+          />
         ) : (
           <p className="text-sm italic text-butter-muted">Todavía no hay escalas cargadas.</p>
         )}

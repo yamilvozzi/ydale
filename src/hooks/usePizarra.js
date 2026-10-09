@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { leerPizarra, guardarPizarra, pizarraVacia, ponerElemento } from '../lib/pizarra'
+import { reordenarGrupo } from '../lib/ordenTarjetas'
 
 export function usePizarra() {
   const [estado, setEstado] = useState(() => {
@@ -26,6 +27,7 @@ export function usePizarra() {
     error: estado.error,
     lecturaFallida: estado.lecturaFallida,
     guardar: (tipo, datos) => !estado.lecturaFallida && persistir(ponerElemento(estado.datos, tipo, datos)),
+    reordenar: (tipo, ordenados) => !estado.lecturaFallida && persistir({ ...estado.datos, elementos: reordenarGrupo(estado.datos.elementos, tipo, ordenados) }),
     eliminar: (id) => persistir({ ...estado.datos, elementos: estado.datos.elementos.filter((elemento) => elemento.datos.id !== id) }),
     vaciar: () => persistir(pizarraVacia()),
   }

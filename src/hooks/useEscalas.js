@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { normalizarEscala } from '../lib/escalas'
 import { supabase } from '../lib/supabaseClient'
+import { guardarOrdenEscalas } from '../lib/ordenTarjetas'
 
 export function useEscalas(temaId) {
   const [escalas, setEscalas] = useState([])
@@ -84,6 +85,17 @@ export function useEscalas(temaId) {
     }
   }
 
-  return { escalas, cargando, guardando, error, guardarEscala, eliminarEscala }
+  async function reordenarEscalas(ordenadas) {
+    if (guardando || cargando) return false
+    setGuardando(true)
+    try {
+      setEscalas(await guardarOrdenEscalas(supabase, temaId, ordenadas))
+      return true
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return { escalas, cargando, guardando, error, guardarEscala, eliminarEscala, reordenarEscalas }
 }
 

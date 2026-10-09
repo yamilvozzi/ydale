@@ -1,11 +1,10 @@
-import { Pencil, Plus, Trash2, WandSparkles } from 'lucide-react'
+import { Plus, Trash2, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
 import VolverInicio from '../components/VolverInicio'
 import EditorEscalaModal from '../components/EditorEscalaModal'
-import EscalaDiagrama from '../components/EscalaDiagrama'
+import TarjetasOrdenables from '../components/TarjetasOrdenables'
 import GeneradorAcordesModal from '../components/GeneradorAcordesModal'
 import EditorAcordeModal from '../components/EditorAcordeModal'
-import AcordeDiagrama from '../components/AcordeDiagrama'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
 import { etiquetaTipo } from '../lib/escalas'
 import { usePizarra } from '../hooks/usePizarra'
@@ -15,7 +14,7 @@ const nombreElemento = ({ tipo, datos }) => tipo === 'escala'
 const botonAgregar = 'flex items-center gap-2 rounded-lg bg-teal px-3 py-2.5 text-sm text-butter hover:bg-green disabled:opacity-50'
 
 export default function Pizarra() {
-  const { elementos, error, lecturaFallida, guardar, eliminar, vaciar } = usePizarra()
+  const { elementos, error, lecturaFallida, guardar, eliminar, vaciar, reordenar } = usePizarra()
   const [editor, setEditor] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
 
@@ -40,26 +39,15 @@ export default function Pizarra() {
       {['escala', 'acorde'].map((grupo) => {
         const items = elementos.filter(({ tipo }) => tipo === grupo)
         if (!items.length) return null
-        return <section key={grupo} aria-label={grupo === 'escala' ? 'Escalas' : 'Acordes'} className={grupo === 'escala' ? 'flex min-w-0 flex-col gap-4' : 'flex min-w-0 flex-wrap items-start gap-4'}>
-        {items.map((elemento) => {
-          const { tipo, datos } = elemento
-          const nombre = nombreElemento(elemento)
-          return (
-            <article key={datos.id} className={`${tipo === 'acorde' ? 'w-fit max-w-full' : 'w-full min-w-0'} rounded-lg border border-borde bg-superficie p-3 sm:p-5`}>
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 className="min-w-0 truncate text-base text-butter">{nombre}</h2>
-                <div className="flex shrink-0 gap-1">
-                  <button type="button" onClick={() => setEditor({ tipo, datos })} aria-label={`Editar ${nombre}`} className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"><Pencil /></button>
-                  <button type="button" onClick={() => setConfirmacion({ elemento })} aria-label={`Eliminar ${nombre}`} className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"><Trash2 /></button>
-                </div>
-              </div>
-              <div className="overflow-x-auto pb-2">
-                {tipo === 'escala' ? <EscalaDiagrama escala={datos} /> : <AcordeDiagrama acorde={datos} />}
-              </div>
-            </article>
-          )
-        })}
-        </section>
+        return <TarjetasOrdenables
+          key={grupo}
+          tipo={grupo}
+          items={items.map(({ datos }) => datos)}
+          disabled={lecturaFallida}
+          onReordenar={(ordenados) => reordenar(grupo, ordenados)}
+          onEditar={(datos) => setEditor({ tipo: grupo, datos })}
+          onEliminar={(datos) => setConfirmacion({ elemento: { tipo: grupo, datos } })}
+        />
       })}
       {editor?.tipo === 'escala' && <EditorEscalaModal key={editor.datos?.id ?? 'nueva'} escala={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('escala', datos)} errorGuardado={error} />}
       {editor?.tipo === 'generador' && <GeneradorAcordesModal

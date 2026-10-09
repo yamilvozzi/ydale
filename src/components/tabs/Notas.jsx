@@ -1,7 +1,7 @@
-import { Pencil, Plus, Trash2, WandSparkles } from 'lucide-react'
+import { Plus, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import AcordeDiagrama from '../AcordeDiagrama'
+import TarjetasOrdenables from '../TarjetasOrdenables'
 import EditorAcordeModal from '../EditorAcordeModal'
 import GeneradorAcordesModal from '../GeneradorAcordesModal'
 import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
@@ -76,36 +76,14 @@ export default function Notas() {
         </div>
 
         {notas.acordes.length > 0 ? (
-          <div className="flex flex-wrap items-start gap-3">
-            {notas.acordes.map((acorde) => (
-              <article key={acorde.id} className="w-fit max-w-full self-start rounded-lg border border-borde bg-superficie p-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <h3 className="min-w-0 truncate text-base text-butter">{acorde.nombre || 'Sin nombre'}</h3>
-                  <div className="flex shrink-0 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setEditor(acorde)}
-                      disabled={ocupado}
-                      aria-label={`Editar ${acorde.nombre || 'acorde'}`}
-                      className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
-                    >
-                      <Pencil />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAcordeAEliminar(acorde)}
-                      disabled={ocupado}
-                      aria-label={`Eliminar ${acorde.nombre || 'acorde'}`}
-                      className="accion-icono rounded-lg text-butter-muted hover:bg-fondo hover:text-butter"
-                    >
-                      <Trash2 />
-                    </button>
-                  </div>
-                </div>
-                <AcordeDiagrama acorde={acorde} />
-              </article>
-            ))}
-          </div>
+          <TarjetasOrdenables
+            tipo="acorde"
+            items={notas.acordes}
+            disabled={ocupado}
+            onReordenar={(acordes) => persistirAcordes(acordes, false)}
+            onEditar={setEditor}
+            onEliminar={setAcordeAEliminar}
+          />
         ) : (
           <p className="text-sm italic text-butter-muted">Todavía no hay diagramas cargados.</p>
         )}

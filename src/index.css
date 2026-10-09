@@ -112,6 +112,77 @@ body {
   outline-offset: -2px;
 }
 
+/* Controles exclusivos de las fichas guardadas; no afectan los editores. */
+.tarjeta-musical {
+  position: relative;
+  max-width: 100%;
+  border: 1px solid var(--color-borde);
+  border-radius: 0.5rem;
+  background: var(--color-superficie);
+  padding: 0.75rem;
+}
+
+.tarjeta-acorde { width: fit-content; }
+.tarjeta-escala { width: 100%; min-width: 0; }
+.tarjeta-cabecera { margin-bottom: 0.5rem; }
+.tarjeta-nombre {
+  min-width: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  color: var(--color-butter);
+}
+
+/* Los títulos largos no ensanchan el acorde más allá de su gráfico. */
+.tarjeta-acorde .tarjeta-cabecera { contain: inline-size; }
+.tarjeta-escala .tarjeta-cabecera {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 88px;
+  align-items: center;
+  margin: -0.5rem -0.5rem 0.5rem;
+}
+.tarjeta-mover-sector { justify-self: start; }
+.tarjeta-editar-sector { display: flex; justify-self: end; }
+.tarjeta-controles {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 -0.5rem -0.5rem;
+}
+.tarjeta-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 0.375rem;
+  color: #8fa8a2;
+  cursor: pointer;
+}
+.tarjeta-control > svg { width: 13px; height: 13px; }
+.tarjeta-eliminar { color: #c18f8b; }
+.tarjeta-control:hover { color: var(--color-butter); }
+.tarjeta-eliminar:hover { color: #ddb0ab; }
+.tarjeta-control:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+.tarjeta-control:disabled { opacity: 0.45; cursor: default; }
+/* Sólo el handle reserva el gesto táctil; el resto permite scroll normal. */
+.tarjeta-mover { touch-action: none; cursor: grab; }
+.tarjeta-mover:active { cursor: grabbing; }
+.tarjeta-arrastrando {
+  z-index: 10;
+  box-shadow: 0 8px 24px #0005;
+  border-color: #8fa8a2;
+}
+@media (min-width: 40rem) {
+  .tarjeta-escala { padding: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-musical { transition: none !important; }
+}
+
 /* Cuerdas y notas comparten el eje y=0 de la fila. Los trastes no suman
    bordes al área usada para centrar los marcadores y sus referencias. */
 .diagrama-cuerda {
