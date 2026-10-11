@@ -270,6 +270,74 @@ body {
   color: var(--color-nota-tonica);
 }
 
+/* Herramienta de consulta: el tamaño depende del ancho y del alto del modal.
+   En pantallas bajas se conserva un mínimo legible y el modal puede desplazar. */
+.circulo-modal {
+  width: min(calc(100% - 0.5rem), 56rem);
+  max-width: none;
+  max-height: calc(100dvh - 1rem);
+  padding: 0.5rem;
+}
+.circulo-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.circulo-modal-pie { min-height: 2.75rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.circulo-quintas {
+  position: relative;
+  container-type: inline-size;
+  width: min(100%, max(19rem, calc(100dvh - 11rem)));
+  max-width: 46rem;
+  margin: 0.5rem auto;
+  aspect-ratio: 1;
+}
+.circulo-quintas-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.circulo-sector { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.circulo-sector path { fill: var(--sector-fondo); stroke: var(--color-borde); stroke-width: 1.5; }
+.circulo-nivel-fuera { --sector-fondo: var(--color-fondo); color: var(--color-butter-muted); }
+.circulo-nivel-diatonico { --sector-fondo: color-mix(in srgb, var(--color-teal) 28%, var(--color-superficie)); color: var(--color-butter); }
+.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--color-teal) 70%, var(--color-superficie)); color: var(--color-butter); }
+.circulo-nivel-tonica { --sector-fondo: var(--color-teal); color: var(--color-butter); }
+.circulo-sector.circulo-nivel-tonica path { stroke: var(--color-butter); stroke-width: 2.5; }
+.circulo-sector:hover path { stroke: var(--color-butter-muted); stroke-width: 3; }
+.circulo-sector:focus-visible path { stroke: var(--color-butter); stroke-width: 4; stroke-dasharray: 6 3; }
+.circulo-sector:active path { fill: var(--color-green); }
+.circulo-sector text { fill: currentColor; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.circulo-nota { font-size: 26px; }
+.circulo-grado { font-size: 19px; }
+.circulo-equivalente { font-size: 16px; }
+.circulo-sector.circulo-nivel-tonica .circulo-nota { font-weight: 700; }
+.circulo-centro {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 46%;
+  text-align: center;
+}
+.circulo-centro h3 { font-size: clamp(18px, 4.3cqw, 30px); line-height: 1.15; }
+.circulo-centro h3 span { display: block; font-size: clamp(10px, 1.9cqw, 14px); letter-spacing: 0.14em; margin-top: 0.3em; }
+.circulo-relativa { margin-top: 0.65em; font-size: clamp(11px, 2.1cqw, 16px); color: var(--color-butter-muted); }
+.circulo-relativa strong { font-weight: 400; color: var(--color-butter); }
+.circulo-acordes { display: flex; flex-wrap: wrap; justify-content: center; gap: 1cqw; margin: 2cqw 0 1.5cqw; }
+.circulo-acordes li { display: flex; flex-direction: column; justify-content: center; width: calc((100% - 3cqw) / 4); min-height: 8cqw; border-radius: 0.4rem; background: var(--sector-fondo); border: 1px solid transparent; }
+.circulo-acordes li.circulo-nivel-tonica { border-color: var(--color-butter-muted); }
+.circulo-acordes li.circulo-nivel-disminuido { border-color: var(--color-butter-muted); border-style: dashed; }
+.circulo-acordes span { font-size: clamp(10px, 1.8cqw, 14px); color: var(--color-butter-muted); }
+.circulo-acordes strong { font-size: clamp(11px, 2.3cqw, 18px); font-weight: 400; }
+.circulo-armadura { font-size: clamp(10px, 1.8cqw, 13px); color: var(--color-butter-muted); }
+.circulo-armadura span { display: block; }
+@container (max-width: 340px) {
+  .circulo-centro h3 span { display: inline; margin-left: 0.4em; }
+  .circulo-armadura { display: none; }
+}
+@media (min-width: 40rem) {
+  .circulo-modal { width: min(calc(100% - 3rem), 56rem); max-height: calc(100dvh - 3rem); padding: 1.25rem; }
+  .circulo-quintas { width: min(100%, max(22rem, calc(100dvh - 13rem))); }
+}
+@media (min-width: 40rem) and (max-height: 32rem) {
+  .circulo-modal { display: grid; grid-template-columns: minmax(12rem, 1fr) auto; gap: 1rem; }
+  .circulo-modal-cabecera { align-self: start; align-items: start; }
+  .circulo-modal-pie { grid-column: 1; align-self: end; }
+  .circulo-quintas { grid-column: 2; grid-row: 1 / span 2; width: min(52vw, calc(100dvh - 6rem)); margin: 0; }
+}
+
 @media (min-width: 40rem) {
   .diagrama-nota {
     width: var(--diametro-nota, 24px);

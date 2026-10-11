@@ -1,4 +1,4 @@
-import { Plus, Trash2, WandSparkles } from 'lucide-react'
+import { CircleDot, Plus, Trash2, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
 import VolverInicio from '../components/VolverInicio'
 import EditorEscalaModal from '../components/EditorEscalaModal'
@@ -6,6 +6,7 @@ import TarjetasOrdenables from '../components/TarjetasOrdenables'
 import GeneradorAcordesModal from '../components/GeneradorAcordesModal'
 import EditorAcordeModal from '../components/EditorAcordeModal'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
+import CirculoQuintasModal from '../components/CirculoQuintasModal'
 import { etiquetaTipo } from '../lib/escalas'
 import { usePizarra } from '../hooks/usePizarra'
 
@@ -17,6 +18,7 @@ export default function Pizarra() {
   const { elementos, error, lecturaFallida, guardar, eliminar, vaciar, reordenar } = usePizarra()
   const [editor, setEditor] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
+  const [circuloAbierto, setCirculoAbierto] = useState(false)
 
   function alGuardar(tipo, datos) {
     if (guardar(tipo, datos)) setEditor(null)
@@ -32,6 +34,7 @@ export default function Pizarra() {
         <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'escala' })} aria-label="+ Escala" className={botonAgregar}><Plus size={17} /> Escala</button>
         <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'acorde' })} aria-label="+ Acorde" className={botonAgregar}><Plus size={17} /> Acorde</button>
         <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'generador' })} className={botonAgregar}><WandSparkles size={17} /> Generador</button>
+        <button type="button" onClick={() => setCirculoAbierto(true)} className={botonAgregar}><CircleDot size={17} /> Círculo de 5tas</button>
         <button type="button" disabled={!elementos.length && !lecturaFallida} onClick={() => setConfirmacion({ todo: true })} className="ml-auto flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-butter-muted hover:bg-superficie hover:text-butter disabled:opacity-40"><Trash2 size={16} /> VACIAR PIZARRA</button>
       </div>
       {error && !editor && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
@@ -57,6 +60,7 @@ export default function Pizarra() {
         errorGuardado={error}
       />}
       {editor?.tipo === 'acorde' && <EditorAcordeModal key={editor.datos?.id ?? 'nuevo'} acorde={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('acorde', datos)} errorGuardado={error} />}
+      {circuloAbierto && <CirculoQuintasModal onCerrar={() => setCirculoAbierto(false)} />}
       {confirmacion && <ConfirmarEliminacionModal
         preguntaComoTitulo
         mensaje={confirmacion.todo ? '¿Vaciar toda la pizarra?' : `¿Eliminar ${nombreElemento(confirmacion.elemento)} de la pizarra?`}

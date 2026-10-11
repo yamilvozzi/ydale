@@ -13,6 +13,27 @@
 
 El contenido se guarda en `localStorage` bajo `ydaaaale_pizarra_v1`. Permanece tras recargar y reabrir la aplicación en el mismo navegador y origen. No se sincroniza entre dispositivos; borrar los datos del navegador también borra la pizarra. Los errores de almacenamiento se muestran sin cerrar el editor ni descartar su borrador. Si no se puede leer el contenido guardado, no se sobrescribe automáticamente.
 
+## Círculo de 5tas
+
+El botón **Círculo de 5tas** abre una herramienta de consulta exclusiva de
+Pizarra. El anillo exterior selecciona mayores y el interior sus relativas
+menores naturales. La tónica, los grados IV/V (iv/v en menor), los demás acordes
+diatónicos y el disminuido tienen distintas jerarquías visuales. El centro
+muestra los siete grados y acordes, la relativa y, si hay espacio, la armadura.
+F♯/G♭ y D♯m/E♭m permiten alternar su escritura enarmónica desde el pie del modal.
+
+La selección sólo vive en el estado del modal: comienza en C mayor al abrir,
+no agrega elementos a la pizarra y no escribe en localStorage ni Supabase.
+Se puede cerrar con el botón o Escape; el foco vuelve al botón de apertura.
+Los sectores admiten toque, clic, Tab, Enter y espacio. En pantallas bajas y
+anchas el encabezado queda al costado para conservar visible el círculo.
+
+La lógica musical está en `src/lib/circuloQuintas.js`, el gráfico en
+`src/components/CirculoQuintas.jsx` y el diálogo en
+`src/components/CirculoQuintasModal.jsx`. Las pruebas en
+`src/lib/circuloQuintas.test.js` cubren las 12 mayores y menores, grados,
+relativas, armaduras, grafías enarmónicas y correspondencia de los sectores.
+
 ## Supabase
 
 No requiere cambios en Supabase: ni tablas, columnas, RLS, índices, funciones, triggers, permisos ni Storage. No hay SQL que ejecutar. La pizarra no consulta ni modifica temas; sus elementos contienen los mismos datos de escalas y acordes usados por los componentes existentes, pero se persisten exclusivamente en el navegador. Las variables y permisos que ya utiliza el repertorio siguen siendo los mismos.
