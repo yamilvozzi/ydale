@@ -23,7 +23,7 @@ export default function CirculoQuintas({ tonalidad, onSeleccionar }) {
             <g key={`${item.indice}-${item.modo}`}
               role="button" tabIndex={0} aria-pressed={item.nivel === 'tonica'}
               aria-label={`${mostrarNota(item.tonica)} ${item.modo}${item.grado ? `, ${item.grado}` : ''}`}
-              className={`circulo-sector circulo-nivel-${item.nivel}`}
+              className={`circulo-sector circulo-modo-${item.modo} circulo-nivel-${item.nivel}`}
               onClick={seleccionar}
               onKeyDown={(evento) => {
                 if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); seleccionar() }
@@ -41,7 +41,7 @@ export default function CirculoQuintas({ tonalidad, onSeleccionar }) {
         <h3>{mostrarNota(tonalidad.tonica)} <span>{tonalidad.modo === 'mayor' ? 'MAYOR' : 'MENOR'}</span></h3>
         <p className="circulo-relativa">Relativa: <strong>{tonalidad.relativa}</strong></p>
         <ol className="circulo-acordes" aria-label="Acordes diatónicos">
-          {tonalidad.acordes.map((acorde) => <li key={acorde.grado} className={`circulo-nivel-${acorde.nivel}`}>
+          {tonalidad.acordes.map((acorde) => <li key={acorde.grado} className={`circulo-modo-${acorde.modo} circulo-nivel-${acorde.nivel}`}>
             <span>{acorde.grado}</span><strong>{acorde.nombre}</strong>
           </li>)}
         </ol>

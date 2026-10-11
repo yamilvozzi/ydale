@@ -29,23 +29,20 @@ export default function CirculoQuintasModal({ onCerrar }) {
   }, [])
 
   return (
-    <dialog ref={dialogo} aria-labelledby={`${id}-titulo`} aria-describedby={`${id}-ayuda`}
+    <dialog ref={dialogo} aria-labelledby={`${id}-titulo`}
       onCancel={(evento) => { evento.preventDefault(); onCerrar() }}
       className="circulo-modal fixed inset-0 m-auto overflow-y-auto rounded-xl border border-borde bg-superficie text-butter shadow-2xl backdrop:bg-black/70"
     >
-      <header className="circulo-modal-cabecera">
-        <div>
-          <h2 id={`${id}-titulo`} className="text-lg">Círculo de 5tas</h2>
-          <p id={`${id}-ayuda`} className="mt-1 text-xs text-butter-muted">Tocá una tonalidad. Mayores afuera, menores adentro.</p>
-        </div>
+      <header className="circulo-modal-cabecera pizarra-modal-cabecera">
+        <h2 id={`${id}-titulo`}>Círculo de 5tas</h2>
         <button ref={cerrar} type="button" onClick={onCerrar} aria-label="Cerrar círculo de quintas" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-butter-muted hover:bg-fondo hover:text-butter focus-visible:outline-2 focus-visible:outline-butter"><X size={20} /></button>
       </header>
       <CirculoQuintas tonalidad={tonalidad} onSeleccionar={setSeleccion} />
-      <footer className="circulo-modal-pie">
-        {tieneEquivalente ? <button type="button" onClick={() => setSeleccion({ ...seleccion, tonica: equivalente })} className="min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-fondo hover:text-butter">
+      {tieneEquivalente && <footer className="circulo-modal-pie">
+        <button type="button" onClick={() => setSeleccion({ ...seleccion, tonica: equivalente })} className="min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-fondo hover:text-butter">
           Misma tonalidad · Ver como {nombreAcorde(equivalente, seleccion.modo)}
-        </button> : <p className="text-xs text-butter-muted">Elegí la tónica y explorá sus siete acordes.</p>}
-      </footer>
+        </button>
+      </footer>}
     </dialog>
   )
 }

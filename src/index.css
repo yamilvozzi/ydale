@@ -278,7 +278,24 @@ body {
   max-height: calc(100dvh - 1rem);
   padding: 0.5rem;
 }
-.circulo-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+/* Variante explícita de Pizarra; los modales compartidos conservan su
+   encabezado habitual cuando se abren desde el repertorio. */
+.pizarra-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; }
+.pizarra-modal-cabecera > h2 {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--color-teal) 22%, var(--color-butter));
+  color: var(--color-green);
+  font-size: 1rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+}
 .circulo-modal-pie { min-height: 2.75rem; display: flex; align-items: center; justify-content: center; text-align: center; }
 .circulo-quintas {
   position: relative;
@@ -291,14 +308,18 @@ body {
 .circulo-quintas-svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .circulo-sector { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
 .circulo-sector path { fill: var(--sector-fondo); stroke: var(--color-borde); stroke-width: 1.5; }
-.circulo-nivel-fuera { --sector-fondo: var(--color-fondo); color: var(--color-butter-muted); }
-.circulo-nivel-diatonico { --sector-fondo: color-mix(in srgb, var(--color-teal) 28%, var(--color-superficie)); color: var(--color-butter); }
-.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--color-teal) 70%, var(--color-superficie)); color: var(--color-butter); }
-.circulo-nivel-tonica { --sector-fondo: var(--color-teal); color: var(--color-butter); }
+.circulo-modo-mayor { --sector-color: var(--color-teal); }
+.circulo-modo-menor { --sector-color: var(--color-nota-tonica); }
+.circulo-nivel-fuera { --sector-fondo: color-mix(in srgb, var(--sector-color) 14%, var(--color-fondo)); color: var(--color-butter-muted); }
+.circulo-nivel-diatonico { --sector-fondo: color-mix(in srgb, var(--sector-color) 45%, var(--color-superficie)); color: var(--color-butter); }
+.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--sector-color) 70%, var(--color-superficie)); color: var(--color-butter); }
+.circulo-nivel-tonica { --sector-fondo: var(--sector-color); color: var(--color-butter); }
+.circulo-modo-menor.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--sector-color) 90%, var(--color-superficie)); color: var(--color-fondo); }
+.circulo-modo-menor.circulo-nivel-tonica { color: var(--color-fondo); }
 .circulo-sector.circulo-nivel-tonica path { stroke: var(--color-butter); stroke-width: 2.5; }
 .circulo-sector:hover path { stroke: var(--color-butter-muted); stroke-width: 3; }
 .circulo-sector:focus-visible path { stroke: var(--color-butter); stroke-width: 4; stroke-dasharray: 6 3; }
-.circulo-sector:active path { fill: var(--color-green); }
+.circulo-sector:active path { fill: color-mix(in srgb, var(--sector-fondo) 92%, var(--color-butter)); }
 .circulo-sector text { fill: currentColor; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .circulo-nota { font-size: 26px; }
 .circulo-grado { font-size: 19px; }
@@ -319,7 +340,7 @@ body {
 .circulo-acordes li { display: flex; flex-direction: column; justify-content: center; width: calc((100% - 3cqw) / 4); min-height: 8cqw; border-radius: 0.4rem; background: var(--sector-fondo); border: 1px solid transparent; }
 .circulo-acordes li.circulo-nivel-tonica { border-color: var(--color-butter-muted); }
 .circulo-acordes li.circulo-nivel-disminuido { border-color: var(--color-butter-muted); border-style: dashed; }
-.circulo-acordes span { font-size: clamp(10px, 1.8cqw, 14px); color: var(--color-butter-muted); }
+.circulo-acordes span { font-size: clamp(10px, 1.8cqw, 14px); color: inherit; }
 .circulo-acordes strong { font-size: clamp(11px, 2.3cqw, 18px); font-weight: 400; }
 .circulo-armadura { font-size: clamp(10px, 1.8cqw, 13px); color: var(--color-butter-muted); }
 .circulo-armadura span { display: block; }
@@ -328,6 +349,7 @@ body {
   .circulo-armadura { display: none; }
 }
 @media (min-width: 40rem) {
+  .pizarra-modal-cabecera > h2 { font-size: 1.125rem; line-height: 1.5rem; }
   .circulo-modal { width: min(calc(100% - 3rem), 56rem); max-height: calc(100dvh - 3rem); padding: 1.25rem; }
   .circulo-quintas { width: min(100%, max(22rem, calc(100dvh - 13rem))); }
 }
