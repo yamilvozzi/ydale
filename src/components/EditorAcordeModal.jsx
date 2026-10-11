@@ -38,8 +38,8 @@ export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardan
         onSubmit={enviar}
         className="flex flex-col"
       >
-        <div className={cabeceraPizarra ? 'pizarra-modal-cabecera' : 'mb-5 flex items-center justify-between gap-4'}>
-          <h2 id={tituloId} className="text-lg text-butter">{acorde && !acorde.esNuevo ? 'Editar acorde' : 'Nuevo acorde'}</h2>
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 id={tituloId} className={`text-lg ${cabeceraPizarra ? 'pizarra-modal-titulo' : 'text-butter'}`}>{acorde && !acorde.esNuevo ? 'Editar acorde' : 'Nuevo acorde'}</h2>
           <button
             type="button"
             onClick={onCerrar}

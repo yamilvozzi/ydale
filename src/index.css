@@ -13,6 +13,7 @@
   --color-superficie: #222624;
   --color-borde: #313633;
   --color-teal: #00555a;
+  --color-teal-claro: #8fa8a2;
   --color-petroleo: #4a9fc1;
   --color-green: #013e37;
   --color-butter: #f2ede0;
@@ -278,24 +279,9 @@ body {
   max-height: calc(100dvh - 1rem);
   padding: 0.5rem;
 }
-/* Variante explícita de Pizarra; los modales compartidos conservan su
-   encabezado habitual cuando se abren desde el repertorio. */
-.pizarra-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; }
-.pizarra-modal-cabecera > h2 {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  min-height: 2.75rem;
-  margin: 0;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--color-teal) 22%, var(--color-butter));
-  color: var(--color-green);
-  font-size: 1rem;
-  line-height: 1.25rem;
-  font-weight: 400;
-}
+/* El teal claro ya usado en los controles de tarjetas destaca sólo el texto. */
+.pizarra-modal-titulo { color: var(--color-teal-claro); }
+.circulo-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .circulo-modal-pie { min-height: 2.75rem; display: flex; align-items: center; justify-content: center; text-align: center; }
 .circulo-quintas {
   position: relative;
@@ -349,7 +335,6 @@ body {
   .circulo-armadura { display: none; }
 }
 @media (min-width: 40rem) {
-  .pizarra-modal-cabecera > h2 { font-size: 1.125rem; line-height: 1.5rem; }
   .circulo-modal { width: min(calc(100% - 3rem), 56rem); max-height: calc(100dvh - 3rem); padding: 1.25rem; }
   .circulo-quintas { width: min(100%, max(22rem, calc(100dvh - 13rem))); }
 }

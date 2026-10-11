@@ -19,8 +19,8 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
         onSubmit={enviar}
         className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-6xl flex-col overflow-y-auto rounded-xl border border-borde bg-superficie p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:p-6"
       >
-        <div className={cabeceraPizarra ? 'pizarra-modal-cabecera' : 'mb-5 flex items-center justify-between gap-4'}>
-          <h2 className="text-lg text-butter">{escala ? 'Editar escala' : 'Nueva escala'}</h2>
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className={`text-lg ${cabeceraPizarra ? 'pizarra-modal-titulo' : 'text-butter'}`}>{escala ? 'Editar escala' : 'Nueva escala'}</h2>
           <button
             type="button"
             onClick={onCerrar}

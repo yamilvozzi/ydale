@@ -33,8 +33,8 @@ export default function CirculoQuintasModal({ onCerrar }) {
       onCancel={(evento) => { evento.preventDefault(); onCerrar() }}
       className="circulo-modal fixed inset-0 m-auto overflow-y-auto rounded-xl border border-borde bg-superficie text-butter shadow-2xl backdrop:bg-black/70"
     >
-      <header className="circulo-modal-cabecera pizarra-modal-cabecera">
-        <h2 id={`${id}-titulo`}>Círculo de 5tas</h2>
+      <header className="circulo-modal-cabecera">
+        <h2 id={`${id}-titulo`} className="text-lg pizarra-modal-titulo">Círculo de 5tas</h2>
         <button ref={cerrar} type="button" onClick={onCerrar} aria-label="Cerrar círculo de quintas" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-butter-muted hover:bg-fondo hover:text-butter focus-visible:outline-2 focus-visible:outline-butter"><X size={20} /></button>
       </header>
       <CirculoQuintas tonalidad={tonalidad} onSeleccionar={setSeleccion} />
