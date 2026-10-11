@@ -13,7 +13,6 @@
   --color-superficie: #222624;
   --color-borde: #313633;
   --color-teal: #00555a;
-  --color-teal-claro: #8fa8a2;
   --color-petroleo: #4a9fc1;
   --color-green: #013e37;
   --color-butter: #f2ede0;
@@ -279,8 +278,8 @@ body {
   max-height: calc(100dvh - 1rem);
   padding: 0.5rem;
 }
-/* El teal claro ya usado en los controles de tarjetas destaca sólo el texto. */
-.pizarra-modal-titulo { color: var(--color-teal-claro); }
+/* Sólo los títulos principales de los modales; conserva tipografía y medidas. */
+.modal-titulo { color: var(--color-butter); text-transform: uppercase; }
 .circulo-modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .circulo-modal-pie { min-height: 2.75rem; display: flex; align-items: center; justify-content: center; text-align: center; }
 .circulo-quintas {
@@ -294,18 +293,18 @@ body {
 .circulo-quintas-svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .circulo-sector { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
 .circulo-sector path { fill: var(--sector-fondo); stroke: var(--color-borde); stroke-width: 1.5; }
-.circulo-modo-mayor { --sector-color: var(--color-teal); }
-.circulo-modo-menor { --sector-color: var(--color-nota-tonica); }
-.circulo-nivel-fuera { --sector-fondo: color-mix(in srgb, var(--sector-color) 14%, var(--color-fondo)); color: var(--color-butter-muted); }
-.circulo-nivel-diatonico { --sector-fondo: color-mix(in srgb, var(--sector-color) 45%, var(--color-superficie)); color: var(--color-butter); }
-.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--sector-color) 70%, var(--color-superficie)); color: var(--color-butter); }
+/* Variantes locales: teal más luminoso y naranja más oscuro para texto butter.
+   Los colores de los diagramas de escalas y acordes conservan sus tokens. */
+.circulo-modo-mayor { --sector-color: #08747a; }
+.circulo-modo-menor { --sector-color: #a94f22; }
+.circulo-nivel-fuera { --sector-fondo: color-mix(in srgb, var(--sector-color) 5%, var(--color-fondo)); color: var(--color-butter); }
+.circulo-nivel-diatonico { --sector-fondo: color-mix(in srgb, var(--sector-color) 30%, var(--color-superficie)); color: var(--color-butter); }
+.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--sector-color) 65%, var(--color-superficie)); color: var(--color-butter); }
 .circulo-nivel-tonica { --sector-fondo: var(--sector-color); color: var(--color-butter); }
-.circulo-modo-menor.circulo-nivel-principal { --sector-fondo: color-mix(in srgb, var(--sector-color) 90%, var(--color-superficie)); color: var(--color-fondo); }
-.circulo-modo-menor.circulo-nivel-tonica { color: var(--color-fondo); }
 .circulo-sector.circulo-nivel-tonica path { stroke: var(--color-butter); stroke-width: 2.5; }
 .circulo-sector:hover path { stroke: var(--color-butter-muted); stroke-width: 3; }
 .circulo-sector:focus-visible path { stroke: var(--color-butter); stroke-width: 4; stroke-dasharray: 6 3; }
-.circulo-sector:active path { fill: color-mix(in srgb, var(--sector-fondo) 92%, var(--color-butter)); }
+.circulo-sector:active path { fill: color-mix(in srgb, var(--sector-fondo) 94%, var(--color-fondo)); }
 .circulo-sector text { fill: currentColor; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .circulo-nota { font-size: 26px; }
 .circulo-grado { font-size: 19px; }

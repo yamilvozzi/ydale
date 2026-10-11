@@ -49,7 +49,7 @@ export default function ConfirmarEliminacionModal({ mensaje, onCancelar, onConfi
       onCancel={(evento) => { evento.preventDefault(); if (!enviando.current) onCancelar() }}
       className="fixed inset-0 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-sm overflow-y-auto rounded-xl border border-borde bg-superficie p-5 text-butter shadow-2xl backdrop:bg-black/70"
     >
-      <h2 id={`${id}-titulo`} className="break-words text-lg">{preguntaComoTitulo ? mensaje : 'Confirmar eliminación'}</h2>
+      <h2 id={`${id}-titulo`} className="break-words text-lg modal-titulo">{preguntaComoTitulo ? mensaje : 'Confirmar eliminación'}</h2>
       {!preguntaComoTitulo && <p id={`${id}-mensaje`} className="mt-3 break-words text-sm text-butter-muted">{mensaje}</p>}
       {error && <p role="alert" className="mt-3 text-sm text-butter-muted">No se pudo eliminar. Intentá de nuevo.</p>}
       <div className="mt-5 flex justify-end gap-2">

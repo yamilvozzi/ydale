@@ -34,7 +34,7 @@ function Interruptor({ etiqueta, activo, onChange, disabled = false, className =
   )
 }
 
-export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false, errorGuardado = '', cabeceraPizarra = false }) {
+export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, guardando = false, errorGuardado = '' }) {
   const dialogo = useRef(null)
   const buscador = useRef(null)
   const opcionTactil = useRef(null)
@@ -142,7 +142,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
       className="fixed inset-0 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-6xl overflow-y-auto rounded-xl border border-borde bg-superficie p-4 text-butter shadow-2xl backdrop:bg-black/70 sm:max-h-[calc(100dvh-3rem)] sm:w-[calc(100%-3rem)] sm:p-6"
     >
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 id={`${id}-titulo`} className={`text-lg${cabeceraPizarra ? ' pizarra-modal-titulo' : ''}`}>Generador de acordes</h2>
+        <h2 id={`${id}-titulo`} className="text-lg modal-titulo">Generador de acordes</h2>
         <button type="button" onClick={onCerrar} disabled={guardando} aria-label="Cerrar generador de acordes" className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"><X size={20} /></button>
       </div>
 

@@ -52,7 +52,7 @@ export default function NuevoTemaModal({ onCerrar, onGuardado, temaEditando = nu
         onSubmit={guardar}
         className="w-full max-w-sm bg-superficie border border-borde rounded-lg p-5 flex flex-col gap-4"
       >
-        <h2 className="text-lg text-butter">{esEdicion ? 'Editar tema' : 'Nuevo tema'}</h2>
+        <h2 className="text-lg modal-titulo">{esEdicion ? 'Editar tema' : 'Nuevo tema'}</h2>
 
         <div className="flex flex-col gap-1">
           <label className="text-xs text-butter-muted uppercase tracking-wide">Tema</label>
