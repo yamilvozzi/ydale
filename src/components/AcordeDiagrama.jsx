@@ -1,6 +1,7 @@
 import MarcadorNota from './MarcadorNota'
 import LineasDiapason from './LineasDiapason'
 import { AFINACION, notaEnTraste } from '../lib/escalas'
+import { ventanaAcorde } from '../lib/ventanaAcorde'
 
 const ESTADOS = ['vacio', 'presionada', 'aire', 'muteada']
 
@@ -19,15 +20,11 @@ export default function AcordeDiagrama({
   compacto = !editable,
 }) {
   const columnas = acorde.trastes.length
-  const contieneTrasteUno = acorde.posiciones.some((fila) => fila.some((estado, indice) => {
-    const numero = acorde.trastes[indice].trim()
-    return estado === 'presionada' && /^\d+$/.test(numero) && Number(numero) === 1
-  }))
-  // Espacio decorativo sólo en fichas fijas: no cambia los índices, los trastes
-  // numerados ni la digitación. Si la primera celda ya está vacía, alcanza.
-  const separarCejuela = !editable && !contieneTrasteUno &&
-    acorde.posiciones.some((fila) => fila[0] === 'presionada')
-  const columnasVisuales = columnas + (separarCejuela ? 1 : 0)
+  const vista = editable ? {
+    trastes: acorde.trastes,
+    indicesPorCuerda: acorde.posiciones.map((fila) => fila.map((_, indice) => indice)),
+  } : ventanaAcorde(acorde)
+  const columnasVisuales = vista.trastes.length
   function ciclarCelda(cuerda, traste) {
     const posiciones = acorde.posiciones.map((fila) => [...fila])
     const actual = posiciones[cuerda][traste]
@@ -102,8 +99,7 @@ export default function AcordeDiagrama({
     <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} ${medidas.nota} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
       <div className="grid items-end" style={{ gridTemplateColumns: medidas.grilla }}>
         <div />
-        {separarCejuela && <div aria-hidden="true" />}
-        {acorde.trastes.map((traste, indice) =>
+        {vista.trastes.map((traste, indice) =>
           editable ? (
             <label key={indice} className="flex justify-center pb-4">
               <span className="sr-only">Número del traste {indice + 1}</span>
@@ -157,25 +153,23 @@ export default function AcordeDiagrama({
                 )}
               </div>
 
-              {separarCejuela && <div aria-hidden="true" className={`relative ${altoFila}`}>
-                <LineasDiapason traste cejuela />
-              </div>}
-              {fila.map((estado, traste) => {
+              {vista.indicesPorCuerda[cuerda].map((traste, columnaVisual) => {
+                const estado = traste === null ? 'vacio' : fila[traste]
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
                 const esBajo = acorde.bajo?.cuerda === cuerda && acorde.bajo?.traste === traste
                 const esOpcional = acorde.opcional?.cuerda === cuerda && acorde.opcional?.traste === traste
-                const numero = acorde.trastes[traste].trim()
+                const numero = vista.trastes[columnaVisual].trim()
                 const nota = /^\d+$/.test(numero) ? notaEnTraste(AFINACION[cuerda], Number(numero)) : null
                 const comun = `relative ${altoFila}`
                 const contenido = (
                   <>
-                    <LineasDiapason traste cejuela={traste === 0 && !separarCejuela} />
+                    <LineasDiapason traste cejuela={columnaVisual === 0} />
                     {estado === 'presionada' && <MarcadorNota nota={nota} esTonica={esTonica} esOpcional={esOpcional} />}
                   </>
                 )
                 return editable ? (
                   <button
-                    key={traste}
+                    key={columnaVisual}
                     type="button"
                     onClick={() => ciclarCelda(cuerda, traste)}
                     aria-label={`Cuerda ${cuerda + 1}, traste ${numero || `sin definir (${traste + 1})`}: ${estado}${esTonica ? ', tónica' : ''}${esBajo ? ', bajo' : ''}${esOpcional ? ', opcional' : ''}`}
@@ -184,7 +178,7 @@ export default function AcordeDiagrama({
                     {contenido}
                   </button>
                 ) : (
-                  <div key={traste} aria-label={esOpcional ? `Nota ${nota || ''} opcional` : undefined} className={comun}>{contenido}</div>
+                  <div key={columnaVisual} aria-label={esOpcional ? `Nota ${nota || ''} opcional` : undefined} className={comun}>{contenido}</div>
                 )
               })}
             </div>
