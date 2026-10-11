@@ -19,6 +19,15 @@ export default function AcordeDiagrama({
   compacto = !editable,
 }) {
   const columnas = acorde.trastes.length
+  const contieneTrasteUno = acorde.posiciones.some((fila) => fila.some((estado, indice) => {
+    const numero = acorde.trastes[indice].trim()
+    return estado === 'presionada' && /^\d+$/.test(numero) && Number(numero) === 1
+  }))
+  // Espacio decorativo sólo en fichas fijas: no cambia los índices, los trastes
+  // numerados ni la digitación. Si la primera celda ya está vacía, alcanza.
+  const separarCejuela = !editable && !contieneTrasteUno &&
+    acorde.posiciones.some((fila) => fila[0] === 'presionada')
+  const columnasVisuales = columnas + (separarCejuela ? 1 : 0)
   function ciclarCelda(cuerda, traste) {
     const posiciones = acorde.posiciones.map((fila) => [...fila])
     const actual = posiciones[cuerda][traste]
@@ -75,14 +84,14 @@ export default function AcordeDiagrama({
 
   const medidas = compacto
     ? {
-        grilla: `1.85rem repeat(${columnas}, 2.6rem)`,
+        grilla: `1.85rem repeat(${columnasVisuales}, 2.6rem)`,
         altoCuerda: 'h-7',
         numero: 'text-xs',
         marcador: 'size-5 text-sm',
         nota: '[--diametro-nota:16px]',
       }
     : {
-        grilla: `2.35rem repeat(${columnas}, minmax(2.75rem, 1fr))`,
+        grilla: `2.35rem repeat(${columnasVisuales}, minmax(2.75rem, 1fr))`,
         altoCuerda: 'h-10 sm:h-12',
         numero: 'text-base',
         marcador: 'size-7 text-lg',
@@ -93,6 +102,7 @@ export default function AcordeDiagrama({
     <div className={`${compacto ? 'w-fit max-w-full' : 'w-full'} ${medidas.nota} min-w-0 pb-3`} aria-label={`Diagrama de ${acorde.nombre || 'acorde'}`}>
       <div className="grid items-end" style={{ gridTemplateColumns: medidas.grilla }}>
         <div />
+        {separarCejuela && <div aria-hidden="true" />}
         {acorde.trastes.map((traste, indice) =>
           editable ? (
             <label key={indice} className="flex justify-center pb-4">
@@ -147,6 +157,9 @@ export default function AcordeDiagrama({
                 )}
               </div>
 
+              {separarCejuela && <div aria-hidden="true" className={`relative ${altoFila}`}>
+                <LineasDiapason traste cejuela />
+              </div>}
               {fila.map((estado, traste) => {
                 const esTonica = acorde.tonica?.cuerda === cuerda && acorde.tonica?.traste === traste
                 const esBajo = acorde.bajo?.cuerda === cuerda && acorde.bajo?.traste === traste
@@ -156,7 +169,7 @@ export default function AcordeDiagrama({
                 const comun = `relative ${altoFila}`
                 const contenido = (
                   <>
-                    <LineasDiapason traste cejuela={traste === 0} />
+                    <LineasDiapason traste cejuela={traste === 0 && !separarCejuela} />
                     {estado === 'presionada' && <MarcadorNota nota={nota} esTonica={esTonica} esOpcional={esOpcional} />}
                   </>
                 )
