@@ -32,7 +32,7 @@ function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar }) {
       <h3 className="tarjeta-nombre" title={nombre}>{nombre}</h3>
       {tipo === 'escala' && <div className="tarjeta-editar-sector">{editar}{eliminar}</div>}
     </header>
-    <div className="min-w-0 overflow-x-auto">
+    <div className={tipo === 'escala' ? 'min-w-0' : 'min-w-0 overflow-x-auto'}>
       {tipo === 'escala' ? <EscalaDiagrama escala={datos} /> : <AcordeDiagrama acorde={datos} />}
     </div>
     {tipo === 'acorde' && <footer className="tarjeta-controles">{mover}{editar}{eliminar}</footer>}

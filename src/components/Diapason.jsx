@@ -57,6 +57,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
                     esTonica={esTonicaAbierta}
                     esNotaBlues={esNotaBluesAbierta}
                     esOpcional={marcadorAbierto.esOpcional}
+                    esAtenuada={marcadorAbierto.esAtenuada}
                   />
                 )}
               </div>
@@ -89,6 +90,7 @@ export default function Diapason({ etiqueta, obtenerMarcador = () => null }) {
                         esTonica={esTonica}
                         esNotaBlues={esNotaBlues}
                         esOpcional={marcador.esOpcional}
+                        esAtenuada={marcador.esAtenuada}
                       />
                     )}
                   </div>

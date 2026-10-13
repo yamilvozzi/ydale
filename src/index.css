@@ -1,6 +1,4 @@
-/* Varela Round: única tipografía de marca del proyecto.
-   El editor de ESTRUCTURA conserva el stack "font-mono" nativo de
-   Tailwind; su contenido renderizado usa la tipografía de marca. */
+/* Varela Round: única tipografía de marca del proyecto. */
 @import url("https://fonts.googleapis.com/css2?family=Varela+Round&display=swap");
 @import "tailwindcss";
 
@@ -26,6 +24,38 @@ body {
   background-color: var(--color-fondo);
   color: var(--color-butter);
 }
+
+/* Letras reales con acordes anclados al carácter. Los rótulos son absolutos:
+   nunca se agregan espacios ni se altera el ancho de una palabra. */
+.letra-con-acordes { overflow-x: auto; padding: 0.25rem 0.25rem 0.5rem; line-height: 1.65; }
+.letra-con-acordes-editable { border-radius: 0.375rem; }
+.letra-con-acordes-editable:focus-visible { outline: 2px solid var(--color-butter-muted); outline-offset: -2px; }
+.letra-verso { width: max-content; min-width: 100%; min-height: 1.65em; white-space: pre; }
+.letra-verso-con-acordes { padding-top: calc(var(--filas-acordes, 1) * 1.4em); }
+.letra-caracter { position: relative; }
+.letra-caracter-editable { cursor: pointer; }
+.letra-caracter-editable:hover { background: var(--color-teal); }
+.letra-caracter-elegida { background: var(--color-teal); outline: 1px solid var(--color-butter-muted); }
+.letra-acorde {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--carril-acorde, 0) * 1.4em);
+  z-index: 1;
+  width: max-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-nota-tonica);
+  white-space: nowrap;
+}
+button.letra-acorde { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+button.letra-acorde[data-moviendo] { cursor: grabbing; z-index: 3; outline: 1px solid currentColor; background: var(--color-superficie); border-radius: 2px; }
+button.letra-acorde::before { content: ''; position: absolute; inset: -0.2rem -0.15rem; }
+button.letra-acorde:focus-visible { outline: 1px solid currentColor; }
+.letra-acorde-ausente { color: var(--color-butter-muted); }
 
 /* Ventana apaisada sobre el original cuadrado: recorta el fondo sobrante,
    conserva las letras y reserva el espacio incluso antes de cargar la imagen. */
@@ -124,6 +154,21 @@ body {
 
 .tarjeta-acorde { width: fit-content; }
 .tarjeta-escala { width: 100%; min-width: 0; }
+/* Medida única para ajustar la proporción del gráfico en escritorio. */
+.escala-diagrama {
+  --escala-ancho-maximo: 70rem;
+  width: 100%;
+  max-width: var(--escala-ancho-maximo);
+  min-width: 0;
+  margin-inline: auto;
+}
+.escala-grafico {
+  overflow-x: auto;
+  /* Reserva espacio real para el encabezado desplazado y los círculos
+     centrados sobre la última cuerda, sin recortarlos ni ocultar overflow. */
+  padding: 0.5rem 0 1rem;
+}
+.diagrama-nota-atenuada { opacity: 0.12; }
 .tarjeta-cabecera { margin-bottom: 0.5rem; }
 .tarjeta-nombre {
   min-width: 0;

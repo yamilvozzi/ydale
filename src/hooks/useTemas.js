@@ -8,6 +8,7 @@ export function useTemas() {
 
   const recargar = useCallback(async () => {
     setCargando(true)
+    setError(null)
     const { data, error } = await supabase
       .from('temas')
       .select('id, nombre, artista')

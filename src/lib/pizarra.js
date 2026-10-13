@@ -1,8 +1,19 @@
 import { normalizarEscala } from './escalas.js'
 import { normalizarAcorde } from './notasConAcordes.js'
+import { transponerNota, transponerDiagrama } from './transposicion.js'
 
 export const CLAVE_PIZARRA = 'ydaaaale_pizarra_v1'
 export const pizarraVacia = () => ({ version: 1, elementos: [] })
+
+export function transponerPizarra(pizarra, semitonos) {
+  if (![1, -1].includes(semitonos)) throw new Error('La transposición debe ser de un semitono.')
+  return { ...pizarra, elementos: pizarra.elementos.map(elemento => ({
+    ...elemento,
+    datos: elemento.tipo === 'escala'
+      ? { ...elemento.datos, tonica: transponerNota(elemento.datos.tonica, semitonos) }
+      : transponerDiagrama(elemento.datos, semitonos),
+  })) }
+}
 
 export function leerPizarra(storage) {
   const texto = storage.getItem(CLAVE_PIZARRA)

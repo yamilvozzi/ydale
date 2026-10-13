@@ -50,9 +50,9 @@ export function crearAcorde() {
 
 export function normalizarAcorde(acorde = {}) {
   if (!acorde || typeof acorde !== 'object') acorde = {}
-  // Los diagramas históricos tienen cuatro columnas. Una extensión de cuatro
-  // trastes puede necesitar cinco columnas consecutivas, incluidos sus extremos.
-  const columnas = acorde.trastes?.length === 5 ? 5 : 4
+  // Cuatro columnas históricas y las adicionales necesarias para conservar
+  // dibujos libres al convertir una cuerda al aire en nota pisada.
+  const columnas = Array.isArray(acorde.trastes) ? Math.max(4, acorde.trastes.length) : 4
   const posiciones = Array.from({ length: 6 }, (_, cuerda) =>
     Array.from({ length: columnas }, (_, traste) => {
       const estado = acorde.posiciones?.[cuerda]?.[traste]

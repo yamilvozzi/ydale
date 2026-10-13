@@ -1,3 +1,5 @@
+import { claseDeNota } from './circuloQuintas.js'
+
 export const NOTAS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
 // El orden coincide con la orientación visual pedida: 1.ª a 6.ª cuerda.
@@ -39,7 +41,7 @@ export function crearEscala() {
 export function normalizarEscala(escala = {}) {
   return {
     ...(escala.id ? { id: escala.id } : {}),
-    tonica: NOTAS.includes(escala.tonica) ? escala.tonica : 'C',
+    tonica: typeof escala.tonica === 'string' && /^[A-G][#b]?$/.test(escala.tonica) ? escala.tonica : 'C',
     tipo: Object.hasOwn(INTERVALOS_ESCALA, escala.tipo) ? escala.tipo : 'mayor',
     orden: Number.isInteger(escala.orden) ? escala.orden : 0,
   }
@@ -61,7 +63,7 @@ const GRADOS_ESCALA = {
 /** Claves cromáticas para ubicar las notas; nombres diatónicos para mostrarlas. */
 export function obtenerMarcadoresEscala(tonica, tipo) {
   const escala = normalizarEscala({ tonica, tipo })
-  const indiceTonica = NOTAS.indexOf(escala.tonica)
+  const indiceTonica = claseDeNota(escala.tonica)
   const grados = GRADOS_ESCALA[escala.tipo] ?? [0, 1, 2, 3, 4, 5, 6]
   const notas = new Map()
   let distancia = 0

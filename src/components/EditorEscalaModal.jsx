@@ -2,6 +2,7 @@ import { Check, X } from 'lucide-react'
 import { useState } from 'react'
 import EscalaDiagrama from './EscalaDiagrama'
 import { crearEscala, normalizarEscala, NOTAS, TIPOS_ESCALA } from '../lib/escalas'
+import { claseDeNota } from '../lib/circuloQuintas'
 
 export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardando = false, errorGuardado = '' }) {
   const [borrador, setBorrador] = useState(() =>
@@ -38,21 +39,22 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
             </legend>
             <div className="grid grid-cols-6 gap-2">
               {NOTAS.map((nota) => {
-                const seleccionada = borrador.tonica === nota
+                const seleccionada = claseDeNota(borrador.tonica) === claseDeNota(nota)
+                const nombre = seleccionada ? borrador.tonica : nota
                 return (
                   <button
                     key={nota}
                     type="button"
                     autoFocus={seleccionada}
                     aria-pressed={seleccionada}
-                    onClick={() => setBorrador({ ...borrador, tonica: nota })}
+                    onClick={() => setBorrador({ ...borrador, tonica: nombre })}
                     className={`rounded-lg border px-2 py-2.5 text-sm transition-colors ${
                       seleccionada
                         ? 'border-teal bg-teal text-butter'
                         : 'border-borde bg-fondo text-butter-muted hover:border-teal hover:text-butter'
                     }`}
                   >
-                    {nota}
+                    {nombre}
                   </button>
                 )
               })}
@@ -93,9 +95,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
               {borrador.tonica} · {TIPOS_ESCALA.find((tipo) => tipo.valor === borrador.tipo)?.etiqueta}
             </p>
           </div>
-          <div className="overflow-x-auto pb-2">
-            <EscalaDiagrama escala={borrador} />
-          </div>
+          <EscalaDiagrama escala={borrador} />
         </div>
 
         {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
