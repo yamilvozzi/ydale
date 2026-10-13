@@ -9,15 +9,15 @@ import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
 import CirculoQuintasModal from '../components/CirculoQuintasModal'
 import TapTempoModal from '../components/TapTempoModal'
 import RepertorioPizarraModal from '../components/RepertorioPizarraModal'
-import { etiquetaTipo } from '../lib/escalas'
+import { tituloEscala } from '../lib/escalas'
 import { usePizarra } from '../hooks/usePizarra'
 
 const nombreElemento = ({ tipo, datos }) => tipo === 'escala'
-  ? `${datos.tonica} · ${etiquetaTipo(datos.tipo)}` : datos.nombre || 'Sin nombre'
+  ? tituloEscala(datos) : datos.nombre || 'Sin nombre'
 const botonAgregar = 'flex items-center gap-2 rounded-lg bg-teal px-3 py-2.5 text-sm text-butter hover:bg-green disabled:opacity-50'
 
 export default function Pizarra() {
-  const { elementos, error, lecturaFallida, guardar, eliminar, vaciar, reordenar, transponer, cargarTema } = usePizarra()
+  const { elementos, error, lecturaFallida, guardar, eliminar, vaciar, reordenar, transponer, cargarTema, desplazamiento, reiniciarTransposicion } = usePizarra()
   const [editor, setEditor] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
   const [circuloAbierto, setCirculoAbierto] = useState(false)
@@ -42,12 +42,19 @@ export default function Pizarra() {
         <button type="button" onClick={() => setCirculoAbierto(true)} className={botonAgregar}><CircleDot size={17} /> Círculo de 5tas</button>
         <button type="button" onClick={() => setTapAbierto(true)} className={botonAgregar}><Timer size={17} /> Tap Tempo</button>
         <div className="ml-auto flex items-center gap-2">
-          <div role="group" aria-label="Transposición global" className="flex gap-2">
-            {[-1, 1].map(semitonos => <button key={semitonos} type="button" disabled={lecturaFallida || !elementos.length}
-              onClick={() => transponer(semitonos)} aria-label={semitonos < 0 ? 'Bajar toda la pizarra un semitono' : 'Subir toda la pizarra un semitono'}
-              title={semitonos < 0 ? 'Bajar todo un semitono' : 'Subir todo un semitono'}
+          <div role="group" aria-label="Transposición global" className="flex items-center gap-1">
+            <button type="button" disabled={lecturaFallida || !elementos.length} onClick={() => transponer(-1)}
+              aria-label="Bajar toda la pizarra un semitono" title="Bajar todo un semitono"
               className="min-h-11 min-w-11 rounded-lg border border-borde px-3 text-base text-butter hover:bg-teal focus-visible:outline-2 focus-visible:outline-butter disabled:opacity-40"
-            >{semitonos < 0 ? '-1' : '+1'}</button>)}
+            >-1</button>
+            <button type="button" disabled={lecturaFallida} onClick={reiniciarTransposicion}
+              aria-label={`Restablecer transposición a cero: desplazamiento actual ${desplazamiento > 0 ? '+' : ''}${desplazamiento} semitonos`}
+              title="Restablecer transposición a 0" className="min-h-11 min-w-9 rounded-lg px-1 text-sm tabular-nums text-butter hover:bg-superficie focus-visible:outline-2 focus-visible:outline-butter disabled:opacity-40"
+            ><span aria-live="polite" aria-atomic="true">{desplazamiento > 0 ? '+' : ''}{desplazamiento}</span></button>
+            <button type="button" disabled={lecturaFallida || !elementos.length} onClick={() => transponer(1)}
+              aria-label="Subir toda la pizarra un semitono" title="Subir todo un semitono"
+              className="min-h-11 min-w-11 rounded-lg border border-borde px-3 text-base text-butter hover:bg-teal focus-visible:outline-2 focus-visible:outline-butter disabled:opacity-40"
+            >+1</button>
           </div>
           <div className="border-l border-borde pl-2">
             <button type="button" disabled={!elementos.length && !lecturaFallida} onClick={() => setConfirmacion({ todo: true })} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-butter-muted hover:bg-superficie hover:text-butter disabled:opacity-40"><Trash2 size={16} /> VACIAR PIZARRA</button>

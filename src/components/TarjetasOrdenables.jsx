@@ -5,10 +5,10 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Pencil, Trash2 } from 'lucide-react'
 import AcordeDiagrama from './AcordeDiagrama'
 import EscalaDiagrama from './EscalaDiagrama'
-import { etiquetaTipo } from '../lib/escalas'
+import { tituloEscala } from '../lib/escalas'
 
 const nombreTarjeta = (tipo, datos) => tipo === 'escala'
-  ? `${datos.tonica} · ${etiquetaTipo(datos.tipo)}` : datos.nombre || 'Sin nombre'
+  ? tituloEscala(datos) : datos.nombre || 'Sin nombre'
 
 function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: datos.id, disabled })

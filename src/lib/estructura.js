@@ -1,5 +1,5 @@
 import { actualizarTema } from './actualizarTema.js'
-import { etiquetaTipo } from './escalas.js'
+import { tituloEscala } from './escalas.js'
 import { normalizarLetraConAnclas } from './anclasEstructura.js'
 
 export const TIPOS_BLOQUE = [
@@ -65,11 +65,8 @@ export const guardarEstructura = estructura => JSON.stringify(normalizarEstructu
 export const nombreBloque = bloque => bloque.nombre || TIPOS_BLOQUE.find(tipo => tipo.valor === bloque.tipo)?.etiqueta || 'OTRO'
 
 /** Sólo presentación de datos musicales existentes; nada se duplica en JSON. */
-export function referenciaEstructura(tema, escalas = []) {
-  if (escalas.length) return escalas.map(escala =>
-    `${escala.tonica}${escala.tipo === 'menor' ? 'm' : ''} · ${etiquetaTipo(escala.tipo).split('(')[0].trim()}`
-  ).join(' / ')
-  return [tema.tonalidad, tema.escala_nombre].map(valor => texto(valor).trim()).filter(Boolean).join(' · ')
+export function referenciaEstructura(escalas = []) {
+  return escalas.length ? escalas.map(tituloEscala).join(' / ') : '-'
 }
 
 export async function guardarEstructuraTema(cliente, temaId, estructura) {

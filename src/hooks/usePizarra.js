@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { leerPizarra, guardarPizarra, pizarraVacia, ponerElemento, transponerPizarra } from '../lib/pizarra'
+import { leerPizarra, guardarPizarra, pizarraVacia, ponerElemento, transponerPizarra, desplazamientoPizarra, reiniciarTransposicionPizarra } from '../lib/pizarra'
 import { reordenarGrupo } from '../lib/ordenTarjetas'
 import { copiarMusicaAPizarra } from '../lib/musicaRepertorio'
 
@@ -23,10 +23,10 @@ export function usePizarra() {
     }
   }
 
-  function transponer(semitonos) {
+  function aplicarTransposicion(transformar) {
     if (estado.lecturaFallida) return false
     try {
-      return persistir(transponerPizarra(estado.datos, semitonos))
+      return persistir(transformar(estado.datos))
     } catch (error) {
       setEstado(actual => ({ ...actual, error: error.message }))
       return false
@@ -47,7 +47,9 @@ export function usePizarra() {
     elementos: estado.datos.elementos,
     error: estado.error,
     lecturaFallida: estado.lecturaFallida,
-    transponer,
+    transponer: semitonos => aplicarTransposicion(datos => transponerPizarra(datos, semitonos)),
+    desplazamiento: desplazamientoPizarra(estado.datos),
+    reiniciarTransposicion: () => aplicarTransposicion(reiniciarTransposicionPizarra),
     cargarTema,
     guardar: (tipo, datos) => !estado.lecturaFallida && persistir(ponerElemento(estado.datos, tipo, datos)),
     reordenar: (tipo, ordenados) => !estado.lecturaFallida && persistir({ ...estado.datos, elementos: reordenarGrupo(estado.datos.elementos, tipo, ordenados) }),

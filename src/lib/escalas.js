@@ -51,6 +51,11 @@ export function etiquetaTipo(tipo) {
   return TIPOS_ESCALA.find((opcion) => opcion.valor === tipo)?.etiqueta ?? TIPOS_ESCALA[0].etiqueta
 }
 
+/** Identificación compacta obtenida de la misma escala que genera el gráfico. */
+export function tituloEscala(escala) {
+  return `${escala.tonica}${escala.tipo === 'menor' ? 'm' : ''} · ${etiquetaTipo(escala.tipo).split('(')[0].trim()}`
+}
+
 const NATURALES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
 const LETRAS = Object.keys(NATURALES)
 // Grados desde cero. En blues, la quinta disminuida y la justa comparten letra.

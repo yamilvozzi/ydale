@@ -41,6 +41,14 @@ un semitono todas las escalas y acordes guardados. Actualizan los mismos IDs,
 conservan el orden, el tipo de escala/modo y la calidad y bajo del cifrado.
 Se guarda toda la operación en localStorage antes de mostrar el cambio.
 
+Entre ambos botones se muestra el desplazamiento acumulado: `-1  0  +1`,
+`-1  +3  +1`, etc. Pulsar el valor aplica la transposición inversa necesaria
+sobre el contenido actual y vuelve a cero; no restaura una copia ni deshace
+ediciones, agregados, eliminaciones u ordenamientos. El contador no se reduce
+módulo doce y acompaña a los datos guardados. Las pizarras anteriores empiezan
+en cero; vaciar o cargar otro tema establece un nuevo origen. Una edición o
+un error de almacenamiento que impida transportar conserva también el contador.
+
 Los diagramas se trasladan en sus cuerdas originales, conservando las voces,
 la tónica, el bajo, las notas opcionales y las cuerdas muteadas. Las notas al
 aire pasan a pisadas cuando corresponde. Al cruzar la cejuela se usa la octava

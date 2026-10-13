@@ -1,7 +1,7 @@
 import { Check, X } from 'lucide-react'
 import { useState } from 'react'
 import EscalaDiagrama from './EscalaDiagrama'
-import { crearEscala, normalizarEscala, NOTAS, TIPOS_ESCALA } from '../lib/escalas'
+import { crearEscala, normalizarEscala, NOTAS, TIPOS_ESCALA, tituloEscala } from '../lib/escalas'
 import { claseDeNota } from '../lib/circuloQuintas'
 
 export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardando = false, errorGuardado = '' }) {
@@ -92,7 +92,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
           <div className="mb-5 flex items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-wide text-butter-muted">Vista previa</p>
             <p className="text-sm text-butter">
-              {borrador.tonica} · {TIPOS_ESCALA.find((tipo) => tipo.valor === borrador.tipo)?.etiqueta}
+              {tituloEscala(borrador)}
             </p>
           </div>
           <EscalaDiagrama escala={borrador} />

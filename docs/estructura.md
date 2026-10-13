@@ -1,10 +1,15 @@
 # Estructura de Repertorio
 
-La pestaña muestra una secuencia compacta de bloques, con nombres en butter,
+La pestaña muestra bloques compactos en columnas verticales, dos desde 768 px
+y una en anchos menores. Se lee hacia abajo y luego continúa en la segunda
+columna, como LETRA; se equilibran las alturas sin partir un bloque entre columnas.
+Mantiene nombres en butter,
 letra de 12–14 px (menor que LETRA), cantidad de repeticiones y notas discretas.
 La referencia musical aparece al comienzo, por ejemplo `Em · Eólico`.
-Reutiliza los diagramas de escala existentes y, si no hay diagramas, los campos
-`tonalidad` y `escala_nombre` del tema. No guarda una segunda referencia musical.
+Reutiliza exclusivamente los diagramas de escala existentes y muestra `-` si no
+hay ninguno. No consulta la referencia manual antigua ni guarda una segunda
+referencia musical. El título de cada diagrama usa la misma identificación.
+Las etiquetas de repeticiones mantienen su tamaño, con texto y borde en butter.
 
 `EDITAR ESTRUCTURA` abre un modal grande con cabecera y acciones siempre visibles.
 Permite pegar la letra completa, separar automáticamente los párrafos en bloques,

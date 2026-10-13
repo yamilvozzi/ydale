@@ -69,12 +69,12 @@ test('un documento incompatible o bloque corrupto produce un error detectable', 
   assert.throws(() => leerEstructura(JSON.stringify({ version: 1, bloques: [null] })), /Bloque/)
 })
 
-test('la referencia compacta reutiliza las escalas existentes o los campos del tema', () => {
-  assert.equal(referenciaEstructura({ tonalidad: 'Em', escala_nombre: 'Eólico' }), 'Em · Eólico')
-  assert.equal(referenciaEstructura({ tonalidad: 'Referencia antigua', escala_nombre: 'Otra' }, [{ tonica: 'E', tipo: 'menor' }]), 'Em · Eólico')
-  assert.equal(referenciaEstructura({}, [{ tonica: 'C', tipo: 'mayor' }, { tonica: 'Db', tipo: 'lidio' }]), 'C · Jónico / Db · Lidio')
-  assert.equal(referenciaEstructura({ tonalidad: ' D ', escala_nombre: null }), 'D')
-  assert.equal(referenciaEstructura({}), '')
+test('la referencia compacta proviene exclusivamente de las escalas graficadas y sin escala muestra guion', () => {
+  assert.equal(referenciaEstructura([{ tonica: 'E', tipo: 'menor' }]), 'Em · Eólico')
+  assert.equal(referenciaEstructura([{ tonica: 'C', tipo: 'mayor' }, { tonica: 'Db', tipo: 'lidio' }]), 'C · Jónico / Db · Lidio')
+  assert.equal(referenciaEstructura([{ tonica: 'F#', tipo: 'dorico' }]), 'F# · Dórico')
+  assert.equal(referenciaEstructura([]), '-')
+  assert.equal(referenciaEstructura(), '-')
 })
 
 function clientePrueba(fetch) {

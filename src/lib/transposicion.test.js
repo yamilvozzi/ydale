@@ -102,7 +102,7 @@ test('un traste sin definir impide modificar parcialmente la pizarra', () => {
   const original = structuredClone(pizarra)
   assert.throws(() => transponerPizarra(pizarra, 1), /Definí los números/)
   assert.deepEqual(pizarra, original)
-  assert.throws(() => transponerPizarra(pizarra, 2))
+  assert.throws(() => transponerPizarra(pizarra, 1.5))
   assert.deepEqual(transponerPizarra(pizarraVacia(), -1), pizarraVacia())
 })
 
