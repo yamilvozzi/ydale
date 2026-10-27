@@ -27,19 +27,21 @@ export default function Setlists() {
   return <main className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
     <VolverInicio />
     <h1 className="flex justify-center mb-6"><Logo /></h1>
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-lg tracking-widest">SETLISTS</h2>
-      <button onClick={() => setModal({})} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-teal px-4 py-3 text-sm text-butter hover:bg-green"><Plus size={18} /> NUEVO SETLIST</button>
+    <div className="mx-auto mb-4 w-full max-w-6xl">
+      <h2 className="border-b border-borde pb-4 text-center text-lg tracking-widest">SETLISTS</h2>
+      <div className="mt-4 flex justify-end">
+        <button onClick={() => setModal({})} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-teal px-4 py-3 text-sm text-butter hover:bg-green"><Plus size={18} /> NUEVO SETLIST</button>
+      </div>
     </div>
     {(error || errorAccion) && <div role="alert" className="mb-4 text-sm text-butter-muted">
       <p>{error || errorAccion}</p>
       <button onClick={() => { setErrorAccion(''); recargar() }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:bg-superficie">REINTENTAR</button>
     </div>}
     {cargando ? <p className="mt-8 text-center text-butter-muted">Cargando…</p>
-      : !error && (setlists.length ? <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      : !error && (setlists.length ? <ul className="mx-auto flex w-full max-w-6xl flex-wrap justify-center gap-3">
         {setlists.map(setlist => {
           const cantidad = setlist.setlist_songs?.[0]?.count ?? 0
-          return <li key={setlist.id} className="flex min-w-0 items-stretch rounded-lg border border-borde bg-superficie hover:border-teal">
+          return <li key={setlist.id} className="flex w-full min-w-0 max-w-[22rem] items-stretch rounded-lg border border-borde bg-superficie hover:border-teal">
             <Link to={`/setlists/${setlist.id}`} className="min-w-0 flex-1 rounded-lg px-4 py-4 hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter">
               <h3 className="break-words text-butter">{setlist.title}</h3>
               <p className="mt-1 text-sm text-butter-muted">{fechaSetlist(setlist.date)}</p>

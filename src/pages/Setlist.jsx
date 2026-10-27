@@ -72,7 +72,7 @@ export default function Setlist() {
     {cargando ? <p className="mt-8 text-center text-butter-muted">Cargando…</p>
       : error ? <div role="alert" className="mt-6 text-butter-muted"><p>{error}</p><button onClick={recargar} className="mt-3 min-h-11 rounded-lg border border-borde px-4">REINTENTAR</button></div>
         : !setlist ? <p className="mt-8 text-center text-butter-muted">No se encontró el setlist.</p>
-          : <>
+          : <div className="mx-auto w-full max-w-3xl">
             <header className="my-5 flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0"><h1 className="break-words text-xl text-butter">{setlist.title}</h1><p className="mt-1 text-sm text-butter-muted">{fechaSetlist(setlist.date)}</p>{setlist.place && <p className="break-words text-sm text-butter-muted">{setlist.place}</p>}</div>
               <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="min-h-11 rounded-lg bg-teal px-4 py-2 text-sm text-butter hover:bg-green disabled:opacity-50">{edicion ? 'LISTO' : 'EDITAR'}</button>
@@ -95,6 +95,6 @@ export default function Setlist() {
               }} /> : <p className="mt-4 text-center text-butter-muted">Este setlist todavía no tiene canciones.</p>}
             {selector && <AgregarCancionesSetlist items={items} ocupado={ocupado} bloqueado={conflicto} error={errorGuardado} onCerrar={() => setSelector(false)}
               onAgregar={tema => guardar([...setlist.items, { id: crypto.randomUUID(), song_id: tema.id, nombre: tema.nombre, artista: tema.artista }])} />}
-          </>}
+          </div>}
   </main>
 }

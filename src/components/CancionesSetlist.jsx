@@ -9,13 +9,13 @@ function Cancion({ item, numero, total, edicion, ocupado, setlistId, onCambiar, 
   const { setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: item.id, disabled: !edicion || ocupado })
   const nombre = item.nombre || 'Canción no disponible'
   return <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
-    className={`relative flex min-w-0 items-center gap-1 rounded-lg border border-borde bg-superficie ${isDragging ? 'z-10 opacity-70' : ''}`}>
+    className={`relative flex w-full min-w-0 items-center gap-1 rounded-lg border border-borde bg-superficie ${isDragging ? 'z-10 opacity-70' : ''}`}>
     {edicion && <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners} disabled={ocupado}
       aria-label={`Mover ${nombre}`} className="accion-icono touch-none select-none rounded-lg text-butter-muted hover:bg-borde disabled:opacity-50"><GripVertical /></button>}
-    <span aria-hidden="true" className={`shrink-0 text-sm tabular-nums text-butter-muted ${edicion ? 'pl-1' : 'pl-4'}`}>{numero}.</span>
+    <span aria-hidden="true" className={`shrink-0 text-sm tabular-nums text-butter ${edicion ? 'pl-1' : 'pl-4'}`}>{numero}.</span>
     <Link to={`/tema/${encodeURIComponent(item.song_id)}/letra?setlist=${setlistId}`}
       state={{ setlistScroll: window.scrollY, setlistId }} onClick={onAbrir}
-      className="min-w-0 flex-1 rounded-lg px-3 py-4 hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter">
+      className="min-w-0 flex-1 rounded-lg px-3 py-4 text-left hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter">
       <p className="break-words">{nombre}</p>
       {item.artista && <p className="break-words text-xs text-butter-muted">{item.artista}</p>}
     </Link>
@@ -56,7 +56,7 @@ export default function CancionesSetlist({ items, edicion, ocupado, setlistId, o
       },
     }}>
     <SortableContext items={items} strategy={verticalListSortingStrategy}>
-      <ol aria-label="Canciones del setlist" aria-busy={ocupado} className="flex flex-col gap-2">
+      <ol aria-label="Canciones del setlist" aria-busy={ocupado} className="mx-auto flex w-full max-w-3xl flex-col gap-2">
         {items.map((item, indice) => <Cancion key={item.id} item={item} numero={indice + 1} total={items.length}
           edicion={edicion} ocupado={ocupado} setlistId={setlistId} onCambiar={cambiar} onAbrir={onAbrir} />)}
       </ol>
