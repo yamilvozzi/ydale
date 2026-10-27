@@ -4,9 +4,8 @@ import { Search, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTemas } from '../hooks/useTemas'
 import { supabase } from '../lib/supabaseClient'
 import NuevoTemaModal from '../components/NuevoTemaModal'
-import Logo from '../components/Logo'
+import EncabezadoSeccion from '../components/EncabezadoSeccion'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
-import VolverInicio from '../components/VolverInicio'
 
 export default function Repertorio() {
   const { temas, cargando, recargar } = useTemas()
@@ -51,14 +50,8 @@ export default function Repertorio() {
 
   return (
     <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-      <VolverInicio />
-      <div className="w-full">
-        <div className="flex justify-center mb-6">
-          <h1>
-            <Logo />
-          </h1>
-        </div>
-
+      <EncabezadoSeccion titulo="REPERTORIO" />
+      <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-center gap-2 mb-4">
           <div className="relative flex-1">
             <Search
@@ -89,35 +82,37 @@ export default function Repertorio() {
             {temas.length === 0 ? 'Todavía no hay temas cargados.' : 'No hay resultados.'}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="flex w-full flex-col gap-2">
             {temasFiltrados.map((t) => (
-              <li key={t.id} className="flex items-stretch gap-2">
+              <li key={t.id} className="flex w-full min-w-0 items-stretch rounded-lg border border-borde bg-superficie">
                 <button
                   onClick={() => navegar(`/tema/${t.id}`)}
-                  className="flex-1 min-w-0 text-left bg-superficie hover:bg-borde rounded-lg px-4 py-3 transition-colors"
+                  className="flex-1 min-w-0 rounded-l-lg px-4 py-3 text-left focus-visible:outline-2 focus-visible:outline-butter"
                 >
-                  <p className="text-butter truncate">{t.nombre}</p>
-                  {t.artista && <p className="text-sm text-butter-muted truncate">{t.artista}</p>}
+                  <p className="break-words text-butter">{t.nombre}</p>
+                  {t.artista && <p className="break-words text-sm text-butter-muted">{t.artista}</p>}
                 </button>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setTemaEditando(t)
-                  }}
-                  aria-label={`Editar ${t.nombre}`}
-                  className="accion-icono rounded-lg bg-superficie hover:bg-borde transition-colors"
-                >
-                  <Pencil className="text-butter-muted" />
-                </button>
+                <div className="flex w-11 shrink-0 flex-col justify-between">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setTemaEditando(t)
+                    }}
+                    aria-label={`Editar ${t.nombre}`}
+                    className="accion-icono rounded-lg text-butter-muted hover:text-butter transition-colors"
+                  >
+                    <Pencil />
+                  </button>
 
-                <button
-                  onClick={(e) => { e.stopPropagation(); setTemaAEliminar(t) }}
-                  aria-label={`Eliminar ${t.nombre}`}
-                  className="accion-icono rounded-lg bg-superficie hover:bg-borde transition-colors"
-                >
-                  <Trash2 className="text-butter-muted" />
-                </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setTemaAEliminar(t) }}
+                    aria-label={`Eliminar ${t.nombre}`}
+                    className="accion-icono rounded-lg text-butter-muted hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -125,7 +120,8 @@ export default function Repertorio() {
       </div>
 
       {temaAEliminar && <ConfirmarEliminacionModal
-        mensaje={`¿Eliminar "${temaAEliminar.nombre}" del repertorio?`}
+        destructiva
+        mensaje={`¿Seguro que querés eliminar “${temaAEliminar.nombre}” del repertorio?`}
         onCancelar={() => setTemaAEliminar(null)}
         onConfirmar={() => eliminarTema(temaAEliminar)}
       />}

@@ -48,6 +48,41 @@ test('duplicar conserva orden y canciones pero crea IDs nuevos de evento y relac
   assert.equal(llamadas[1].body.p_place, null)
 })
 
+test('editar datos conserva el evento, los IDs de relaciones, las repeticiones y el orden', async () => {
+  const original = { ...evento, items: [{ id: 'entrada-3', song_id: 9 }, { id: 'entrada-1', song_id: 7 }, { id: 'entrada-2', song_id: 9 }] }
+  const antes = structuredClone(original)
+  const llamadas = []
+  const db = repositorioSetlists(cliente(async (url, opciones) => {
+    const body = JSON.parse(opciones.body)
+    llamadas.push({ path: new URL(url).pathname, body })
+    return respuesta(llamadas.length === 1 ? original : { ...original, title: body.p_title, date: body.p_date, place: body.p_place, revision: 4 })
+  }))
+  const guardado = await db.editarDatos(evento, { title: ' Show reprogramado ', date: '2026-12-01', place: ' Otro lugar ' })
+  assert.equal(guardado.id, id)
+  assert.equal(guardado.title, 'Show reprogramado')
+  assert.equal(guardado.date, '2026-12-01')
+  assert.equal(guardado.place, 'Otro lugar')
+  assert.deepEqual(guardado.items, antes.items)
+  assert.deepEqual(original, antes)
+  assert.deepEqual(llamadas.map(l => l.path), ['/rest/v1/rpc/ydale_get_setlist', '/rest/v1/rpc/ydale_save_setlist'])
+  assert.deepEqual(llamadas[1].body, { p_id: id, p_revision: 3, p_title: 'Show reprogramado', p_date: '2026-12-01', p_place: 'Otro lugar', p_items: antes.items })
+})
+
+test('editar datos no escribe si el setlist cambió, desapareció o no se pudo leer', async () => {
+  for (const datos of [null, { ...evento, revision: 4, items: [] }]) {
+    let lecturas = 0
+    const db = repositorioSetlists(cliente(async (url) => {
+      assert.ok(new URL(url).pathname.endsWith('ydale_get_setlist'))
+      lecturas++
+      return respuesta(datos)
+    }))
+    await assert.rejects(db.editarDatos(evento, { title: 'Corrección', date: evento.date, place: '' }), e => e.code === '40001')
+    assert.equal(lecturas, 1)
+  }
+  const db = repositorioSetlists(cliente(async () => { throw new TypeError('Failed to fetch') }))
+  await assert.rejects(db.editarDatos(evento, { title: 'Corrección', date: evento.date, place: '' }))
+})
+
 test('lectura actual y eliminación usan exclusivamente consultas y RPC de setlists', async () => {
   const llamadas = []
   const db = repositorioSetlists(cliente(async (url, opciones) => {

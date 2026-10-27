@@ -52,6 +52,15 @@ export function repositorioSetlists(cliente) {
       return this.guardar({ ...evento, id: crypto.randomUUID(), revision: null },
         original.items.map(({ song_id }) => ({ id: crypto.randomUUID(), song_id })))
     },
+    async editarDatos(setlist, evento) {
+      // Releer las referencias evita guardar una tarjeta parcial como si fuera
+      // un setlist vacío. La revisión protege también la edición de otro usuario.
+      const actual = await this.leer(setlist.id)
+      if (!actual || actual.revision !== setlist.revision) {
+        throw Object.assign(new Error('El setlist cambió; recargar antes de editar.'), { code: '40001' })
+      }
+      return this.guardar({ ...actual, title: evento.title, date: evento.date, place: evento.place }, actual.items)
+    },
     async eliminar(setlist) {
       const { data, error } = await cliente.rpc('ydale_delete_setlist', { p_id: setlist.id, p_revision: setlist.revision })
       if (comprobar(data, error) !== setlist.id) throw new Error('No se confirmó la eliminación.')

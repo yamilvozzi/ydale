@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { mensajeErrorSetlists } from '../lib/setlists'
 
-export default function ModalSetlist({ original, onCerrar, onGuardar }) {
+export default function ModalSetlist({ original, editando = false, onCerrar, onGuardar }) {
   const dialogo = useRef(null)
   const bloqueo = useRef(false)
   const id = useId()
@@ -43,7 +43,7 @@ export default function ModalSetlist({ original, onCerrar, onGuardar }) {
     onCancel={e => { e.preventDefault(); if (!bloqueo.current) onCerrar() }}
     className="fixed inset-0 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-sm overflow-y-auto rounded-xl border border-borde bg-superficie p-5 text-butter shadow-2xl backdrop:bg-black/70">
     <form onSubmit={guardar} className="flex flex-col gap-4">
-      <h2 id={`${id}-titulo`} className="text-lg modal-titulo">{original ? 'Duplicar setlist' : 'Nuevo setlist'}</h2>
+      <h2 id={`${id}-titulo`} className="text-lg modal-titulo">{editando ? 'Editar setlist' : original ? 'Duplicar setlist' : 'Nuevo setlist'}</h2>
       <label className="flex flex-col gap-1 text-xs text-butter-muted uppercase tracking-wide">Título
         <input autoFocus required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} className={campo} disabled={guardando} />
       </label>
@@ -56,7 +56,7 @@ export default function ModalSetlist({ original, onCerrar, onGuardar }) {
       {error && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
       <div className="flex gap-2 justify-end mt-2">
         <button type="button" disabled={guardando} onClick={onCerrar} className="px-4 py-2 rounded-lg text-butter-muted hover:bg-fondo disabled:opacity-50">CANCELAR</button>
-        <button type="submit" disabled={guardando || !title.trim() || !date} className="px-4 py-2 rounded-lg bg-teal hover:bg-green text-butter disabled:opacity-50">{guardando ? 'Guardando…' : original ? 'DUPLICAR' : 'CREAR'}</button>
+        <button type="submit" disabled={guardando || !title.trim() || !date} className="px-4 py-2 rounded-lg bg-teal hover:bg-green text-butter disabled:opacity-50">{guardando ? 'Guardando…' : editando ? 'GUARDAR' : original ? 'DUPLICAR' : 'CREAR'}</button>
       </div>
     </form>
   </dialog>

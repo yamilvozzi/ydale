@@ -1,6 +1,6 @@
 import { BookOpen, CircleDot, Plus, Timer, Trash2, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
-import VolverInicio from '../components/VolverInicio'
+import EncabezadoSeccion from '../components/EncabezadoSeccion'
 import EditorEscalaModal from '../components/EditorEscalaModal'
 import TarjetasOrdenables from '../components/TarjetasOrdenables'
 import GeneradorAcordesModal from '../components/GeneradorAcordesModal'
@@ -29,11 +29,9 @@ export default function Pizarra() {
   }
 
   return (
-    <main className="flex min-h-dvh w-full flex-col gap-5 px-4 py-6 sm:px-6">
-      <header className="flex items-center gap-4">
-        <VolverInicio />
-        <h1 className="text-lg tracking-widest text-butter">PIZARRA</h1>
-      </header>
+    <main className="flex min-h-dvh w-full flex-col px-4 py-6 sm:px-6">
+      <EncabezadoSeccion titulo="PIZARRA" />
+      <div className="flex min-w-0 flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2 border-b border-borde pb-5">
         <button type="button" disabled={lecturaFallida} onClick={() => setRepertorioAbierto(true)} className="flex min-h-11 items-center gap-2 rounded-lg border border-butter-muted bg-superficie px-3 py-2 text-xs tracking-wide text-butter hover:border-butter hover:bg-borde disabled:opacity-40"><BookOpen size={17} /> REPERTORIO</button>
         <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'escala' })} aria-label="+ Escala" className={botonAgregar}><Plus size={17} /> Escala</button>
@@ -93,6 +91,7 @@ export default function Pizarra() {
         onCancelar={() => setConfirmacion(null)}
         onConfirmar={() => confirmacion.todo ? vaciar() : eliminar(confirmacion.elemento.datos.id)}
       />}
+      </div>
     </main>
   )
 }
