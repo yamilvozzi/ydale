@@ -2,10 +2,11 @@
 
 ## Navegación
 
-- `/`: Inicio con REPERTORIO y PIZARRA, detrás del acceso por PIN existente.
+- `/`: Inicio con REPERTORIO, PIZARRA y SETLISTS, detrás del acceso por PIN existente.
 - `/repertorio`: listado y operaciones existentes; ATRÁS vuelve a Inicio.
 - `/pizarra`: espacio independiente; ATRÁS vuelve a Inicio.
-- `/tema/:id/...`: conserva las direcciones existentes; su flecha vuelve a `/repertorio`.
+- `/tema/:id/...`: conserva las direcciones existentes; su flecha vuelve al origen (Repertorio o el setlist indicado en la navegación).
+- `/setlists` y `/setlists/:id`: biblioteca y eventos; ver [instalación de Setlists](setlists.md).
 
 ## Pizarra
 

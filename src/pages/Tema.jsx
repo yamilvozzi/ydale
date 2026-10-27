@@ -1,6 +1,7 @@
-import { useParams, Link, NavLink, Outlet } from 'react-router-dom'
+import { useParams, useLocation, Link, NavLink, Outlet } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { useTema } from '../hooks/useTema'
+import { origenTema } from '../lib/navegacionTema'
 
 const SECCIONES = [
   { ruta: 'letra', etiqueta: 'Letra' },
@@ -12,6 +13,8 @@ const SECCIONES = [
 
 export default function Tema() {
   const { id } = useParams()
+  const location = useLocation()
+  const origen = origenTema(location.search)
   const { tema, cargando, actualizarCampoLocal } = useTema(id)
 
   if (cargando) {
@@ -22,7 +25,7 @@ export default function Tema() {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center gap-4 text-butter-muted">
         <p>No se encontró el tema.</p>
-        <Link to="/repertorio" className="text-teal">Volver al repertorio</Link>
+        <Link to={origen.ruta} state={location.state} className="text-teal">{origen.etiqueta}</Link>
       </div>
     )
   }
@@ -32,8 +35,9 @@ export default function Tema() {
       {/* Volver: jerarquía visual distinta a las pestañas, no es "una más". */}
       <div className="w-full flex items-center gap-3 px-4 sm:px-6 lg:px-8 pt-4">
         <Link
-          to="/repertorio"
-          aria-label="Volver al repertorio"
+          to={origen.ruta}
+          state={location.state}
+          aria-label={origen.etiqueta}
           className="p-2 -ml-2 rounded-lg hover:bg-superficie transition-colors"
         >
           <ChevronLeft size={22} className="text-butter" />
@@ -50,7 +54,8 @@ export default function Tema() {
         {SECCIONES.map((s) => (
           <NavLink
             key={s.ruta}
-            to={s.ruta}
+            to={{ pathname: s.ruta, search: origen.search }}
+            state={location.state}
             className="pestana-tema flex-1 text-center px-2 py-3 text-sm sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
           >
             {s.etiqueta}
