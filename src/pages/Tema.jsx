@@ -33,30 +33,33 @@ export default function Tema() {
   return (
     <div className="min-h-dvh flex flex-col">
       {/* Sólo la cabecera limita su ancho; el contenido musical es independiente. */}
-      <header className="px-4 sm:px-6 lg:px-8 pt-4">
+      <header className="px-4 sm:px-6 lg:px-8 pt-3">
         <div className="columna-encabezado">
-          <Link
-            to={origen.ruta}
-            state={location.state}
-            aria-label={origen.etiqueta}
-            className="accion-plana inline-flex min-h-11 min-w-11 items-center justify-center p-2 -ml-2 rounded-lg"
-          >
-            <ChevronLeft size={22} className="text-butter" />
-          </Link>
-          <div className="mt-2 min-w-0 text-center">
-            <h1 className="text-lg break-words text-butter">{tema.nombre}</h1>
-            {tema.artista && (
-              <p className="text-xs text-butter-muted break-words">{tema.artista}</p>
-            )}
+          <div className="tema-identidad">
+            <Link
+              to={origen.ruta}
+              state={location.state}
+              aria-label={origen.etiqueta}
+              className="accion-plana inline-flex min-h-11 min-w-11 w-fit items-center gap-1 px-2 rounded-lg text-sm"
+            >
+              <ChevronLeft size={22} className="text-butter" />
+              <span className="hidden sm:inline">ATRÁS</span>
+            </Link>
+            <div className="min-w-0 text-center">
+              <h1 className="text-lg break-words text-butter">{tema.nombre}</h1>
+              {tema.artista && (
+                <p className="text-xs text-butter-muted break-words">{tema.artista}</p>
+              )}
+            </div>
           </div>
 
-          <nav aria-label="Secciones del tema" className="tema-pestanas mt-4 border-b border-borde">
+          <nav aria-label="Secciones del tema" className="tema-pestanas mt-2 border-b border-borde">
             {SECCIONES.map((s) => (
               <NavLink
                 key={s.ruta}
                 to={{ pathname: s.ruta, search: origen.search }}
                 state={location.state}
-                className="pestana-tema text-center px-1 py-3 text-sm sm:px-3 sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
+                className="pestana-tema text-center px-2 py-2 text-sm sm:px-3 sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
               >
                 {s.etiqueta}
               </NavLink>
@@ -65,7 +68,7 @@ export default function Tema() {
         </div>
       </header>
 
-      <main className="w-full flex flex-col flex-1 p-4 sm:p-6 lg:px-8 min-h-0">
+      <main className="tema-contenido w-full flex flex-col flex-1 p-4 sm:p-6 lg:px-8 min-h-0">
         <Outlet context={{ tema, actualizarCampoLocal }} />
       </main>
     </div>

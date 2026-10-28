@@ -88,25 +88,29 @@ body {
   .tarjeta-enlace:hover { border-color: var(--color-teal); }
 }
 
-/* Ancho de referencia de Repertorio, exclusivo de cabeceras y controles. */
-.columna-encabezado { width: 100%; max-width: 48rem; min-width: 0; margin-inline: auto; }
-.tema-pestanas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.25rem; }
-.tema-pestanas > a { grid-column: span 2; min-width: 0; }
-.tema-pestanas > a:nth-child(n + 4) { grid-column: span 3; }
+/* Mismo máximo que los encabezados originales de las tres secciones. */
+.columna-encabezado { width: 100%; max-width: 72rem; min-width: 0; margin-inline: auto; }
+/* Dos laterales iguales centran el título respecto del contenedor completo. */
+.tema-identidad { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; }
+.tema-pestanas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 0.25rem; overflow-x: auto; }
+.tema-pestanas > a { display: flex; align-items: center; justify-content: center; min-height: 44px; }
+.tema-contenido { padding-top: 0.75rem; }
 
-/* Filas explícitas sin comprimir botones ni limitar el área de trabajo. */
-.pizarra-herramientas { display: flex; flex-direction: column; gap: 1rem; }
-.pizarra-funciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
-.pizarra-funciones > button { justify-content: center; min-width: 0; }
+/* Controles al ancho del contenido; el toolbar puede usar toda la pantalla. */
+.pizarra-herramientas { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.375rem; }
+.pizarra-funciones { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; justify-items: center; max-width: 100%; gap: 0.375rem; }
+.pizarra-herramientas button { flex-shrink: 0; white-space: nowrap; }
+.pizarra-funciones > button { justify-content: center; }
 .pizarra-funciones > button > svg { flex-shrink: 0; }
-.pizarra-utilidades { display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid var(--color-borde); padding-top: 1rem; }
-.pizarra-transposicion { display: grid; grid-template-columns: repeat(3, minmax(44px, 1fr)); gap: 0.5rem; }
-.pizarra-vaciado > button { justify-content: center; width: 100%; }
+.pizarra-utilidades { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; border-top: 1px solid var(--color-borde); padding-top: 0.5rem; }
+.pizarra-transposicion { display: flex; gap: 0.25rem; }
+.pizarra-vaciado > button { justify-content: center; }
 @media (min-width: 40rem) {
-  .tema-pestanas { display: flex; flex-wrap: wrap; justify-content: center; }
-  .pizarra-funciones { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .pizarra-utilidades { flex-direction: row; align-items: center; justify-content: center; }
-  .pizarra-vaciado { border-left: 1px solid var(--color-borde); padding-left: 0.75rem; }
+  .tema-identidad { grid-template-columns: 6rem minmax(0, 1fr) 6rem; }
+  .pizarra-funciones { display: contents; }
+  .pizarra-utilidades { display: contents; }
+  .pizarra-transposicion { border-left: 1px solid var(--color-borde); padding-left: 0.5rem; }
+  .pizarra-vaciado { border-left: 1px solid var(--color-borde); padding-left: 0.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .boton-funcion, .boton-funcion-compacto::before, .accion-plana { transition: none; }
