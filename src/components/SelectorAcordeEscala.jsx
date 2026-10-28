@@ -62,7 +62,7 @@ export default function SelectorAcordeEscala({ onAgregar }) {
           className="min-h-11 w-full rounded-lg border border-borde bg-fondo py-2 pl-8 pr-2 text-sm text-butter placeholder:text-butter-muted focus:border-teal focus:outline-none"
         />
       </div>
-      <button type="button" onClick={() => agregar(interpretado)} disabled={!interpretado} aria-label="Agregar acorde a la escala" className="accion-icono rounded-lg border border-borde text-butter-muted hover:bg-teal hover:text-butter disabled:opacity-40"><Plus size={16} /></button>
+      <button type="button" onClick={() => agregar(interpretado)} disabled={!interpretado} aria-label="Agregar acorde a la escala" className="boton-funcion boton-funcion-compacto accion-icono rounded-lg"><Plus size={16} /></button>
       {mostrar && <div className="absolute inset-x-0 bottom-full z-20 mb-2 rounded-lg border border-borde bg-superficie p-1 shadow-xl">
         <ul ref={lista} id={`${id}-lista`} role="listbox" aria-label="Opciones de acordes" className="max-h-48 overflow-y-auto overscroll-contain">
           {opciones.map((opcion, i) => <li key={opcion.nombre} role="presentation">

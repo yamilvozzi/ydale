@@ -32,36 +32,38 @@ export default function Tema() {
 
   return (
     <div className="min-h-dvh flex flex-col">
-      {/* Volver: jerarquía visual distinta a las pestañas, no es "una más". */}
-      <div className="w-full flex items-center gap-3 px-4 sm:px-6 lg:px-8 pt-4">
-        <Link
-          to={origen.ruta}
-          state={location.state}
-          aria-label={origen.etiqueta}
-          className="p-2 -ml-2 rounded-lg hover:bg-superficie transition-colors"
-        >
-          <ChevronLeft size={22} className="text-butter" />
-        </Link>
-        <div className="min-w-0">
-          <h1 className="text-lg truncate text-butter">{tema.nombre}</h1>
-          {tema.artista && (
-            <p className="text-xs text-butter-muted truncate">{tema.artista}</p>
-          )}
-        </div>
-      </div>
-
-      <nav aria-label="Secciones del tema" className="w-full flex gap-1 px-3 sm:px-5 lg:px-7 mt-4 border-b border-borde overflow-x-auto">
-        {SECCIONES.map((s) => (
-          <NavLink
-            key={s.ruta}
-            to={{ pathname: s.ruta, search: origen.search }}
+      {/* Sólo la cabecera limita su ancho; el contenido musical es independiente. */}
+      <header className="px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="columna-encabezado">
+          <Link
+            to={origen.ruta}
             state={location.state}
-            className="pestana-tema flex-1 text-center px-2 py-3 text-sm sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
+            aria-label={origen.etiqueta}
+            className="accion-plana inline-flex min-h-11 min-w-11 items-center justify-center p-2 -ml-2 rounded-lg"
           >
-            {s.etiqueta}
-          </NavLink>
-        ))}
-      </nav>
+            <ChevronLeft size={22} className="text-butter" />
+          </Link>
+          <div className="mt-2 min-w-0 text-center">
+            <h1 className="text-lg break-words text-butter">{tema.nombre}</h1>
+            {tema.artista && (
+              <p className="text-xs text-butter-muted break-words">{tema.artista}</p>
+            )}
+          </div>
+
+          <nav aria-label="Secciones del tema" className="tema-pestanas mt-4 border-b border-borde">
+            {SECCIONES.map((s) => (
+              <NavLink
+                key={s.ruta}
+                to={{ pathname: s.ruta, search: origen.search }}
+                state={location.state}
+                className="pestana-tema text-center px-1 py-3 text-sm sm:px-3 sm:text-base whitespace-nowrap rounded-t-lg transition-colors"
+              >
+                {s.etiqueta}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      </header>
 
       <main className="w-full flex flex-col flex-1 p-4 sm:p-6 lg:px-8 min-h-0">
         <Outlet context={{ tema, actualizarCampoLocal }} />

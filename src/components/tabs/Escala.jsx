@@ -21,13 +21,12 @@ export default function Escala() {
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-sm uppercase tracking-widest text-butter-muted">Escalas</h2>
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => setEditor({})}
             disabled={guardando}
-            className="flex items-center gap-2 rounded-lg border border-borde bg-superficie px-3 py-2 text-sm text-butter transition-colors hover:border-teal hover:bg-fondo"
+            className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
           >
             <Plus size={17} />
             Escala

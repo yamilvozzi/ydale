@@ -69,7 +69,7 @@ export default function Repertorio() {
           <button
             onClick={() => setModalAbierto(true)}
             aria-label="Agregar tema"
-            className="shrink-0 bg-teal hover:bg-green rounded-lg p-3 transition-colors"
+            className="boton-funcion shrink-0 rounded-lg p-3"
           >
             <Plus size={22} className="text-butter" />
           </button>
@@ -84,7 +84,7 @@ export default function Repertorio() {
         ) : (
           <ul className="flex w-full flex-col gap-2">
             {temasFiltrados.map((t) => (
-              <li key={t.id} className="flex w-full min-w-0 items-stretch rounded-lg border border-borde bg-superficie">
+              <li key={t.id} className="tarjeta-enlace flex w-full min-w-0 items-stretch rounded-lg">
                 <button
                   onClick={() => navegar(`/tema/${t.id}`)}
                   className="flex-1 min-w-0 rounded-l-lg px-4 py-3 text-left focus-visible:outline-2 focus-visible:outline-butter"

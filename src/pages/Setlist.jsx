@@ -66,7 +66,7 @@ export default function Setlist() {
 
   const ocupado = pendientes !== null
   const items = pendientes ?? setlist?.items ?? []
-  const atras = <Link to="/setlists" onClick={e => { if (bloqueo.current) e.preventDefault() }} aria-disabled={ocupado} className="inline-flex min-h-11 w-fit items-center gap-1 rounded-lg px-2 text-sm text-butter-muted hover:bg-superficie hover:text-butter"><ChevronLeft size={20} /> ATRÁS</Link>
+  const atras = <Link to="/setlists" onClick={e => { if (bloqueo.current) e.preventDefault() }} aria-disabled={ocupado} className="accion-plana inline-flex min-h-11 w-fit items-center gap-1 rounded-lg px-2 text-sm"><ChevronLeft size={20} /> ATRÁS</Link>
   return <main className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
     {atras}
     {cargando ? <p className="mt-8 text-center text-butter-muted">Cargando…</p>
@@ -75,12 +75,12 @@ export default function Setlist() {
           : <div className="mx-auto w-full max-w-3xl">
             <header className="my-5 flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0"><h1 className="break-words text-xl text-butter">{setlist.title}</h1><p className="mt-1 text-sm text-butter-muted">{fechaSetlist(setlist.date)}</p>{setlist.place && <p className="break-words text-sm text-butter-muted">{setlist.place}</p>}</div>
-              <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="min-h-11 rounded-lg bg-teal px-4 py-2 text-sm text-butter hover:bg-green disabled:opacity-50">{edicion ? 'LISTO' : 'EDITAR'}</button>
+              <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="boton-funcion rounded-lg px-4 py-2 text-sm">{edicion ? 'LISTO' : 'EDITAR'}</button>
             </header>
             {errorGuardado && <div role="alert" className="mb-4 text-sm text-butter-muted"><p>{errorGuardado}</p>
               <button onClick={async () => { setSelector(false); setEdicion(false); setErrorGuardado(''); await recargar(); setConflicto(false) }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:bg-superficie">RECARGAR SETLIST</button>
             </div>}
-            {edicion && <button type="button" disabled={ocupado || conflicto} onClick={() => setSelector(true)} className="mb-4 inline-flex min-h-11 w-fit items-center gap-2 rounded-lg bg-teal px-4 py-2 text-sm hover:bg-green disabled:opacity-50"><Plus size={18} /> AGREGAR CANCIONES</button>}
+            {edicion && <button type="button" disabled={ocupado || conflicto} onClick={() => setSelector(true)} className="boton-funcion mb-4 inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm"><Plus size={18} /> AGREGAR CANCIONES</button>}
             <p role="status" className="mb-3 text-xs text-butter-muted">{ocupado ? 'Guardando…' : edicion ? 'Los cambios se guardan automáticamente.' : `${items.length} ${items.length === 1 ? 'tema' : 'temas'}`}</p>
             {items.length ? <CancionesSetlist items={items} setlistId={id} edicion={edicion} ocupado={ocupado || conflicto} onGuardar={guardar}
               onAbrir={e => {

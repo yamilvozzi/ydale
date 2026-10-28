@@ -10,8 +10,8 @@ export default function Percusion() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="flex justify-end">
-        <button type="button" onClick={() => setTapAbierto(true)} className="flex min-h-11 items-center gap-2 rounded-lg bg-teal px-3 py-2.5 text-sm text-butter hover:bg-green"><Timer size={17} /> Tap Tempo</button>
+      <div className="flex justify-start">
+        <button type="button" onClick={() => setTapAbierto(true)} className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm"><Timer size={17} /> Tap Tempo</button>
       </div>
       <SeccionTextoEditable
         temaId={tema.id}

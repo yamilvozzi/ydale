@@ -39,7 +39,7 @@ export default function Estructura() {
     <section className="mx-auto w-full max-w-5xl">
       <header className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-borde pb-4">
         {referencia && <p aria-label="Referencia musical del tema" className="text-sm text-butter">{referencia}</p>}
-        <button type="button" onClick={() => { setErrorGuardado(''); setEditorAbierto(true) }} className="ml-auto flex min-h-11 items-center gap-2 rounded-lg bg-teal px-3 text-xs tracking-wide text-butter hover:bg-green"><Pencil size={16} /> EDITAR ESTRUCTURA</button>
+        <button type="button" onClick={() => { setErrorGuardado(''); setEditorAbierto(true) }} className="boton-funcion ml-auto flex items-center gap-2 rounded-lg px-3 text-xs tracking-wide"><Pencil size={16} /> EDITAR ESTRUCTURA</button>
       </header>
       {lectura.error && <p role="alert" className="mb-3 text-sm text-butter-muted">{lectura.error}</p>}
       {!lectura.datos.bloques.length && <p className="text-sm text-butter-muted">Todavía no hay estructura cargada.</p>}

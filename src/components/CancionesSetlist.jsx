@@ -9,15 +9,15 @@ function Cancion({ item, numero, total, edicion, ocupado, setlistId, onCambiar, 
   const { setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: item.id, disabled: !edicion || ocupado })
   const nombre = item.nombre || 'Canción no disponible'
   return <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
-    className={`relative grid w-full min-w-0 items-center gap-1 rounded-lg border border-borde bg-superficie ${edicion ? 'grid-cols-[5rem_minmax(0,1fr)_5rem]' : 'grid-cols-[3rem_minmax(0,1fr)_3rem]'} ${isDragging ? 'z-10 opacity-70' : ''}`}>
+    className={`tarjeta-enlace relative grid w-full min-w-0 items-center gap-1 rounded-lg ${edicion ? 'grid-cols-[5rem_minmax(0,1fr)_5rem]' : 'grid-cols-[3rem_minmax(0,1fr)_3rem]'} ${isDragging ? 'z-10 opacity-70' : ''}`}>
     <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
       {edicion && <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners} disabled={ocupado}
-        aria-label={`Mover ${nombre}`} className="accion-icono touch-none select-none rounded-lg text-butter-muted hover:bg-borde disabled:opacity-50"><GripVertical /></button>}
+        aria-label={`Mover ${nombre}`} className="accion-plana accion-icono touch-none select-none rounded-lg disabled:opacity-50"><GripVertical /></button>}
       <span aria-hidden="true" className={`shrink-0 text-sm tabular-nums text-butter ${edicion ? 'pl-1' : 'pl-4'}`}>{numero}.</span>
     </div>
     <Link to={`/tema/${encodeURIComponent(item.song_id)}/letra?setlist=${setlistId}`}
       state={{ setlistScroll: window.scrollY, setlistId }} onClick={onAbrir}
-      className="col-start-2 row-start-1 min-w-0 rounded-lg px-3 py-4 text-center hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter">
+      className="col-start-2 row-start-1 min-w-0 rounded-lg px-3 py-4 text-center focus-visible:outline-2 focus-visible:outline-butter">
       <p className="break-words">{nombre}</p>
       {item.artista && <p className="break-words text-xs text-butter-muted">{item.artista}</p>}
     </Link>

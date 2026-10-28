@@ -25,6 +25,93 @@ body {
   color: var(--color-butter);
 }
 
+/* Referencias compartidas: funciones como Inicio, tarjetas como Setlists.
+   Las medidas y la tipografía siguen definidas en cada componente. */
+@layer components {
+  .boton-funcion {
+    --boton-contorno: var(--color-borde);
+    --boton-fondo: var(--color-superficie);
+    --boton-acento: var(--color-teal);
+    min-height: 44px;
+    border: 1px solid var(--boton-contorno);
+    background: var(--boton-fondo);
+    color: var(--color-butter);
+    transition: color 150ms, border-color 150ms, background-color 150ms;
+  }
+  .boton-funcion:not(:disabled, [aria-disabled="true"]):hover {
+    --boton-contorno: var(--boton-acento);
+    --boton-fondo: color-mix(in srgb, var(--boton-acento) 20%, transparent);
+    color: var(--color-butter);
+  }
+  .boton-funcion:disabled { opacity: 0.4; }
+  .boton-funcion:focus-visible,
+  .accion-plana:focus-visible {
+    outline: 2px solid var(--color-butter);
+    outline-offset: 2px;
+  }
+  .boton-funcion-destructiva {
+    /* Mismo rojo apagado que los controles de eliminación musicales. */
+    --boton-contorno: color-mix(in srgb, #c18f8b 55%, var(--color-borde));
+    --boton-acento: #c18f8b;
+    color: #c18f8b;
+  }
+  /* Dibujo de 36px dentro de una superficie táctil de 44px. */
+  .boton-funcion-compacto {
+    position: relative;
+    isolation: isolate;
+    border: 0;
+    background: transparent;
+  }
+  .boton-funcion-compacto::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 4px;
+    border: 1px solid var(--boton-contorno);
+    border-radius: 0.5rem;
+    background: var(--boton-fondo);
+    transition: border-color 150ms, background-color 150ms;
+  }
+  .accion-plana {
+    background: transparent;
+    color: var(--color-butter-muted);
+    transition: color 150ms;
+  }
+  .accion-plana:not(:disabled, [aria-disabled="true"]):hover {
+    background: transparent;
+    color: var(--color-butter);
+  }
+  .tarjeta-enlace {
+    border: 2px solid var(--color-borde);
+    background: var(--color-superficie);
+  }
+  .tarjeta-enlace:hover { border-color: var(--color-teal); }
+}
+
+/* Ancho de referencia de Repertorio, exclusivo de cabeceras y controles. */
+.columna-encabezado { width: 100%; max-width: 48rem; min-width: 0; margin-inline: auto; }
+.tema-pestanas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.25rem; }
+.tema-pestanas > a { grid-column: span 2; min-width: 0; }
+.tema-pestanas > a:nth-child(n + 4) { grid-column: span 3; }
+
+/* Filas explícitas sin comprimir botones ni limitar el área de trabajo. */
+.pizarra-herramientas { display: flex; flex-direction: column; gap: 1rem; }
+.pizarra-funciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.pizarra-funciones > button { justify-content: center; min-width: 0; }
+.pizarra-funciones > button > svg { flex-shrink: 0; }
+.pizarra-utilidades { display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid var(--color-borde); padding-top: 1rem; }
+.pizarra-transposicion { display: grid; grid-template-columns: repeat(3, minmax(44px, 1fr)); gap: 0.5rem; }
+.pizarra-vaciado > button { justify-content: center; width: 100%; }
+@media (min-width: 40rem) {
+  .tema-pestanas { display: flex; flex-wrap: wrap; justify-content: center; }
+  .pizarra-funciones { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pizarra-utilidades { flex-direction: row; align-items: center; justify-content: center; }
+  .pizarra-vaciado { border-left: 1px solid var(--color-borde); padding-left: 0.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boton-funcion, .boton-funcion-compacto::before, .accion-plana { transition: none; }
+}
+
 /* Letras reales con acordes anclados al carácter. Los rótulos son absolutos:
    nunca se agregan espacios ni se altera el ancho de una palabra. */
 .letra-con-acordes { overflow-x: auto; padding: 0.25rem 0.25rem 0.5rem; line-height: 1.65; }

@@ -51,14 +51,12 @@ export default function Notas() {
   return (
     <div className="flex flex-col gap-6">
       <section>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-sm uppercase tracking-widest text-butter-muted">Acordes</h2>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setGeneradorAbierto(true)}
             disabled={ocupado}
-            className="flex items-center gap-2 rounded-lg border border-teal bg-teal px-3 py-2 text-sm text-butter transition-colors hover:bg-green"
+            className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
           >
             <WandSparkles size={17} />
             Generador
@@ -67,12 +65,11 @@ export default function Notas() {
             type="button"
             onClick={() => setEditor({})}
             disabled={ocupado}
-            className="flex items-center gap-2 rounded-lg border border-borde bg-superficie px-3 py-2 text-sm text-butter transition-colors hover:border-teal hover:bg-fondo"
+            className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
           >
             <Plus size={17} />
             Acorde
           </button>
-          </div>
         </div>
 
         {notas.acordes.length > 0 ? (

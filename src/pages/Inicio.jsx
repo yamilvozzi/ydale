@@ -12,7 +12,7 @@ export default function Inicio() {
           { ruta: '/pizarra', nombre: 'PIZARRA', Icono: NotebookPen },
           { ruta: '/setlists', nombre: 'SETLISTS', Icono: ListMusic },
         ].map(({ ruta, nombre, Icono }) => (
-          <Link key={ruta} to={ruta} className="group flex items-center gap-4 rounded-xl border border-borde bg-superficie px-6 py-8 text-butter transition-colors hover:border-teal hover:bg-teal/20 focus-visible:outline-2 focus-visible:outline-butter">
+          <Link key={ruta} to={ruta} className="boton-funcion group flex items-center gap-4 rounded-xl px-6 py-8 focus-visible:outline-2 focus-visible:outline-butter">
             <Icono size={28} className="text-butter-muted group-hover:text-butter" />
             <span className="flex-1 text-base tracking-widest">{nombre}</span>
             <ChevronRight size={20} className="text-butter-muted" />
