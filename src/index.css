@@ -92,7 +92,8 @@ body {
 .columna-encabezado { width: 100%; max-width: 72rem; min-width: 0; margin-inline: auto; }
 /* Dos laterales iguales centran el título respecto del contenedor completo. */
 .tema-identidad { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; }
-.tema-pestanas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 0.25rem; overflow-x: auto; }
+/* overflow-x: auto vuelve auto el otro eje si no se define explícitamente. */
+.tema-pestanas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 0.25rem; overflow-x: auto; overflow-y: hidden; }
 .tema-pestanas > a { display: flex; align-items: center; justify-content: center; min-height: 44px; }
 .tema-contenido { padding-top: 0.75rem; }
 
