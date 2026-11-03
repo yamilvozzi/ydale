@@ -2,20 +2,21 @@ import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import Diapason from './Diapason'
 import { filtrarAcordes } from '../lib/catalogoAcordes'
-import { generarPosiciones, interpretarAcorde, propuestaAEditable } from '../lib/generadorAcordes'
+import { interpretarAcorde, propuestaAEditable } from '../lib/generadorAcordes'
+import { propuestasDelModal } from '../lib/opcionesGenerador'
 
-const estiloSelector = (activo) => `rounded-lg border px-1.5 py-1.5 text-[11px] transition-colors focus-visible:outline-2 focus-visible:outline-butter sm:px-2 sm:text-xs ${activo
+const estiloSelector = (activo) => `min-h-9 rounded-lg border px-1.5 py-1.5 text-[11px] transition-colors focus-visible:outline-2 focus-visible:outline-butter disabled:cursor-not-allowed disabled:opacity-40 sm:px-2 sm:text-xs ${activo
   ? 'border-teal bg-teal text-butter'
   : 'border-borde bg-fondo text-butter-muted hover:border-teal hover:text-butter'}`
 
-function Selector({ titulo, opciones, valor, onChange, className = '', compacto = false, filaMovil = false }) {
+function Selector({ titulo, opciones, valor, onChange, className = '', disabled = false, columnas = 'grid-cols-4' }) {
   return (
-    <fieldset className={`min-w-0 ${className}`}>
-      <legend className="mb-1 text-xs uppercase tracking-wide text-butter-muted">{titulo}</legend>
-      <div className={filaMovil ? 'grid grid-cols-4 gap-1 sm:grid-cols-2' : compacto ? `grid ${opciones.length === 5 ? 'grid-cols-3' : 'grid-cols-2'} gap-1` : 'flex flex-wrap gap-1'}>
+    <fieldset disabled={disabled} className={`min-w-0 ${className}`}>
+      <legend className={`mb-1 text-xs uppercase tracking-wide text-butter-muted ${disabled ? 'opacity-40' : ''}`}>{titulo}</legend>
+      <div className={`grid ${columnas} gap-1`}>
         {opciones.map((opcion) => (
-          <button key={opcion} type="button" aria-pressed={valor === opcion} onClick={() => onChange(opcion)} className={estiloSelector(valor === opcion)}>
-            {opcion.replaceAll('–', '')}
+          <button key={opcion} type="button" disabled={disabled} aria-pressed={valor === opcion} onClick={() => onChange(opcion)} className={estiloSelector(valor === opcion)}>
+            {opcion}
           </button>
         ))}
       </div>
@@ -26,7 +27,7 @@ function Selector({ titulo, opciones, valor, onChange, className = '', compacto 
 function Interruptor({ etiqueta, activo, onChange, disabled = false, className = '' }) {
   return (
     <button type="button" role="switch" aria-checked={activo} disabled={disabled} onClick={onChange} className={`${estiloSelector(activo)} flex items-center gap-2 ${className}`}>
-      <span aria-hidden="true" className={`flex h-3.5 w-6 items-center rounded-full px-0.5 ${activo ? 'bg-butter' : 'bg-borde'}`}>
+      <span aria-hidden="true" className={`flex h-3.5 w-6 shrink-0 items-center rounded-full px-0.5 ${activo ? 'bg-butter' : 'bg-borde'}`}>
         <span className={`h-2.5 w-2.5 rounded-full transition-transform ${activo ? 'translate-x-2.5 bg-teal' : 'bg-butter-muted'}`} />
       </span>
       {etiqueta}
@@ -46,7 +47,6 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   const [abierto, setAbierto] = useState(false)
   const [indice, setIndice] = useState(0)
   const [cuerdas, setCuerdas] = useState('AUTO')
-  const [cantidadCuerdas, setCantidadCuerdas] = useState(3)
   const [bajo, setBajo] = useState(false)
   const [completo, setCompleto] = useState(false)
   const [zona, setZona] = useState('TODAS')
@@ -56,7 +56,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
   const opciones = interpretado && !catalogo.some(({ nombre }) => nombre === interpretado.nombre)
     ? [interpretado, ...catalogo] : catalogo
   const bajoActivo = bajo || Boolean(interpretado?.bajo)
-  const propuestas = useMemo(() => generarPosiciones(interpretado, { cuerdas, cantidadCuerdas, zona, bajo, completo }), [interpretado, cuerdas, cantidadCuerdas, zona, bajo, completo])
+  const propuestas = useMemo(() => propuestasDelModal(interpretado, { cuerdas, zona, bajo, completo }), [interpretado, cuerdas, zona, bajo, completo])
   const propuesta = propuestas[posicion]
 
   function cambiarFiltro(setter, valor) {
@@ -146,78 +146,75 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
         <button type="button" onClick={onCerrar} disabled={guardando} aria-label="Cerrar generador de acordes" className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"><X size={20} /></button>
       </div>
 
-      <fieldset disabled={guardando} className="mb-3 flex min-w-0 flex-wrap items-end gap-x-4 gap-y-3">
-        <Interruptor etiqueta="ACORDE COMPLETO" activo={completo} onChange={() => cambiarFiltro(setCompleto, !completo)} className="order-0" />
-        <div ref={buscador} className="relative order-1 w-36 shrink-0 sm:w-44" onKeyDown={manejarTecla}>
-          <div className="relative">
-            <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
-            <input
-              role="combobox"
-              aria-label="Buscar acorde"
-              aria-autocomplete="list"
-              aria-expanded={abierto}
-              aria-controls={`${id}-lista`}
-              aria-activedescendant={abierto && opciones[indice] ? `${id}-opcion-${indice}` : undefined}
-              autoComplete="off"
-              spellCheck={false}
-              value={consulta}
-              placeholder="Acorde"
-              onFocus={() => setAbierto(true)}
-              onClick={() => setAbierto(true)}
-              onChange={(evento) => { setConsulta(evento.target.value); setAcorde(null); setIndice(0); setPosicion(0); setAbierto(true) }}
-              className="w-full rounded-lg border border-borde bg-fondo py-2 pl-9 pr-3 text-sm text-butter placeholder:text-butter-muted focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal/30"
-            />
-          </div>
-          {abierto && (
-            <div className="absolute left-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border border-borde bg-superficie shadow-xl">
-              <ul ref={lista} id={`${id}-lista`} role="listbox" aria-label="Acordes" className="max-h-52 overflow-y-auto overscroll-contain p-1">
-                {opciones.map((opcion, i) => (
-                  <li
-                    key={opcion.nombre}
-                    id={`${id}-opcion-${i}`}
-                    role="option"
-                    aria-selected={acorde?.nombre === opcion.nombre}
-                    onPointerDown={(evento) => {
-                      if (evento.pointerType === 'touch') opcionTactil.current = opcion
-                    }}
-                    onPointerCancel={() => { opcionTactil.current = null }}
-                    onTouchEnd={(evento) => {
-                      // El scroll nativo cancela el pointer. Un tap selecciona
-                      // sin depender del click sintético ni enviarlo al fondo.
-                      if (opcionTactil.current !== opcion) return
-                      evento.preventDefault()
-                      opcionTactil.current = null
-                      seleccionar(opcion)
-                    }}
-                    onClick={() => seleccionar(opcion)}
-                    className={`cursor-pointer rounded-md px-3 py-2 text-sm hover:bg-teal ${i === indice ? 'bg-teal text-butter' : 'text-butter-muted'}`}
-                  >{opcion.nombre}</li>
-                ))}
-              </ul>
-              {opciones.length === 0 && <p role="status" className="px-3 py-2 text-sm text-butter-muted">Sin coincidencias</p>}
+      <fieldset disabled={guardando} className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_10.25rem] items-start gap-3 lg:grid-cols-[minmax(9rem,1fr)_10.5rem_minmax(17rem,2fr)_10.5rem]">
+        <div className="min-w-0">
+          <label htmlFor={`${id}-busqueda`} className="mb-1 block text-xs uppercase tracking-wide text-butter-muted">ACORDE</label>
+          <div ref={buscador} className="relative" onKeyDown={manejarTecla}>
+            <div className="relative">
+              <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
+              <input
+                id={`${id}-busqueda`}
+                role="combobox"
+                aria-label="Buscar acorde"
+                aria-autocomplete="list"
+                aria-expanded={abierto}
+                aria-controls={`${id}-lista`}
+                aria-activedescendant={abierto && opciones[indice] ? `${id}-opcion-${indice}` : undefined}
+                autoComplete="off"
+                spellCheck={false}
+                value={consulta}
+                placeholder="Acorde"
+                onFocus={() => setAbierto(true)}
+                onClick={() => setAbierto(true)}
+                onChange={(evento) => { setConsulta(evento.target.value); setAcorde(null); setIndice(0); setPosicion(0); setAbierto(true) }}
+                className="h-9 w-full rounded-lg border border-borde bg-fondo pl-9 pr-2 text-base text-butter placeholder:text-butter-muted focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal/30 sm:text-sm"
+              />
             </div>
-          )}
+            {abierto && (
+              <div className="absolute left-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border border-borde bg-superficie shadow-xl">
+                <ul ref={lista} id={`${id}-lista`} role="listbox" aria-label="Acordes" className="max-h-52 overflow-y-auto overscroll-contain p-1">
+                  {opciones.map((opcion, i) => (
+                    <li
+                      key={opcion.nombre}
+                      id={`${id}-opcion-${i}`}
+                      role="option"
+                      aria-selected={acorde?.nombre === opcion.nombre}
+                      onPointerDown={(evento) => {
+                        if (evento.pointerType === 'touch') opcionTactil.current = opcion
+                      }}
+                      onPointerCancel={() => { opcionTactil.current = null }}
+                      onTouchEnd={(evento) => {
+                        // El scroll nativo cancela el pointer. Un tap selecciona
+                        // sin depender del click sintético ni enviarlo al fondo.
+                        if (opcionTactil.current !== opcion) return
+                        evento.preventDefault()
+                        opcionTactil.current = null
+                        seleccionar(opcion)
+                      }}
+                      onClick={() => seleccionar(opcion)}
+                      className={`cursor-pointer rounded-md px-3 py-2 text-sm hover:bg-teal ${i === indice ? 'bg-teal text-butter' : 'text-butter-muted'}`}
+                    >{opcion.nombre}</li>
+                  ))}
+                </ul>
+                {opciones.length === 0 && <p role="status" className="px-3 py-2 text-sm text-butter-muted">Sin coincidencias</p>}
+              </div>
+            )}
+          </div>
         </div>
-        {!completo && <div className="order-3 grid w-full grid-cols-2 gap-3 sm:w-auto lg:order-2">
-          {[3, 4].map((cantidad) => (
-            <Selector
-              key={cantidad}
-              compacto
-              titulo={`${cantidad} CUERDAS`}
-              opciones={cantidad === 3 ? ['AUTO', '1–2–3', '2–3–4', '3–4–5', '4–5–6'] : ['AUTO', '1–2–3–4', '2–3–4–5', '3–4–5–6']}
-              valor={cantidadCuerdas === cantidad ? cuerdas : null}
-              onChange={(valor) => { setCantidadCuerdas(cantidad); cambiarFiltro(setCuerdas, valor) }}
-            />
-          ))}
-        </div>}
-        {!completo && <Interruptor etiqueta="BAJO" activo={bajoActivo} disabled={Boolean(interpretado?.bajo)} onChange={() => cambiarFiltro(setBajo, !bajo)} className="order-2 lg:order-3" />}
-        <Selector className="order-4" filaMovil titulo="ZONA" opciones={['ABIERTA', 'MEDIA', 'AGUDA', 'TODAS']} valor={zona} onChange={(valor) => cambiarFiltro(setZona, valor)} />
+        <div className="grid gap-1 pt-5">
+          <Interruptor etiqueta="ACORDE COMPLETO" activo={completo} onChange={() => cambiarFiltro(setCompleto, !completo)} className="w-full whitespace-nowrap" />
+          <Interruptor etiqueta="BAJO" activo={bajoActivo} disabled={completo || Boolean(interpretado?.bajo)} onChange={() => cambiarFiltro(setBajo, !bajo)} className="w-full" />
+        </div>
+        <Selector className="col-span-2 lg:col-span-1" titulo="CUERDAS" disabled={completo}
+          opciones={['AUTO', '1–2–3', '2–3–4', '3–4–5', '4–5–6', '1–2–3–4', '2–3–4–5', '3–4–5–6']}
+          valor={cuerdas} onChange={(valor) => cambiarFiltro(setCuerdas, valor)} />
+        <Selector className="col-span-2 lg:col-span-1" columnas="grid-cols-4 lg:grid-cols-2" titulo="ZONA" opciones={['ABIERTA', 'MEDIA', 'AGUDA', 'TODAS']} valor={zona} onChange={(valor) => cambiarFiltro(setZona, valor)} />
       </fieldset>
 
       <div className="rounded-lg border border-borde bg-fondo/40 p-3 sm:p-5">
         <div ref={diapasón} className="overflow-x-auto pb-2 pt-3" tabIndex={0} role="region" aria-label="Diapasón de la propuesta">
           <Diapason
-            etiqueta={interpretado ? `Diapasón de ${interpretado.nombre}` : completo ? 'Diapasón para acordes completos' : `Diapasón para posiciones de ${cantidadCuerdas} cuerdas`}
+            etiqueta={interpretado ? `Diapasón de ${interpretado.nombre}` : completo ? 'Diapasón para acordes completos' : 'Diapasón para posiciones de tres y cuatro cuerdas'}
             obtenerMarcador={(cuerda, traste) => {
               if (!propuesta) return null
               if (propuesta.bajo?.cuerda === cuerda && propuesta.bajo.traste === traste) return propuesta.bajo

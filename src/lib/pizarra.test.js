@@ -16,7 +16,9 @@ test('la pizarra persiste varias escalas y un voicing completo sin tocar otras c
   pizarra = ponerElemento(pizarra, 'escala', { tonica: 'C', tipo: 'mayor' })
   pizarra = ponerElemento(pizarra, 'escala', { tonica: 'D', tipo: 'dorico' })
   const acorde = interpretarAcorde('D/F#')
-  const voicing = generarPosiciones(acorde, { zona: 'AGUDA', cuerdas: '1–2–3' })[0]
+  // La forma de cinco columnas se conserva, pero ahora sigue a la más cómoda.
+  const voicing = generarPosiciones(acorde, { zona: 'AGUDA', cuerdas: '1–2–3' }).find(p => p.id === '0:10-1:10-2:11-5:14')
+  assert.ok(voicing)
   pizarra = ponerElemento(pizarra, 'acorde', propuestaAEditable(acorde, voicing))
   guardarPizarra(storage, pizarra)
   const recargada = leerPizarra(storage)

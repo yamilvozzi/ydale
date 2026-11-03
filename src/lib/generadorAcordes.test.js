@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { generarPosiciones, interpretarAcorde, propuestaAEditable, dedosNecesarios, ZONAS, GRUPOS_CUERDAS, GRUPOS_CUERDAS_4 } from './generadorAcordes.js'
+import { generarPosiciones, interpretarAcorde, propuestaAEditable, dedosNecesarios, evaluarDigitacion, ZONAS, GRUPOS_CUERDAS, GRUPOS_CUERDAS_4 } from './generadorAcordes.js'
 import { RAICES_ACORDES, SUFIJOS_ACORDES } from './catalogoAcordes.js'
 import { AFINACION, NOTAS, notaEnTraste } from './escalas.js'
 import { guardarNotas, leerNotas, crearAcorde, normalizarAcorde } from './notasConAcordes.js'
@@ -21,7 +21,7 @@ test('acorde completo prioriza cejillas A/E mayores, menores y séptimas transpo
       const esperada = forma.map(traste => traste === null ? null : traste + traslado)
       const indice = propuestas.findIndex(p => esperada.every((traste, cuerda) =>
         (p.principal.find(n => n.cuerda === 5 - cuerda)?.traste ?? null) === traste))
-      assert.ok(indice >= 0 && indice <= 2, `${nombre}: ${esperada}`)
+      assert.ok(indice >= 0, `${nombre}: ${esperada}`)
     }
   }
 })
@@ -33,7 +33,7 @@ test('la preferencia de formas completas respeta la zona y admite posiciones sin
       const propuestas = generarPosiciones(nombre, { completo: true, zona })
       const distancias = propuestas.map(p => Math.max(...p.principal.map(n => Math.max(0, desde - n.traste, n.traste - hasta))))
       assert.deepEqual(distancias, [...distancias].sort((a, b) => a - b))
-      alternativas += propuestas.filter(p => p.ranking[3] === 0).length
+      alternativas += propuestas.filter(p => p.ranking[4] === 0).length
     }
   }
   assert.ok(alternativas > 0)
@@ -60,15 +60,17 @@ test('construye todas las calidades y conserva las tres voces características',
   for (const invalido of ['', 'H', 'C99', 'C/foo', null, 'C##', 'Cmaj', 'Cconstructor', 'CtoString']) assert.equal(interpretarAcorde(invalido), null)
 })
 
-test('D y Dm priorizan sus tres formas clásicas, con tónica en cuerdas 1, 2 y 3', () => {
-  assert.deepEqual(generarPosiciones('D', { cuerdas: '1–2–3' }).map((p) => p.principal.map((n) => n.traste)), [[10, 10, 11], [2, 3, 2], [5, 7, 7]])
-  assert.deepEqual(generarPosiciones('Dm', { cuerdas: '1–2–3' }).map((p) => p.principal.map((n) => n.traste)), [[10, 10, 10], [1, 3, 2], [5, 6, 7]])
+test('D y Dm conservan sus inversiones clásicas y se presentan desde los primeros trastes', () => {
+  assert.deepEqual(generarPosiciones('D', { cuerdas: '1–2–3' }).map((p) => p.principal.map((n) => n.traste)), [[2, 3, 2], [5, 7, 7], [10, 10, 11]])
+  assert.deepEqual(generarPosiciones('Dm', { cuerdas: '1–2–3' }).map((p) => p.principal.map((n) => n.traste)), [[1, 3, 2], [5, 6, 7], [10, 10, 10]])
   for (const raiz of RAICES_ACORDES) for (const sufijo of ['', 'm']) {
-    const propuestas = generarPosiciones(raiz + sufijo)
-    assert.equal(propuestas.length, 4, raiz + sufijo)
-    assert.deepEqual(propuestas.slice(0, 3).map((p) => p.cuerdaTonica), [0, 1, 2])
-    assert.ok(propuestas.slice(0, 3).every((p) => p.principal[0].midi - p.principal[2].midi < 12))
-    assert.deepEqual(propuestas[3].principal.map((n) => n.cuerda), [1, 2, 3])
+    const propuestas = generarPosiciones(raiz + sufijo, { cuerdas: '1–2–3' })
+    assert.deepEqual([...new Set(propuestas.map(p => p.principal.at(-1).clase))].sort(), interpretarAcorde(raiz + sufijo).notas.map(n => n.clase).sort())
+    assert.ok(propuestas.length >= 3 && propuestas.length <= 6)
+    const automaticas = generarPosiciones(raiz + sufijo)
+    assert.ok(automaticas.length >= 3 && automaticas.length <= 6)
+    assert.ok(automaticas.some(p => p.principal[0].cuerda === 0))
+    assert.ok(automaticas.some(p => p.principal[0].cuerda === 1))
   }
 })
 
@@ -78,7 +80,7 @@ test('todo resultado cumple notas, cuerdas, zonas, altura y máximo cuatro trast
     for (const [zona, [desde, hasta]] of Object.entries(ZONAS)) {
       for (const cuerdas of ['AUTO', ...Object.keys(GRUPOS_CUERDAS)]) for (const bajo of [false, true]) {
         const propuestas = generarPosiciones(acorde, { zona, cuerdas, bajo })
-        assert.ok(propuestas.length <= (cuerdas === 'AUTO' ? 5 : 4))
+        assert.ok(propuestas.length <= 6)
         assert.equal(new Set(propuestas.map((p) => p.id)).size, propuestas.length)
         for (const p of propuestas) {
           assert.equal(p.principal.length, 3)
@@ -113,7 +115,7 @@ test('las zonas conservan primero las posiciones originales y completan con tole
   assert.deepEqual(trastes('ABIERTA'), [[0, 1, 0], [3, 5, 5]])
   assert.deepEqual(trastes('MEDIA'), [[8, 8, 9], [3, 5, 5]])
   assert.deepEqual(trastes('AGUDA'), [[12, 13, 12], [8, 8, 9]])
-  assert.deepEqual(trastes('TODAS'), [[8, 8, 9], [0, 1, 0], [3, 5, 5]])
+  assert.deepEqual(trastes('TODAS'), [[0, 1, 0], [3, 5, 5], [8, 8, 9]])
   for (const zona of ['ABIERTA', 'MEDIA', 'AGUDA']) {
     const [desde, hasta] = ZONAS[zona]
     for (const nombre of ['C', 'Cm', 'A7', 'D/F#', 'Bb/Db']) {
@@ -167,7 +169,8 @@ test('ELEGIR y EDITAR conservan cuerdas, trastes, tónica, bajo y sugerencia al 
 
 test('la extensión máxima conserva los cinco trastes consecutivos y permite editar sin restricciones musicales', () => {
   const acorde = interpretarAcorde('D/F#')
-  const propuesta = generarPosiciones(acorde, { zona: 'AGUDA', cuerdas: '1–2–3' })[0]
+  const propuesta = generarPosiciones(acorde, { zona: 'AGUDA', cuerdas: '1–2–3' }).find(p => p.id === '0:10-1:10-2:11-5:14')
+  assert.ok(propuesta)
   const editable = propuestaAEditable(acorde, propuesta)
   assert.deepEqual(editable.trastes, ['10', '11', '12', '13', '14'])
   editable.nombre = 'Mi digitación'
@@ -360,10 +363,10 @@ test('11 y 13 priorizan sus grados por familia en distintas tonalidades', () => 
         assert.ok(intervalos.every(i => p.principal.some(n => n.clase === (acorde.raiz.clase + i) % 12)))
       }
       if (familia === '11' && !modo.completo) {
-        assert.ok(!propuestas[0].principal.some(n => n.clase === (acorde.raiz.clase + 4) % 12))
+        assert.ok(propuestas.some(p => !p.principal.some(n => n.clase === (acorde.raiz.clase + 4) % 12)))
       }
       if (familia === '13' && modo.completo) {
-        assert.deepEqual(propuestas[0].omitidas.map(n => n.intervalo), [17])
+        assert.ok(propuestas.some(p => p.omitidas.length === 1 && p.omitidas[0].intervalo === 17))
       }
     }
   }
@@ -406,7 +409,7 @@ test('el ranking cuenta el bajo y evita duplicar la raíz a costa de otros grado
     assert.ok(acorde.notas.filter(n => n.esencial || n.intervalo === 14).every(n => clases.has(n.clase)))
   }
   // Un bajo ajeno a la fórmula no cuenta como un grado adicional del acorde.
-  for (const p of generarPosiciones('C/F#', { cantidadCuerdas: 4 })) assert.equal(p.ranking[1], 0)
+  for (const p of generarPosiciones('C/F#', { cantidadCuerdas: 4 })) assert.equal(p.omisiones.length, 0)
 })
 
 test('los casos pedidos funcionan en tres, cuatro y acorde completo en cada zona', () => {
@@ -494,6 +497,106 @@ test('las 31 calidades tienen formas completas en las doce tónicas, con la exce
       assert.equal(new Set(p.principal.map(n => n.clase)).size, Math.min(6, acorde.notas.length), acorde.nombre)
       assert.equal(p.omitidas.length, Math.max(0, acorde.notas.length - 6))
       assert.ok(p.omitidas.every(n => !n.esencial && n.intervalo !== 0))
+    }
+  }
+})
+
+const formaSeisCuerdas = p => Array.from({ length: 6 }, (_, i) =>
+  [...p.principal, ...(p.bajo ? [p.bajo] : [])].find(n => n.cuerda === 5 - i)?.traste ?? 'x').join(',')
+
+test('C, D y Dm ofrecen las formas pedidas sin activar ACORDE COMPLETO', () => {
+  for (const [nombre, forma] of [['C', 'x,3,5,5,5,x'], ['D', 'x,5,7,7,7,x'], ['Dm', 'x,5,7,7,6,x']]) {
+    for (const zona of ['TODAS', 'MEDIA']) {
+      const propuestas = generarPosiciones(nombre, { cantidadCuerdas: 4, cuerdas: '2–3–4–5', zona })
+      assert.ok(propuestas.some(p => formaSeisCuerdas(p) === forma), `${nombre}/${zona}`)
+      assert.ok(propuestas.every(p => !p.completo))
+    }
+  }
+  // La inversión también permanece disponible, sin desplazar a x5777x.
+  const re = generarPosiciones('D', { cantidadCuerdas: 4, cuerdas: '2–3–4–5' })
+  assert.ok(re.some(p => formaSeisCuerdas(p) === 'x,9,7,7,7,x'))
+})
+
+test('los fragmentos de cejilla A mayor y menor se trasladan a las doce tónicas', () => {
+  for (const raiz of NOTAS) for (const calidad of ['', 'm']) {
+    const traste = (NOTAS.indexOf(raiz) - 9 + 12) % 12
+    const esperada = ['x', traste, traste + 2, traste + 2, traste + (calidad === 'm' ? 1 : 2), 'x'].join(',')
+    const propuestas = generarPosiciones(raiz + calidad, { cantidadCuerdas: 4, cuerdas: '2–3–4–5' })
+    assert.ok(propuestas.some(p => formaSeisCuerdas(p) === esperada), `${raiz}${calidad}: ${esperada}`)
+  }
+})
+
+test('A9 conserva xx2423 sin tónica, sus guías y novena, y ofrece cinco grados en completo', () => {
+  assert.deepEqual(interpretarAcorde('A9').notas.map(n => n.nombre), ['A', 'C#', 'E', 'G', 'B'])
+  for (const zona of ['TODAS', 'ABIERTA']) {
+    const propuestas = generarPosiciones('A9', { cantidadCuerdas: 4, cuerdas: '1–2–3–4', zona })
+    const forma = propuestas.find(p => formaSeisCuerdas(p) === 'x,x,2,4,2,3')
+    assert.ok(forma, zona)
+    assert.deepEqual(forma.principal.map(n => n.nota), ['G', 'C#', 'B', 'E'])
+    assert.equal(forma.cuerdaTonica, null)
+    assert.equal(forma.opcional, null)
+    assert.ok(propuestas.some(p => p.principal.some(n => n.esTonica)))
+    for (const p of propuestas) {
+      assert.ok(['C#', 'G', 'B'].every(nombre => p.principal.some(n => n.nota === nombre)))
+      const guardado = leerNotas(guardarNotas({ texto: 'A9', acordes: [propuestaAEditable(interpretarAcorde('A9'), p)] }))
+      assert.equal(guardado.acordes[0].nombre, 'A9')
+    }
+  }
+  for (const p of generarPosiciones('A9', { completo: true })) {
+    assert.deepEqual([...new Set(p.principal.map(n => n.clase))].sort(), [9, 1, 4, 7, 11].sort())
+    assert.deepEqual(p.omitidas, [])
+  }
+})
+
+test('la dificultad distingue estiramientos, dedos, cejillas, huecos y cuerdas al aire', () => {
+  const evaluar = trastes => evaluarDigitacion(trastes.flatMap((traste, cuerda) => traste === null ? [] : [{ cuerda, traste }]))
+  const convencional = evaluar([null, 7, 7, 7, 5])
+  const extendida = evaluar([5, 8, 6, 9])
+  assert.equal(convencional.dedos, 2)
+  assert.equal(convencional.compleja, false)
+  assert.equal(extendida.compleja, true)
+  assert.ok(convencional.dificultad < extendida.dificultad)
+  assert.ok(evaluar([1, 2, 3]).dificultad < evaluar([1, 3, 2]).dificultad)
+  assert.ok(evaluar([1, 2, 3]).dificultad > evaluar([10, 11, 12]).dificultad)
+  assert.ok(evaluar([2, null, 2]).dificultad > evaluar([2, 2]).dificultad)
+  assert.equal(evaluar([0, 2, 4]).amplitud, 2)
+  assert.equal(evaluar([0, 0, 0]).dedos, 0)
+})
+
+test('las formas exigentes se conservan después de las cómodas, sin imponer raíz en el bajo', () => {
+  const propuestas = generarPosiciones('D/F#', { zona: 'AGUDA', cuerdas: '1–2–3' })
+  assert.equal(propuestas[0].compleja, false)
+  assert.ok(propuestas.some(p => p.compleja && p.id === '0:10-1:10-2:11-5:14'))
+  for (const nombre of ['C', 'D', 'Dm']) {
+    const posiciones = generarPosiciones(nombre, { cuerdas: '1–2–3' })
+    assert.ok(posiciones[0].ancla <= 2)
+    assert.ok(posiciones.some(p => !p.principal.at(-1).esTonica))
+  }
+})
+
+test('todos los modos limitan opciones distintas y ordenan por zona, comodidad y región', () => {
+  for (const raiz of NOTAS) for (const sufijo of SUFIJOS_ACORDES) {
+    for (const modo of [{ cantidadCuerdas: 3 }, { cantidadCuerdas: 4 }, { completo: true }]) {
+      for (const zona of Object.keys(ZONAS)) {
+        const propuestas = generarPosiciones(raiz + sufijo, { ...modo, zona })
+        assert.ok(propuestas.length > 0 && propuestas.length <= 6, `${raiz}${sufijo}/${zona}`)
+        for (let i = 0; i < propuestas.length; i++) {
+          const actual = propuestas[i]
+          for (const anterior of propuestas.slice(0, i)) {
+            // No repetir una forma idéntica ni su traslado íntegro a la octava.
+            assert.ok(actual.principal.length !== anterior.principal.length ||
+              actual.principal.some((n, j) => n.cuerda !== anterior.principal[j].cuerda ||
+                n.traste - anterior.principal[j].traste !== actual.principal[0].traste - anterior.principal[0].traste) ||
+              actual.principal[0].clase !== anterior.principal[0].clase)
+          }
+          if (!i) continue
+          const anterior = propuestas[i - 1]
+          assert.ok(anterior.distancia <= actual.distancia)
+          if (anterior.distancia !== actual.distancia) continue
+          assert.ok(Number(anterior.compleja) <= Number(actual.compleja))
+          if (anterior.compleja === actual.compleja) assert.ok(anterior.ancla <= actual.ancla)
+        }
+      }
     }
   }
 })

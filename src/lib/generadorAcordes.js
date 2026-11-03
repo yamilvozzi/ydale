@@ -41,7 +41,7 @@ export function interpretarAcorde(texto) {
 
 function extension(notas) {
   const trastes = notas.map(({ traste }) => traste)
-  return Math.max(...trastes) - Math.min(...trastes)
+  return trastes.length ? Math.max(...trastes) - Math.min(...trastes) : 0
 }
 
 function posicionesEnCuerda(cuerda, notas, desde, hasta, raiz) {
@@ -116,17 +116,100 @@ const FORMAS_CONOCIDAS = {
   maj7: [[0, 2, 1, 1, 0, 0], [null, 0, 2, 1, 2, 0], [null, 3, 2, 0, 0, 0], [null, null, 0, 2, 2, 2]],
 }
 
-function bonusFormaConocida(acorde, principal) {
-  const trastes = Array(6).fill(null)
-  for (const nota of principal) trastes[5 - nota.cuerda] = nota.traste
+function bonusFormaConocida(acorde, principal, completo) {
+  let abierta = false
   const indice = (FORMAS_CONOCIDAS[acorde.calidad] ?? []).findIndex(forma => {
-    const primera = forma.findIndex(traste => traste !== null)
-    const traslado = trastes[primera] - forma[primera]
-    return traslado >= 0 && forma.every((traste, i) => traste === null
-      ? trastes[i] === null : trastes[i] !== null && trastes[i] === traste + traslado)
+    if (completo && principal.length !== forma.filter(n => n !== null).length) return false
+    const referencia = forma[5 - principal[0].cuerda]
+    if (referencia === null) return false
+    const traslado = principal[0].traste - referencia
+    // También reconoce fragmentos sobre las cuerdas elegidas. La fórmula
+    // ya validó sus grados: no agrega notas ni excepciones por tonalidad.
+    const coincide = traslado >= 0 && principal.every(({ cuerda, traste }) =>
+      forma[5 - cuerda] !== null && traste === forma[5 - cuerda] + traslado)
+    if (coincide) abierta = traslado === 0 && principal.some(n => n.traste === 0)
+    return coincide
   })
   // Las cejillas E/A son más habituales y cómodas que trasladar C/G/D.
-  return indice < 0 ? 0 : indice < 2 ? -2 : -1
+  return indice < 0 ? 0 : abierta ? -3 : indice < 2 ? -2 : -1
+}
+
+export function evaluarDigitacion(notas) {
+  const pisadas = notas.filter(n => n.traste > 0).sort((a, b) => a.cuerda - b.cuerda)
+  const ancla = pisadas.length ? Math.min(...pisadas.map(n => n.traste)) : 0
+  // El generador conserva su ventana de búsqueda; la evaluación física
+  // distingue las cuerdas al aire, que no consumen dedos ni estiramiento.
+  const amplitud = extension(pisadas)
+  const dedos = dedosNecesarios(notas)
+  const estiramiento = pisadas.slice(1).reduce((total, nota, i) => total +
+    Math.max(0, Math.abs(nota.traste - pisadas[i].traste) - 1) ** 2 / (nota.cuerda - pisadas[i].cuerda), 0)
+  const huecos = Math.max(...notas.map(n => n.cuerda)) - Math.min(...notas.map(n => n.cuerda)) + 1 - notas.length
+  // Los trastes se acercan físicamente al subir por el diapasón. Las
+  // cejillas ya cuentan como un dedo cuando no tapan aire ni muteadas.
+  const dificultad = (amplitud ** 2 + estiramiento) * 2 ** (-ancla / 12) + dedos * 2 + huecos * 2
+  return { ancla, dedos, amplitud, estiramiento, dificultad, compleja: amplitud >= 4 || dedos > 4 }
+}
+
+function evaluarPropuesta(acorde, notas, zona, completo = false) {
+  const [desde, hasta] = ZONAS[zona]
+  const fisica = evaluarDigitacion(notas)
+  const omitidas = notasOmitidas(acorde, notas)
+  const distancia = Math.max(...notas.map(({ traste }) => Math.max(0, desde - traste, traste - hasta)))
+  const conocida = bonusFormaConocida(acorde, notas, completo)
+  return {
+    ...fisica, omisiones: omitidas, distancia,
+    ranking: [omitidas.length, distancia, Number(fisica.compleja), perdidaMusical(acorde, notas),
+      completo ? conocida : 0, completo ? -notas.length : 0,
+      fisica.dificultad + conocida * 3, fisica.ancla],
+  }
+}
+
+const notasPropuesta = p => [...p.principal, ...(p.bajo ? [p.bajo] : [])]
+const region = p => Math.floor(p.ancla / 3)
+const omision = p => p.omisiones.map(n => n.intervalo).join(',')
+const inversion = p => notasPropuesta(p).at(-1).clase
+const disposicion = p => notasPropuesta(p).map(n => `${n.cuerda}:${n.clase}`).join('-')
+const formaOctava = p => {
+  const notas = notasPropuesta(p)
+  return notas.map(n => `${n.cuerda}:${n.midi - notas.at(-1).midi}`).join('-') + `/${inversion(p)}`
+}
+
+function similares(a, b) {
+  if (inversion(a) !== inversion(b) || omision(a) !== omision(b)) return false
+  const notasA = notasPropuesta(a), notasB = notasPropuesta(b)
+  const comunes = notasA.filter(n => notasB.some(m => m.cuerda === n.cuerda && m.traste === n.traste)).length
+  return comunes >= Math.min(notasA.length, notasB.length) - 1 && Math.abs(a.ancla - b.ancla) <= 2
+}
+
+function seleccionarPropuestas(resultados) {
+  if (!resultados.length) return []
+  // Conservar la mayor cobertura posible; nunca sustituir grados esenciales
+  // para obtener una forma más fácil. No se exige raíz en el bajo.
+  const cobertura = Math.min(...resultados.map(p => p.omisiones.length))
+  const unicas = new Map()
+  for (const p of resultados.filter(p => p.omisiones.length === cobertura)) {
+    const anterior = unicas.get(formaOctava(p))
+    // La misma disposición trasladada una octava no ocupa otra opción.
+    if (!anterior || p.distancia < anterior.distancia ||
+      (p.distancia === anterior.distancia && p.ancla < anterior.ancla) ||
+      (p.distancia === anterior.distancia && p.ancla === anterior.ancla && comparar(p, anterior) < 0)) {
+      unicas.set(formaOctava(p), p)
+    }
+  }
+  const candidatas = [...unicas.values()].sort(comparar)
+  const elegidas = []
+  const agregar = p => { if (p && elegidas.length < 6 && !elegidas.some(e => e.id === p.id || similares(e, p))) elegidas.push(p) }
+  agregar(candidatas[0])
+  // Alternativas de omisión preservan, por ejemplo, una novena sin raíz.
+  // La diversidad se basa en grados, bajo real y región, no en la primera
+  // cuerda que contiene una tónica (que confundía formas e inversiones).
+  for (const clave of [omision, region, inversion]) {
+    for (const p of candidatas) if (!elegidas.some(e => clave(e) === clave(p))) agregar(p)
+  }
+  for (const p of candidatas) if (!elegidas.some(e => disposicion(e) === disposicion(p))) agregar(p)
+  // Selección por calidad; presentación por zona, comodidad y traste.
+  return elegidas.sort((a, b) => a.distancia - b.distancia || Number(a.compleja) - Number(b.compleja) ||
+    a.ancla - b.ancla || a.dificultad - b.dificultad || comparar(a, b))
 }
 
 function generarCompleto(acorde, zona) {
@@ -157,35 +240,19 @@ function generarCompleto(acorde, zona) {
     if (acorde.bajo && ultima.clase !== acorde.bajo.clase) return
     const dedos = dedosNecesarios(principal)
     if (dedos > 4) return
-    const distancia = Math.max(...principal.map(({ traste }) => Math.max(0, preferidoDesde - traste, traste - preferidoHasta)))
-    const omitidas = notasOmitidas(acorde, principal)
     const notas = principal.map(nota => acorde.bajo && nota === ultima ? { ...nota, esBajo: true } : nota)
-    const pisadas = principal.filter(nota => nota.traste > 0).map(nota => nota.traste)
+    const evaluacion = evaluarPropuesta(acorde, notas, zona, true)
     resultados.push({
       id: principal.map(({ cuerda, traste }) => `${cuerda}:${traste}`).join('-'),
-      principal: notas, bajo: null, opcional: null, completo: true, omitidas, dedos,
+      principal: notas, bajo: null, opcional: null, completo: true,
       cuerdaTonica: principal.find(nota => nota.esTonica)?.cuerda ?? null,
-      ancla: pisadas.length ? Math.min(...pisadas) : 0,
-      // Cobertura, identidad y zona primero. La preferencia por formas
-      // conocidas sólo ordena candidatos que ya superaron el filtro físico.
-      ranking: [omitidas.length, perdidaMusical(acorde, principal), distancia,
-        bonusFormaConocida(acorde, principal),
-        ultima.esTonica ? 0 : 1, -principal.length, dedos, extension(principal), Math.max(...principal.map(nota => nota.traste))],
+      ...evaluacion,
+      // El modal conserva la información de omisiones del modo completo.
+      omitidas: evaluacion.omisiones,
     })
   }
   buscar(0, [])
-  resultados.sort(comparar)
-  if (!resultados.length) return []
-  // No mezcla formas con menos grados si ya hay una cobertura mayor tocable.
-  const mejorCobertura = resultados[0].omitidas.length
-  const lugares = new Set()
-  return resultados.filter(propuesta => {
-    if (propuesta.omitidas.length !== mejorCobertura) return false
-    const lugar = Math.floor(propuesta.ancla / 3)
-    if (lugares.has(lugar)) return false
-    lugares.add(lugar)
-    return true
-  })
+  return seleccionarPropuestas(resultados)
 }
 
 function combinaciones(candidatas, principal = []) {
@@ -246,26 +313,14 @@ function generarGrupo(acorde, grupo, zona, conBajo) {
       bajo = bajos[0]
     }
     const notas = bajo ? [...principal, bajo] : principal
-    const amplitud = principal[0].midi - ultima.midi
-    // El bajo también aporta un grado: no premiar duplicar su tónica arriba
-    // a costa de perder una quinta, novena u otra voz que todavía falta.
-    const faltantes = notasOmitidas(acorde, notas).length
-    const trastesPisados = notas.filter(({ traste }) => traste > 0).map(({ traste }) => traste)
     resultados.push({
       id: notas.map(({ cuerda, traste }) => `${cuerda}:${traste}`).join('-'),
       principal, bajo,
       cuerdaTonica: principal.find(({ esTonica }) => esTonica)?.cuerda ?? null,
-      // Primero la zona original; la tolerancia solo completa alternativas.
-      ranking: [distanciaZona(notas), grupo.length === 4 ? faltantes : 0, acorde.notas.length > 4 ? perdidaMusical(acorde, notas) : 0, amplitud < 12 ? 0 : 1, extension(notas), new Set(trastesPisados).size, amplitud, Math.max(...notas.map(({ traste }) => traste))],
+      ...evaluarPropuesta(acorde, notas, zona),
     })
   }
-  resultados.sort(comparar)
-  // Conserva las inversiones habituales y agrega una alternativa sin raíz
-  // cuando mantiene las voces características, sin duplicados a la octava.
-  return [...grupo, null].flatMap((cuerda) => {
-    const forma = resultados.find(({ cuerdaTonica }) => cuerdaTonica === cuerda)
-    return forma ? [{ ...forma, opcional: sugerirTonica(acorde, forma.principal, forma.bajo, desde, hasta) }] : []
-  })
+  return resultados
 }
 
 export function generarPosiciones(acorde, { cuerdas = 'AUTO', cantidadCuerdas = 3, zona = 'TODAS', bajo = false, completo = false } = {}) {
@@ -275,16 +330,17 @@ export function generarPosiciones(acorde, { cuerdas = 'AUTO', cantidadCuerdas = 
   if (![3, 4].includes(cantidadCuerdas)) return []
   const conBajo = bajo || Boolean(interpretado.bajo)
   const grupos = cantidadCuerdas === 4 ? GRUPOS_CUERDAS_4 : GRUPOS_CUERDAS
-  if (cantidadCuerdas === 4 && cuerdas === 'AUTO') {
-    return Object.values(grupos).flatMap((grupo) => generarGrupo(interpretado, grupo, zona, conBajo).sort(comparar).slice(0, 2)).sort(comparar)
-  }
-  if (cuerdas === 'AUTO') return [
-    ...generarGrupo(interpretado, GRUPOS_CUERDAS['1–2–3'], zona, conBajo),
-    ...generarGrupo(interpretado, GRUPOS_CUERDAS['2–3–4'], zona, conBajo).sort(comparar).slice(0, 1),
-  ].sort((a, b) => a.ranking[0] - b.ranking[0])
-  if (!grupos[cuerdas]) return []
-  const resultados = generarGrupo(interpretado, grupos[cuerdas], zona, conBajo)
-  return resultados.sort(cantidadCuerdas === 4 ? comparar : (a, b) => a.ranking[0] - b.ranking[0])
+  if (cuerdas !== 'AUTO' && !grupos[cuerdas]) return []
+  // AUTO conserva sus grupos históricos, pero selecciona después de reunir
+  // todos los candidatos: no recorta formas útiles antes de compararlas.
+  const elegidos = cuerdas !== 'AUTO' ? [grupos[cuerdas]] : cantidadCuerdas === 4
+    ? Object.values(grupos) : [grupos['1–2–3'], grupos['2–3–4']]
+  const resultados = elegidos.flatMap(grupo => generarGrupo(interpretado, grupo, zona, conBajo))
+  const [desde, hasta] = ZONAS[zona]
+  return seleccionarPropuestas(resultados).map(forma => ({
+    ...forma,
+    opcional: sugerirTonica(interpretado, forma.principal, forma.bajo, Math.max(0, desde - 2), Math.min(CANTIDAD_TRASTES, hasta + 2)),
+  }))
 }
 
 /** Usa el mismo formato para guardar directamente o abrir el editor. */
