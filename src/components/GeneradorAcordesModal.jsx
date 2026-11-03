@@ -146,7 +146,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
         <button type="button" onClick={onCerrar} disabled={guardando} aria-label="Cerrar generador de acordes" className="rounded-lg p-2 text-butter-muted hover:bg-fondo hover:text-butter"><X size={20} /></button>
       </div>
 
-      <fieldset disabled={guardando} className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_10.25rem] items-start gap-3 lg:grid-cols-[minmax(9rem,1fr)_10.5rem_minmax(17rem,2fr)_10.5rem]">
+      <fieldset disabled={guardando} className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_10.25rem] items-start gap-3 lg:grid-cols-[minmax(9rem,1fr)_10.5rem_minmax(17rem,1.75fr)_10.5rem] lg:gap-x-5">
         <div className="min-w-0">
           <label htmlFor={`${id}-busqueda`} className="mb-1 block text-xs uppercase tracking-wide text-butter-muted">ACORDE</label>
           <div ref={buscador} className="relative" onKeyDown={manejarTecla}>
