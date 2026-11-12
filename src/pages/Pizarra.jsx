@@ -1,6 +1,7 @@
 import { BookOpen, CircleDot, FolderOpen, Plus, Save, Timer, Trash2, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
 import EncabezadoSeccion from '../components/EncabezadoSeccion'
+import BotonAccionEncabezado from '../components/BotonAccionEncabezado'
 import EditorEscalaModal from '../components/EditorEscalaModal'
 import TarjetasOrdenables from '../components/TarjetasOrdenables'
 import GeneradorAcordesModal from '../components/GeneradorAcordesModal'
@@ -19,7 +20,6 @@ import { pizarrasDB, usePizarra } from '../hooks/usePizarra'
 const nombreElemento = ({ tipo, datos }) => tipo === 'escala'
   ? tituloEscala(datos) : datos.nombre || 'Sin nombre'
 const botonAgregar = 'boton-funcion flex items-center gap-2 rounded-lg px-2.5 py-2.5 text-sm'
-const botonEncabezado = 'accion-plana accion-icono rounded-lg disabled:opacity-40'
 
 function comprobarCambioLocal(resultado) {
   if (!resultado) throw new Error('No se pudo cambiar la pizarra en este dispositivo. Revisá el almacenamiento local.')
@@ -67,10 +67,10 @@ export default function Pizarra() {
   return (
     <main className="flex min-h-dvh w-full flex-col px-4 py-6 sm:px-6">
       <EncabezadoSeccion titulo="PIZARRA" compacto acciones={<>
-        <button type="button" onClick={() => setBibliotecaAbierta(true)} aria-label="Abrir pizarras" title="Abrir pizarras" className={botonEncabezado}><FolderOpen size={20} aria-hidden="true" /></button>
-        <button type="button" disabled={lecturaFallida || (!proyecto && !pendiente)} onClick={() => setModalProyecto({ modo: 'guardar' })} aria-label="Guardar pizarra" title="Guardar pizarra" className={botonEncabezado}><Save size={20} aria-hidden="true" /></button>
+        <BotonAccionEncabezado icono={FolderOpen} etiqueta="Abrir pizarras" onClick={() => setBibliotecaAbierta(true)} />
+        <BotonAccionEncabezado icono={Save} etiqueta="Guardar pizarra" disabled={lecturaFallida || (!proyecto && !pendiente)} onClick={() => setModalProyecto({ modo: 'guardar' })} />
       </>} />
-      <div className="pizarra-herramientas border-b border-borde pb-3">
+      <div className="pizarra-herramientas border-b border-butter-muted pb-3">
         <div role="group" aria-label="Funciones de pizarra" className="pizarra-funciones">
           <button type="button" disabled={lecturaFallida} onClick={() => setRepertorioAbierto(true)} className="boton-funcion flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs tracking-wide"><BookOpen size={17} /> REPERTORIO</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'escala' })} aria-label="+ Escala" className={botonAgregar}><Plus size={17} /> Escala</button>

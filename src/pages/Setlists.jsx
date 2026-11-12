@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import EncabezadoSeccion from '../components/EncabezadoSeccion'
+import BotonAccionEncabezado from '../components/BotonAccionEncabezado'
 import ModalSetlist from '../components/ModalSetlist'
 import MenuSetlist from '../components/MenuSetlist'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
@@ -32,12 +33,9 @@ export default function Setlists() {
   }
 
   return <main className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-    <EncabezadoSeccion titulo="SETLISTS" />
-    <div className="mx-auto mb-4 w-full max-w-6xl">
-      <div className="flex justify-end">
-        <button onClick={() => setModal({})} className="boton-funcion inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm"><Plus size={18} /> SETLIST</button>
-      </div>
-    </div>
+    <EncabezadoSeccion titulo="SETLISTS" acciones={
+      <BotonAccionEncabezado icono={Plus} etiqueta="Nuevo setlist" onClick={() => setModal({})} />
+    } />
     {(error || errorAccion) && <div role="alert" className="mb-4 text-sm text-butter-muted">
       <p>{error || errorAccion}</p>
       <button onClick={() => { setErrorAccion(''); recargar() }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:bg-superficie">REINTENTAR</button>

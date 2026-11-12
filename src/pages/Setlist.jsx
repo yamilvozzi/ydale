@@ -1,11 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { Check, ChevronLeft, Pencil, Plus } from 'lucide-react'
 import { setlistsDB, useSetlists } from '../hooks/useSetlists'
 import { fechaSetlist, mensajeErrorSetlists } from '../lib/setlists'
 import CancionesSetlist from '../components/CancionesSetlist'
 import AgregarCancionesSetlist from '../components/AgregarCancionesSetlist'
-import MenuSetlist from '../components/MenuSetlist'
+import BotonAccionEncabezado, { BotonExportarPDF } from '../components/BotonAccionEncabezado'
 import ModalExportarPDF from '../components/ModalExportarPDF'
 
 export default function Setlist() {
@@ -76,11 +76,15 @@ export default function Setlist() {
       : error ? <div role="alert" className="mt-6 text-butter-muted"><p>{error}</p><button onClick={recargar} className="mt-3 min-h-11 rounded-lg border border-borde px-4">REINTENTAR</button></div>
         : !setlist ? <p className="mt-8 text-center text-butter-muted">No se encontró el setlist.</p>
           : <div className="mx-auto w-full max-w-3xl">
-            <header className="my-5 flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0"><h1 className="break-words text-xl text-butter">{setlist.title}</h1><p className="mt-1 text-sm text-butter-muted">{fechaSetlist(setlist.date)}</p>{setlist.place && <p className="break-words text-sm text-butter-muted">{setlist.place}</p>}</div>
-              <div className="flex items-center gap-1">
-                <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="boton-funcion rounded-lg px-4 py-2 text-sm">{edicion ? 'LISTO' : 'EDITAR'}</button>
-                <MenuSetlist nombre={setlist.title} disabled={ocupado || conflicto} acciones={[{ texto: 'Exportar PDF', ejecutar: () => setExportar(true) }]} />
+            <header className="my-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2">
+              <h1 className="min-w-0 break-words text-xl text-butter">{setlist.title}</h1>
+              <div className="flex h-7 items-center">
+                <BotonAccionEncabezado icono={edicion ? Check : Pencil} etiqueta={edicion ? 'Terminar edición' : 'Editar setlist'} disabled={ocupado} onClick={() => setEdicion(!edicion)} />
+                <BotonExportarPDF disabled={ocupado || conflicto} onClick={() => setExportar(true)} />
+              </div>
+              <div className="col-span-2 min-w-0 text-sm text-butter-muted">
+                <p className="mt-1">{fechaSetlist(setlist.date)}</p>
+                {setlist.place && <p className="break-words">{setlist.place}</p>}
               </div>
             </header>
             {errorGuardado && <div role="alert" className="mb-4 text-sm text-butter-muted"><p>{errorGuardado}</p>

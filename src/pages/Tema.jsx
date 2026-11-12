@@ -1,7 +1,7 @@
 import { useParams, useLocation, Link, NavLink, Outlet } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
-import MenuSetlist from '../components/MenuSetlist'
+import { BotonExportarPDF } from '../components/BotonAccionEncabezado'
 import ModalExportarPDF from '../components/ModalExportarPDF'
 import { useTema } from '../hooks/useTema'
 import { origenTema } from '../lib/navegacionTema'
@@ -55,7 +55,7 @@ export default function Tema() {
                 <p className="text-xs text-butter-muted break-words">{tema.artista}</p>
               )}
             </div>
-            <div className="flex justify-end"><MenuSetlist nombre={tema.nombre} acciones={[{ texto: 'Exportar PDF', ejecutar: () => setExportar(true) }]} /></div>
+            <div className="flex justify-end"><BotonExportarPDF onClick={() => setExportar(true)} /></div>
           </div>
 
           <nav aria-label="Secciones del tema" className="tema-pestanas mt-2 border-b border-borde">

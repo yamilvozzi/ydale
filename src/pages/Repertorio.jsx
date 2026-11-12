@@ -5,6 +5,7 @@ import { useTemas } from '../hooks/useTemas'
 import { supabase } from '../lib/supabaseClient'
 import NuevoTemaModal from '../components/NuevoTemaModal'
 import EncabezadoSeccion from '../components/EncabezadoSeccion'
+import BotonAccionEncabezado from '../components/BotonAccionEncabezado'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
 
 export default function Repertorio() {
@@ -50,29 +51,19 @@ export default function Repertorio() {
 
   return (
     <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-      <EncabezadoSeccion titulo="REPERTORIO" />
+      <EncabezadoSeccion titulo="REPERTORIO" acciones={
+        <BotonAccionEncabezado icono={Plus} etiqueta="Agregar tema" onClick={() => setModalAbierto(true)} />
+      } />
       <div className="mx-auto w-full max-w-3xl">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted"
-            />
-            <input
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar..."
-              className="w-full bg-superficie border border-borde rounded-lg pl-10 pr-4 py-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
-            />
-          </div>
-
-          <button
-            onClick={() => setModalAbierto(true)}
-            aria-label="Agregar tema"
-            className="boton-funcion shrink-0 rounded-lg p-3"
-          >
-            <Plus size={22} className="text-butter" />
-          </button>
+        <div className="relative mb-4">
+          <Search size={18} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
+          <input
+            aria-label="Buscar temas"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar..."
+            className="block w-full bg-superficie border border-borde rounded-lg pl-10 pr-4 py-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
+          />
         </div>
 
         {cargando ? (
