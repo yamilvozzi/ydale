@@ -70,7 +70,7 @@ export default function BibliotecaPizarrasModal({ onCerrar, onAbrir, onRenombrar
 
   const filtradas = pizarras.filter(proyecto => paraBuscar(proyecto.titulo).includes(paraBuscar(consulta)))
   return <>
-    <DialogoPizarra titulo="Pizarras guardadas" onCerrar={onCerrar} ocupado={abriendo} amplio>
+    <DialogoPizarra titulo="Pizarras guardadas" onCerrar={onCerrar} ocupado={abriendo} amplio className="scheme-dark [scrollbar-color:var(--color-butter-muted)_var(--color-superficie)]">
       <div className="relative mb-4">
         <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
         <input type="search" value={consulta} onChange={e => setConsulta(e.target.value)} aria-label="Buscar pizarra por título" placeholder="Buscar pizarra…"
@@ -89,7 +89,7 @@ export default function BibliotecaPizarrasModal({ onCerrar, onAbrir, onRenombrar
             {proyecto.fecha && <span className="mt-1 block text-xs text-butter-muted">{fechaSetlist(proyecto.fecha)}</span>}
             <span className="mt-1 block text-xs text-butter-muted">Modificada el {fechaModificacion.format(new Date(proyecto.updated_at))}</span>
           </button>
-          <MenuSetlist nombre={proyecto.titulo} disabled={abriendo || cargando} acciones={[
+          <MenuSetlist nombre={proyecto.titulo} disabled={abriendo || cargando} flotante acciones={[
             { texto: 'Renombrar', ejecutar: () => setAccion({ modo: 'renombrar', proyecto }) },
             { texto: 'Duplicar', ejecutar: () => setAccion({ modo: 'duplicar', proyecto }) },
             { texto: 'Eliminar', ejecutar: () => setAccion({ modo: 'eliminar', proyecto }) },
