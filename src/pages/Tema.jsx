@@ -1,5 +1,8 @@
 import { useParams, useLocation, Link, NavLink, Outlet } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
+import { useState } from 'react'
+import MenuSetlist from '../components/MenuSetlist'
+import ModalExportarPDF from '../components/ModalExportarPDF'
 import { useTema } from '../hooks/useTema'
 import { origenTema } from '../lib/navegacionTema'
 
@@ -16,6 +19,7 @@ export default function Tema() {
   const location = useLocation()
   const origen = origenTema(location.search)
   const { tema, cargando, actualizarCampoLocal } = useTema(id)
+  const [exportar, setExportar] = useState(false)
 
   if (cargando) {
     return <div className="min-h-dvh flex items-center justify-center text-butter-muted">Cargando…</div>
@@ -51,6 +55,7 @@ export default function Tema() {
                 <p className="text-xs text-butter-muted break-words">{tema.artista}</p>
               )}
             </div>
+            <div className="flex justify-end"><MenuSetlist nombre={tema.nombre} acciones={[{ texto: 'Exportar PDF', ejecutar: () => setExportar(true) }]} /></div>
           </div>
 
           <nav aria-label="Secciones del tema" className="tema-pestanas mt-2 border-b border-borde">
@@ -71,6 +76,7 @@ export default function Tema() {
       <main className="tema-contenido w-full flex flex-col flex-1 p-4 sm:p-6 lg:px-8 min-h-0">
         <Outlet context={{ tema, actualizarCampoLocal }} />
       </main>
+      {exportar && <ModalExportarPDF tipo="tema" datos={tema} onCerrar={() => setExportar(false)} />}
     </div>
   )
 }

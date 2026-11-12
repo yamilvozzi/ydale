@@ -5,6 +5,7 @@ import EncabezadoSeccion from '../components/EncabezadoSeccion'
 import ModalSetlist from '../components/ModalSetlist'
 import MenuSetlist from '../components/MenuSetlist'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
+import ModalExportarPDF from '../components/ModalExportarPDF'
 import { setlistsDB, useSetlists } from '../hooks/useSetlists'
 import { fechaSetlist, mensajeErrorSetlists } from '../lib/setlists'
 
@@ -12,6 +13,7 @@ export default function Setlists() {
   const { datos: setlists, cargando, error, recargar } = useSetlists()
   const [modal, setModal] = useState(null)
   const [eliminar, setEliminar] = useState(null)
+  const [exportar, setExportar] = useState(null)
   const [errorAccion, setErrorAccion] = useState('')
   const navegar = useNavigate()
 
@@ -51,6 +53,7 @@ export default function Setlists() {
               <p className="text-sm text-butter-muted">{cantidad} {cantidad === 1 ? 'tema' : 'temas'}</p>
             </Link>
             <MenuSetlist nombre={setlist.title} acciones={[
+              { texto: 'Exportar PDF', ejecutar: () => setExportar(setlist) },
               { texto: 'Editar', ejecutar: () => setModal({ original: setlist, editando: true }) },
               { texto: 'Duplicar', ejecutar: () => setModal({ original: setlist }) },
               { texto: 'Eliminar', ejecutar: () => setEliminar(setlist) },
@@ -59,6 +62,7 @@ export default function Setlists() {
         })}
       </ul> : <p className="mt-8 text-center text-butter-muted">Todavía no hay setlists. Creá uno para organizar el próximo show.</p>)}
     {modal && <ModalSetlist original={modal.original} editando={modal.editando} onCerrar={() => setModal(null)} onGuardar={guardar} />}
+    {exportar && <ModalExportarPDF tipo="setlist" datos={exportar} onCerrar={() => setExportar(null)} />}
     {eliminar && <ConfirmarEliminacionModal mensaje={`¿Eliminar “${eliminar.title}”? Las canciones seguirán en Repertorio.`}
       onCancelar={() => setEliminar(null)} onConfirmar={async () => {
         try { await setlistsDB.eliminar(eliminar); await recargar(); return true }

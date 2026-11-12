@@ -31,7 +31,21 @@ export function reiniciarTransposicionPizarra(pizarra) {
 export function leerPizarra(storage) {
   const texto = storage.getItem(CLAVE_PIZARRA)
   if (texto === null) return pizarraVacia()
-  const datos = JSON.parse(texto)
+  return normalizarPizarra(JSON.parse(texto))
+}
+
+function normalizarElemento(tipo, datos) {
+  if (tipo === 'acorde') return normalizarAcorde(datos)
+  const escala = normalizarEscala(datos)
+  const acordes = Array.isArray(datos.resaltado?.acordes) ? datos.resaltado.acordes.filter(acorde =>
+    typeof acorde?.id === 'string' && typeof acorde.nombre === 'string' && typeof acorde.tonica === 'string' && /^[A-G][#b]?$/.test(acorde.tonica),
+  ).map(({ id, nombre, tonica }) => ({ id, nombre, tonica })) : []
+  if (!acordes.length) return escala
+  const seleccionado = acordes.some(acorde => acorde.id === datos.resaltado.seleccionado) ? datos.resaltado.seleccionado : null
+  return { ...escala, resaltado: { acordes, seleccionado } }
+}
+
+export function normalizarPizarra(datos) {
   if (datos?.version !== 1 || !Array.isArray(datos.elementos)) throw new Error('Formato de pizarra inválido')
   if (datos.desplazamiento !== undefined && !Number.isSafeInteger(datos.desplazamiento)) throw new Error('Desplazamiento de pizarra inválido')
   const ids = new Set()
@@ -44,7 +58,7 @@ export function leerPizarra(storage) {
         throw new Error('Elemento de pizarra inválido')
       }
       ids.add(elemento.datos.id)
-      return { tipo: elemento.tipo, datos: elemento.tipo === 'escala' ? normalizarEscala(elemento.datos) : normalizarAcorde(elemento.datos) }
+      return { tipo: elemento.tipo, datos: normalizarElemento(elemento.tipo, elemento.datos) }
     }),
   }
 }
@@ -54,9 +68,9 @@ export function guardarPizarra(storage, pizarra) {
 }
 
 export function ponerElemento(pizarra, tipo, datos) {
-  const normalizar = tipo === 'escala' ? normalizarEscala : normalizarAcorde
-  const elemento = { tipo, datos: normalizar({ ...datos, id: datos.id ?? globalThis.crypto.randomUUID() }) }
-  const existe = pizarra.elementos.some((actual) => actual.datos.id === elemento.datos.id)
+  const original = pizarra.elementos.find(actual => actual.tipo === tipo && actual.datos.id === datos.id)
+  const elemento = { tipo, datos: normalizarElemento(tipo, { ...original?.datos, ...datos, id: datos.id ?? globalThis.crypto.randomUUID() }) }
+  const existe = pizarra.elementos.some(actual => actual.datos.id === elemento.datos.id)
   return { ...pizarra, version: 1, elementos: existe
     ? pizarra.elementos.map((actual) => actual.datos.id === elemento.datos.id ? elemento : actual)
     : [...pizarra.elementos, elemento] }

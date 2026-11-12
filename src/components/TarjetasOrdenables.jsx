@@ -10,7 +10,7 @@ import { tituloEscala } from '../lib/escalas'
 const nombreTarjeta = (tipo, datos) => tipo === 'escala'
   ? tituloEscala(datos) : datos.nombre || 'Sin nombre'
 
-function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar }) {
+function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: datos.id, disabled })
   const nombre = nombreTarjeta(tipo, datos)
   const mover = <button
@@ -33,14 +33,14 @@ function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar }) {
       {tipo === 'escala' && <div className="tarjeta-editar-sector">{editar}{eliminar}</div>}
     </header>
     <div className={tipo === 'escala' ? 'min-w-0' : 'min-w-0 overflow-x-auto'}>
-      {tipo === 'escala' ? <EscalaDiagrama escala={datos} /> : <AcordeDiagrama acorde={datos} />}
+      {tipo === 'escala' ? <EscalaDiagrama escala={datos} onResaltado={onResaltado && (resaltado => onResaltado({ ...datos, resaltado }))} /> : <AcordeDiagrama acorde={datos} />}
     </div>
     {tipo === 'acorde' && <footer className="tarjeta-controles">{mover}{editar}{eliminar}</footer>}
   </article>
 }
 
 /** Una misma interacción para la grilla de acordes y la lista de escalas. */
-export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar, onEliminar, disabled = false }) {
+export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar, onEliminar, onResaltado, disabled = false }) {
   const [pendientes, setPendientes] = useState(null)
   const [error, setError] = useState('')
   const guardando = useRef(false)
@@ -86,7 +86,7 @@ export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar,
     >
       <SortableContext items={visibles} strategy={tipo === 'escala' ? verticalListSortingStrategy : rectSortingStrategy}>
         <div aria-label={tipo === 'escala' ? 'Escalas' : 'Acordes'} aria-busy={Boolean(pendientes)} className={tipo === 'escala' ? 'flex min-w-0 flex-col gap-4' : 'flex min-w-0 flex-wrap items-start gap-3'}>
-          {visibles.map((datos) => <Tarjeta key={datos.id} tipo={tipo} datos={datos} disabled={disabled || Boolean(pendientes)} onEditar={onEditar} onEliminar={onEliminar} />)}
+          {visibles.map((datos) => <Tarjeta key={datos.id} tipo={tipo} datos={datos} disabled={disabled || Boolean(pendientes)} onEditar={onEditar} onEliminar={onEliminar} onResaltado={onResaltado} />)}
         </div>
       </SortableContext>
     </DndContext>

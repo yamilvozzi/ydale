@@ -22,7 +22,7 @@ export default function SelectorAcordeEscala({ onAgregar }) {
 
   function agregar(opcion) {
     if (!opcion) return
-    onAgregar(opcion.nombre)
+    if (onAgregar(opcion.nombre) === false) return
     setConsulta('')
     setIndice(0)
     entrada.current.focus()

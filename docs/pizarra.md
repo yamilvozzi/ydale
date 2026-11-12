@@ -12,7 +12,9 @@
 
 `+ Escala` usa el editor y diapasón actuales. `+ Acorde` permite dibujar directamente en el editor manual. `Generador` abre el generador y ELEGIR transfiere la posición al editor manual. Los tres botones comparten el color principal. Las escalas aparecen siempre arriba, en orden de incorporación; los acordes debajo, en filas que se ajustan al ancho disponible. Los diagramas conservan sus componentes y proporciones. Se pueden editar y eliminar individualmente. Las confirmaciones de eliminación y VACIAR PIZARRA muestran la pregunta como título y los botones de cancelar/eliminar.
 
-El contenido se guarda en `localStorage` bajo `ydaaaale_pizarra_v1`. Permanece tras recargar y reabrir la aplicación en el mismo navegador y origen. No se sincroniza entre dispositivos; borrar los datos del navegador también borra la pizarra. Los errores de almacenamiento se muestran sin cerrar el editor ni descartar su borrador. Si no se puede leer el contenido guardado, no se sobrescribe automáticamente.
+El espacio de trabajo se recupera desde `localStorage` bajo `ydaaaale_pizarra_v1`. Permanece al recargar o volver a abrir el mismo navegador. La carpeta abre la biblioteca compartida y el disquete guarda el contenido actual en Supabase. En una pizarra vinculada, el disquete permite guardar cambios o crear una variante independiente. El borrador local guarda también el vínculo y la referencia al último guardado para detectar cambios pendientes.
+
+Al abrir otra pizarra, cargar un tema o vaciar el espacio de trabajo, los cambios pendientes se pueden guardar, descartar o conservar cancelando la acción. Vaciar desvincula el borrador y conserva la entrada de la biblioteca. La biblioteca permite buscar por título, renombrar, duplicar y eliminar con confirmación. Si se elimina el proyecto activo, su contenido sigue abierto como borrador.
 
 ## Círculo de 5tas
 
@@ -104,10 +106,9 @@ grafías originales se conservan. Un clic en el gráfico, o Enter/espacio/Escape
 con el gráfico enfocado, restaura todas las notas. El chip seleccionado tiene
 un borde y fondo diferenciados y expone `aria-pressed`.
 
-La lista y selección son locales a cada instancia del gráfico durante la sesión
-visible; no se escriben en localStorage ni Supabase. Los chips acompañan una
-transposición de la escala sin afectar otras escalas. Se aplica igualmente en
-Pizarra, Escala de Repertorio y la vista previa del editor.
+En Pizarra se guardan la lista de chips y el acorde resaltado con la escala.
+Los chips acompañan una transposición de la escala sin afectar otras escalas.
+En Repertorio y en la vista previa del editor su estado sigue siendo temporal.
 
 El gráfico se centra con un máximo inicial de **70rem**, ajustable en la variable
 `--escala-ancho-maximo` de `.escala-diagrama` en `src/index.css`. En pantallas
@@ -131,9 +132,8 @@ sin escala puede cargar sus acordes, y uno sin acordes puede cargar su escala.
 Un tema sin ninguno de esos datos no permite cargar; el texto libre de ACORDES
 no se convierte en digitaciones.
 
-Si Pizarra tiene elementos, se muestra exactamente: "La Pizarra contiene
-elementos. Cargar este tema reemplazará el contenido actual." Las opciones
-**Cancelar** y **Cargar** permiten volver a la vista previa o confirmar.
+Si hay cambios pendientes, se ofrece guardarlos, descartarlos o cancelar.
+Si el trabajo actual está guardado y tiene elementos, se confirma el reemplazo.
 El reemplazo completo se guarda con una sola escritura en localStorage; nunca
 se mezcla con el contenido anterior. Un error de red impide una carga parcial,
 y un error de almacenamiento conserva la Pizarra y deja el modal abierto.
@@ -141,7 +141,7 @@ y un error de almacenamiento conserva la Pizarra y deja el modal abierto.
 Las copias reciben IDs nuevos y sus arrays y referencias no se comparten con
 los datos del tema. Sólo se guardan escalas y acordes: no se copia el nombre del
 tema como metadato, texto de notas, letra, estructura, percusión ni IDs de origen.
-Todas las acciones posteriores afectan exclusivamente a la Pizarra local.
+El contenido importado empieza como un borrador independiente.
 La lectura descarta respuestas de una selección anterior si se elige otro tema.
 
 La interfaz está en `src/components/RepertorioPizarraModal.jsx`, la consulta y
@@ -151,7 +151,14 @@ exclusión de datos ajenos, reemplazo, persistencia, referencias y errores.
 
 ## Supabase
 
-No requiere cambios en Supabase: ni tablas, columnas, RLS, índices, funciones, triggers, permisos ni Storage. No hay SQL que ejecutar. El selector REPERTORIO consulta los temas y escalas con operaciones de sólo lectura; Pizarra nunca escribe en Repertorio. Sus elementos contienen los mismos datos de escalas y acordes usados por los componentes existentes, pero se persisten exclusivamente en el navegador. Las variables y permisos que ya utiliza el repertorio siguen siendo los mismos.
+1. Abrí el proyecto de Supabase que ya usa YDALE.
+2. Entrá en **SQL Editor** y elegí **New query**.
+3. Copiá el [SQL completo de Pizarras](../supabase/migrations/202611110001_pizarras.sql), desde `begin;` hasta `commit;`. Pegalo y pulsá **Run** una vez.
+4. Con la versión actual de YDALE abierta, creá un borrador, guardalo y buscá su título con el ícono de carpeta.
+
+La migración agrega `public.pizarras`, su índice de última modificación y tres funciones para crear, actualizar y eliminar. Usa la conexión y la clave pública de la app. No hace falta agregar variables, usuarios, buckets ni credenciales. Cada proyecto guarda título, fecha editable, fechas internas de creación y modificación, revisión y un documento JSONB de hasta 1 MiB con los datos musicales, su orden y el desplazamiento. Los diagramas se recuperan desde las posiciones almacenadas.
+
+La biblioteca es compartida. Los roles `anon` y `authenticated` pueden leer las pizarras y ejecutar sus tres funciones de escritura. Una persona con acceso a la API y la clave pública puede consultar y administrar esta biblioteca. El PIN de la app no restringe esas llamadas. Las escrituras directas sobre la tabla están revocadas y las funciones comprueban la revisión antes de actualizar o eliminar. Las tablas y políticas de Repertorio y Setlists se conservan.
 
 ## Archivos de esta integración
 
@@ -163,6 +170,9 @@ No requiere cambios en Supabase: ni tablas, columnas, RLS, índices, funciones, 
 - `src/pages/Tema.jsx`: regreso al nuevo URL del repertorio.
 - `src/lib/pizarra.js`: formato local, lectura, escritura y actualización de elementos.
 - `src/hooks/usePizarra.js`: estado local, persistencia y errores.
+- `src/lib/proyectosPizarra.js`: biblioteca de Supabase y vínculo entre borrador y proyecto.
+- `src/components/BibliotecaPizarrasModal.jsx` y `src/components/ModalProyectoPizarra.jsx`: biblioteca, ficha y cambios pendientes.
+- `src/lib/pizarrasDatabase.test.js`: pruebas de recuperación y de la migración en PostgreSQL local.
 - `src/lib/pizarra.test.js`: persistencia, aislamiento, edición y errores.
 - `src/components/EditorEscalaModal.jsx` y `src/components/EditorAcordeModal.jsx`: mensaje opcional de error de almacenamiento; los demás usos conservan su comportamiento.
 

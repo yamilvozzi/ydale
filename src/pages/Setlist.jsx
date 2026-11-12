@@ -5,6 +5,8 @@ import { setlistsDB, useSetlists } from '../hooks/useSetlists'
 import { fechaSetlist, mensajeErrorSetlists } from '../lib/setlists'
 import CancionesSetlist from '../components/CancionesSetlist'
 import AgregarCancionesSetlist from '../components/AgregarCancionesSetlist'
+import MenuSetlist from '../components/MenuSetlist'
+import ModalExportarPDF from '../components/ModalExportarPDF'
 
 export default function Setlist() {
   const { id } = useParams()
@@ -17,6 +19,7 @@ export default function Setlist() {
   const [pendientes, setPendientes] = useState(null)
   const [errorGuardado, setErrorGuardado] = useState('')
   const [conflicto, setConflicto] = useState(false)
+  const [exportar, setExportar] = useState(false)
   const bloqueo = useRef(false)
   const scrollRestaurado = useRef(false)
 
@@ -75,7 +78,10 @@ export default function Setlist() {
           : <div className="mx-auto w-full max-w-3xl">
             <header className="my-5 flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0"><h1 className="break-words text-xl text-butter">{setlist.title}</h1><p className="mt-1 text-sm text-butter-muted">{fechaSetlist(setlist.date)}</p>{setlist.place && <p className="break-words text-sm text-butter-muted">{setlist.place}</p>}</div>
-              <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="boton-funcion rounded-lg px-4 py-2 text-sm">{edicion ? 'LISTO' : 'EDITAR'}</button>
+              <div className="flex items-center gap-1">
+                <button type="button" disabled={ocupado} onClick={() => setEdicion(!edicion)} className="boton-funcion rounded-lg px-4 py-2 text-sm">{edicion ? 'LISTO' : 'EDITAR'}</button>
+                <MenuSetlist nombre={setlist.title} disabled={ocupado || conflicto} acciones={[{ texto: 'Exportar PDF', ejecutar: () => setExportar(true) }]} />
+              </div>
             </header>
             {errorGuardado && <div role="alert" className="mb-4 text-sm text-butter-muted"><p>{errorGuardado}</p>
               <button onClick={async () => { setSelector(false); setEdicion(false); setErrorGuardado(''); await recargar(); setConflicto(false) }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:bg-superficie">RECARGAR SETLIST</button>
@@ -95,6 +101,7 @@ export default function Setlist() {
               }} /> : <p className="mt-4 text-center text-butter-muted">Este setlist todavía no tiene canciones.</p>}
             {selector && <AgregarCancionesSetlist items={items} ocupado={ocupado} bloqueado={conflicto} error={errorGuardado} onCerrar={() => setSelector(false)}
               onAgregar={tema => guardar([...setlist.items, { id: crypto.randomUUID(), song_id: tema.id, nombre: tema.nombre, artista: tema.artista }])} />}
+            {exportar && <ModalExportarPDF tipo="setlist" datos={setlist} onCerrar={() => setExportar(false)} />}
           </div>}
   </main>
 }
