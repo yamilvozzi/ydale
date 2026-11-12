@@ -51,7 +51,7 @@ export default function Notas() {
   return (
     <div className="flex flex-col gap-6">
       <section>
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="columna-encabezado mb-3 flex flex-wrap justify-center gap-2">
           <button
             type="button"
             onClick={() => setGeneradorAbierto(true)}

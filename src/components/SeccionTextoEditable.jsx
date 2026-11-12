@@ -1,4 +1,5 @@
 import { Pencil, Check, X } from 'lucide-react'
+import BotonAccionEncabezado from './BotonAccionEncabezado'
 import { useCampoEditable } from '../hooks/useCampoEditable'
 
 export default function SeccionTextoEditable({
@@ -46,7 +47,7 @@ export default function SeccionTextoEditable({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className={`flex items-center mb-3 ${titulo ? 'justify-between' : 'justify-end'}`}>
+      <div className={`columna-encabezado mb-3 flex items-center ${titulo ? 'justify-between' : 'justify-end'}`}>
         {titulo && (
           <h2 className="text-sm tracking-widest text-butter-muted uppercase">
             {titulo}
@@ -54,16 +55,12 @@ export default function SeccionTextoEditable({
         )}
 
         {!editando ? (
-          // El lápiz es una acción secundaria: chico, discreto,
-          // no debe competir con el contenido de la sección.
-          <button
+          <BotonAccionEncabezado
+            icono={Pencil}
+            etiqueta={`Editar ${titulo || 'sección'}`}
             onClick={empezarEdicion}
             disabled={bloqueado}
-            aria-label={`Editar ${titulo || 'sección'}`}
-            className="accion-plana accion-icono -mr-1 rounded-lg"
-          >
-            <Pencil />
-          </button>
+          />
         ) : (
           <div className="flex gap-1">
             <button

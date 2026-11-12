@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import BotonAccionEncabezado from '../BotonAccionEncabezado'
 import EditorEscalaModal from '../EditorEscalaModal'
 import TarjetasOrdenables from '../TarjetasOrdenables'
 import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
@@ -21,16 +22,8 @@ export default function Escala() {
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => setEditor({})}
-            disabled={guardando}
-            className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
-          >
-            <Plus size={17} />
-            Escala
-          </button>
+        <div className="columna-encabezado flex justify-end">
+          <BotonAccionEncabezado icono={Plus} etiqueta="Agregar escala" onClick={() => setEditor({})} disabled={guardando} />
         </div>
 
         {cargando ? (
