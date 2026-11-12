@@ -14,6 +14,7 @@ export default function SeccionTextoEditable({
   editorGrande = false,
   lineaUnica = false,
   columnas = false,
+  claseLectura = '',
   serializarAlGuardar,
   bloqueado = false,
   onGuardandoChange,
@@ -105,7 +106,7 @@ export default function SeccionTextoEditable({
           />
         )
       ) : valor ? (
-        <p className={`${claseTexto} text-butter`}>{valor}</p>
+        <p className={`${claseTexto} text-butter ${claseLectura}`}>{valor}</p>
       ) : (
         <p className="text-butter-muted italic">{placeholder}</p>
       )}

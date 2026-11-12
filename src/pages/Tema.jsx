@@ -46,7 +46,7 @@ export default function Tema() {
               aria-label={origen.etiqueta}
               className="accion-plana inline-flex min-h-11 min-w-11 w-fit items-center gap-1 px-2 rounded-lg text-sm"
             >
-              <ChevronLeft size={22} className="text-butter" />
+              <ChevronLeft size={22} />
               <span className="hidden sm:inline">ATRÁS</span>
             </Link>
             <div className="min-w-0 text-center">
