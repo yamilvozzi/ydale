@@ -1,45 +1,43 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { GripVertical, Plus } from 'lucide-react'
+import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
+import { useCombinedRefs } from '@dnd-kit/utilities'
 import ConfirmarEliminacionModal from './ConfirmarEliminacionModal'
 import MenuSetlist from './MenuSetlist'
 import ModalAcordeBloque, { SelectorAcordeBloque } from './ModalAcordeBloque'
 import ModalBloqueMusical from './ModalBloqueMusical'
 import {
-  conSeccionesBloque, insertarAcordeBloque, MAX_COMPASES, nombreAcordeBloque, seccionesBloque, TIPO_ARRASTRE_ACORDE,
+  columnaBloque, conSeccionesBloque, insertarAcordeBloque, MAX_COMPASES, nombreAcordeBloque, seccionesBloque,
 } from '../lib/bloquesPizarra'
 
-function CompasBloque({ numero, acordes, onAgregar, onConsultar, onSoltar }) {
-  const [resaltado, setResaltado] = useState(false)
+function CifradoBloque({ bloqueId, compas, entrada, onConsultar }) {
+  const { collisions } = useDndContext()
+  const id = `cifrado:${bloqueId}:${compas}:${entrada.id}`
+  const nombre = nombreAcordeBloque(entrada)
+  const data = { tipo: 'cifrado', nombre, bloqueId, compas, entradaId: entrada.id }
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id, data })
+  const destino = useDroppable({ id, data })
+  const ref = useCombinedRefs(setNodeRef, destino.setNodeRef)
+  const insercion = destino.isOver && !isDragging ? (collisions?.[0]?.data?.despues ? 'despues' : 'antes') : undefined
+  return <li className="min-w-0 max-w-full">
+    <button type="button" ref={ref} {...attributes} {...listeners} aria-haspopup="dialog"
+      onClick={() => { if (!isDragging) onConsultar(entrada.id) }} onContextMenu={evento => evento.preventDefault()}
+      data-insercion={insercion} data-arrastrando={isDragging || undefined} className="bloque-cifrado">{nombre}</button>
+  </li>
+}
+
+function CompasBloque({ bloqueId, compas, numero, acordes, onAgregar, onConsultar }) {
   const nombre = numero ? `Compás ${numero}` : 'Secuencia libre'
+  const { setNodeRef, isOver } = useDroppable({
+    id: `compas:${bloqueId}:${compas}`, data: { tipo: 'compas', nombre, bloqueId, compas, vacio: !acordes.length },
+  })
 
-  function resaltarDestino(evento) {
-    if (!evento.dataTransfer.types.includes(TIPO_ARRASTRE_ACORDE)) return
-    evento.preventDefault()
-    evento.dataTransfer.dropEffect = 'copy'
-    setResaltado(true)
-  }
-
-  return <div role="group" aria-label={nombre} data-destino={resaltado || undefined} className="bloque-compas"
-    onDragEnter={resaltarDestino}
-    onDragOver={resaltarDestino}
-    onDragLeave={evento => {
-      if (!evento.currentTarget.contains(evento.relatedTarget)) setResaltado(false)
-    }}
-    onDrop={evento => {
-      if (!evento.dataTransfer.types.includes(TIPO_ARRASTRE_ACORDE)) return
-      evento.preventDefault()
-      setResaltado(false)
-      onSoltar(evento.dataTransfer.getData(TIPO_ARRASTRE_ACORDE))
-    }}
-  >
+  return <div ref={setNodeRef} role="group" aria-label={nombre} data-destino={isOver || undefined} className="bloque-compas">
     <div className="min-w-0">
       {numero && <div aria-hidden="true" className="px-1 text-xs tabular-nums text-butter-muted">{numero}</div>}
       {acordes.length > 0 && <ul className="flex flex-wrap items-center gap-1">
-        {acordes.map(({ id, digitacion }) => <li key={id} className="min-w-0 max-w-full">
-          <button type="button" aria-haspopup="dialog" onClick={() => onConsultar(id)}
-            className="bloque-cifrado">{nombreAcordeBloque(digitacion)}</button>
-        </li>)}
+        {acordes.map(entrada => <CifradoBloque key={entrada.id} bloqueId={bloqueId} compas={compas} entrada={entrada} onConsultar={onConsultar} />)}
       </ul>}
     </div>
     <button type="button" aria-haspopup="dialog" aria-label={numero ? `Agregar acorde al compás ${numero}` : 'Agregar acorde al bloque libre'}
@@ -47,11 +45,18 @@ function CompasBloque({ numero, acordes, onAgregar, onConsultar, onSoltar }) {
   </div>
 }
 
-export default function BloqueMusical({ bloque, acordes, mover, subir, bajar, onGuardar, onEliminar, error }) {
+export default function BloqueMusical({ bloque, acordes, subir, bajar, cambiarColumna, otraColumna, onGuardar, onEliminar, error }) {
   const [modal, setModal] = useState(null)
   const compases = seccionesBloque(bloque)
   const libre = bloque.tipo === 'libre'
   const nombre = bloque.titulo || 'bloque musical'
+  const id = `bloque:${bloque.id}`
+  const data = { tipo: 'bloque', nombre, bloqueId: bloque.id, columna: columnaBloque(bloque) }
+  const { collisions } = useDndContext()
+  const { setNodeRef, setActivatorNodeRef, attributes, listeners, isDragging } = useDraggable({ id, data })
+  const destino = useDroppable({ id, data })
+  const ref = useCombinedRefs(setNodeRef, destino.setNodeRef)
+  const insercion = destino.isOver && !isDragging ? (collisions?.[0]?.data?.despues ? 'despues' : 'antes') : undefined
   const compas = modal?.compas
   const indiceAcorde = compases[compas]?.findIndex(({ id }) => id === modal.entrada)
   const entrada = compases[compas]?.[indiceAcorde]
@@ -67,18 +72,21 @@ export default function BloqueMusical({ bloque, acordes, mover, subir, bajar, on
 
   const acciones = [
     { texto: 'Editar bloque', ejecutar: () => setModal({ tipo: 'editar' }) },
-    { texto: 'Duplicar bloque', ejecutar: () => onGuardar({ ...bloque, id: undefined }) },
+    { texto: 'Duplicar bloque', ejecutar: () => onGuardar(conSeccionesBloque({ ...bloque, id: undefined },
+      compases.map(lista => lista.map(entrada => ({ ...entrada, id: globalThis.crypto.randomUUID() }))),
+    )) },
     ...(!libre ? [{
       texto: 'Agregar compás', disabled: compases.length >= MAX_COMPASES,
       ejecutar: () => guardarSecciones([...compases, []]),
     }] : []),
     { texto: 'Mover arriba', disabled: !subir, ejecutar: subir },
     { texto: 'Mover abajo', disabled: !bajar, ejecutar: bajar },
+    { texto: `Mover a la ${otraColumna}`, ejecutar: cambiarColumna },
     { texto: 'Vaciar bloque', disabled: compases.every(compas => !compas.length), ejecutar: () => setModal({ tipo: 'vaciar' }) },
     { texto: 'Eliminar bloque', ejecutar: () => setModal({ tipo: 'eliminar' }) },
   ]
 
-  return <>
+  return <article ref={ref} className="tarjeta-musical tarjeta-bloque" data-insercion={insercion} data-arrastrando={isDragging || undefined}>
     <header className="bloque-cabecera">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
         {bloque.titulo && <h3 className="min-w-0 text-base font-semibold [overflow-wrap:anywhere]">{bloque.titulo}</h3>}
@@ -88,34 +96,27 @@ export default function BloqueMusical({ bloque, acordes, mover, subir, bajar, on
         </div>
       </div>
       <div className="flex shrink-0 items-center">
-        {mover}
+        <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
+          aria-label={`Mover ${nombre}`} title={`Mover ${nombre}`} className="tarjeta-control tarjeta-mover"><GripVertical aria-hidden="true" /></button>
         <MenuSetlist nombre={nombre} acciones={acciones} flotante />
       </div>
     </header>
     <div className={libre ? undefined : 'bloque-compases'}>
       {compases.map((acordesCompas, indice) => <CompasBloque key={indice}
+        bloqueId={bloque.id} compas={indice}
         numero={libre ? undefined : indice + 1}
         acordes={acordesCompas}
         onAgregar={() => setModal({ tipo: 'agregar', compas: indice })}
         onConsultar={id => setModal({ tipo: 'consultar', compas: indice, entrada: id })}
-        onSoltar={id => {
-          const acorde = acordes.find(acorde => acorde.id === id)
-          if (acorde) agregar(indice, acorde)
-        }}
       />)}
     </div>
     {modal?.tipo === 'editar' && <ModalBloqueMusical bloque={bloque} onGuardar={onGuardar} onCerrar={cerrar} error={error} />}
     {modal?.tipo === 'agregar' && <SelectorAcordeBloque acordes={acordes} onElegir={acorde => agregar(compas, acorde)} onCerrar={cerrar} error={error} />}
     {modal?.tipo === 'consultar' && entrada && <ModalAcordeBloque
-      digitacion={entrada.digitacion} acordes={acordes} compas={compas} cantidad={compases.length} error={error} onCerrar={cerrar}
+      entrada={entrada} acordes={acordes} error={error} onCerrar={cerrar}
       onElegir={digitacion => editarCompas(acordesCompas => acordesCompas.map(acorde => acorde.id === entrada.id ? { ...acorde, digitacion } : acorde))}
       onAdelantar={indiceAcorde > 0 ? () => moverEnCompas(-1) : undefined}
       onAtrasar={indiceAcorde < compases[compas].length - 1 ? () => moverEnCompas(1) : undefined}
-      onMover={destino => guardarSecciones(compases.map((acordesCompas, indice) => {
-        if (indice === compas) return quitarEntrada(acordesCompas)
-        if (indice === destino) return [...acordesCompas, entrada]
-        return acordesCompas
-      }))}
       onQuitar={() => editarCompas(quitarEntrada)}
     />}
     {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal
@@ -123,5 +124,5 @@ export default function BloqueMusical({ bloque, acordes, mover, subir, bajar, on
       onCancelar={cerrar}
       onConfirmar={modal.tipo === 'vaciar' ? () => guardarSecciones(compases.map(() => [])) : onEliminar}
     />}
-  </>
+  </article>
 }

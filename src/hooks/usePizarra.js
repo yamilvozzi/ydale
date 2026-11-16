@@ -70,6 +70,11 @@ export function usePizarra() {
     reiniciarTransposicion: () => aplicarTransposicion(reiniciarTransposicionPizarra),
     cargarTema,
     guardar: (tipo, datos) => !estado.lecturaFallida && persistir(ponerElemento(estado.datos, tipo, datos)),
+    actualizarElementos: transformar => {
+      if (estado.lecturaFallida) return false
+      const elementos = transformar(estado.datos.elementos)
+      return elementos === estado.datos.elementos || persistir({ ...estado.datos, elementos })
+    },
     reordenar: (tipo, ordenados) => !estado.lecturaFallida && persistir({ ...estado.datos, elementos: reordenarGrupo(estado.datos.elementos, tipo, ordenados) }),
     eliminar: (id) => persistir({ ...estado.datos, elementos: estado.datos.elementos.filter((elemento) => elemento.datos.id !== id) }),
     vaciar: () => persistir(pizarraVacia(), null),

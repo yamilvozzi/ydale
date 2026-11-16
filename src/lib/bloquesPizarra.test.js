@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { configurarBloque, insertarAcordeBloque, variantesDigitacion } from './bloquesPizarra.js'
+import {
+  colocarAcordeEnBloque, configurarBloque, insertarAcordeBloque, moverBloque, ordenarBloques,
+  validarNombreAcordeBloque, variantesDigitacion,
+} from './bloquesPizarra.js'
 import { imprimirPizarra } from './impresionPDF.js'
 import { crearAcorde } from './notasConAcordes.js'
-import { pizarraVacia, ponerElemento, transponerPizarra } from './pizarra.js'
+import { normalizarPizarra, pizarraVacia, ponerElemento, transponerPizarra } from './pizarra.js'
 import { cambiosPizarra, guardarTrabajoPizarra, leerTrabajoPizarra } from './proyectosPizarra.js'
 import { transponerDiagrama } from './transposicion.js'
 
@@ -68,9 +71,66 @@ test('las variantes muestran primero la digitación guardada y distinguen posici
   const guardada = digitacion('abierta', 2)
   const editada = digitacion('abierta', 5)
   const aguda = digitacion('aguda', 7)
-  assert.deepEqual(variantesDigitacion(guardada, [editada, aguda, { ...guardada, id: 'copia' }, { ...aguda, nombre: 'EM' }]),
+  assert.deepEqual(variantesDigitacion({ digitacion: guardada }, [editada, aguda, { ...guardada, id: 'copia' }, { ...aguda, nombre: 'EM' }]),
     [guardada, editada, aguda])
-  assert.deepEqual(variantesDigitacion(guardada, []), [guardada])
+  assert.deepEqual(variantesDigitacion({ digitacion: guardada }, []), [guardada])
+  assert.deepEqual(variantesDigitacion({ nombre: 'Bm7(b5)' }, [{ ...aguda, nombre: 'Bm7b5' }]), [{ ...aguda, nombre: 'Bm7b5' }])
+  assert.deepEqual(variantesDigitacion({ nombre: 'Gm' }, [{ ...aguda, nombre: 'GM' }]), [])
+})
+
+test('recupera columnas independientes y asigna a la izquierda los bloques históricos', () => {
+  const bloque = { ...ajustar(null, 2), id: 'intro' }
+  const { columna: _columna, ...historico } = bloque
+  const versionAnterior = { version: 1, elementos: [{ tipo: 'bloque', datos: historico }] }
+  const normalizada = normalizarPizarra(versionAnterior)
+  assert.equal(normalizada.elementos[0].datos.columna, 'izquierda')
+
+  let pizarra = ponerElemento(normalizada, 'acorde', digitacion('suelto', 3))
+  pizarra = ponerElemento(pizarra, 'bloque', { ...bloque, id: 'verso' })
+  pizarra = ponerElemento(pizarra, 'bloque', { ...bloque, id: 'puente' })
+  const elementos = moverBloque(pizarra.elementos, 'verso', { columna: 'derecha' })
+  const movidos = moverBloque(elementos, 'puente', { columna: 'izquierda', referencia: 'intro' })
+  assert.deepEqual(normalizarPizarra({ ...pizarra, elementos: movidos }).elementos, movidos)
+  assert.equal(movidos[1], pizarra.elementos[1])
+  assert.deepEqual(ordenarBloques(movidos.filter(e => e.tipo === 'bloque').map(e => e.datos)).map(({ id, columna }) => [id, columna]),
+    [['puente', 'izquierda'], ['intro', 'izquierda'], ['verso', 'derecha']])
+})
+
+test('copia un acorde original y mueve las apariciones entre bloques en una sola actualización', () => {
+  const suelto = digitacion('suelto', 7)
+  const libre = insertarAcordeBloque({ ...ajustar(null, 0), id: 'libre' }, 0, 'Emadd9')
+  const destino = { ...ajustar(null, 2), id: 'destino' }
+  let pizarra = ponerElemento(pizarraVacia(), 'acorde', suelto)
+  pizarra = ponerElemento(pizarra, 'bloque', libre)
+  pizarra = ponerElemento(pizarra, 'bloque', destino)
+  const copia = colocarAcordeEnBloque(pizarra.elementos, { tipo: 'acorde', id: suelto.id }, { bloqueId: 'libre', compas: 0 })
+  assert.equal(copia[0], pizarra.elementos[0])
+  const [manual, grafico] = copia[1].datos.acordes
+  const reordenado = colocarAcordeEnBloque(copia, { tipo: 'cifrado', bloqueId: 'libre', compas: 0, entradaId: grafico.id },
+    { bloqueId: 'libre', compas: 0, referencia: manual.id })
+  assert.deepEqual(reordenado[1].datos.acordes, [grafico, manual])
+  const movido = colocarAcordeEnBloque(reordenado, { tipo: 'cifrado', bloqueId: 'libre', compas: 0, entradaId: grafico.id },
+    { bloqueId: 'destino', compas: 1 })
+  assert.deepEqual(movido[1].datos.acordes, [manual])
+  assert.deepEqual(movido[2].datos.compases, [[], [grafico]])
+  assert.deepEqual(movido[2].datos.compases[1][0].digitacion, suelto)
+  assert.equal(copia[1].datos.acordes.length, 2)
+})
+
+test('los cifrados manuales conservan la grafía, se pueden transponer y se imprimen sin diagramas', () => {
+  const cifrados = ['C', 'Am', 'D7', 'Gmaj7', 'Emadd9', 'Bm7(b5)', 'F#m', 'Asus4', 'D/F#', 'C♯Δ7']
+  assert.ok(cifrados.every(validarNombreAcordeBloque))
+  assert.ok(['', '7', '<Am>', 'Am\nG'].every(nombre => !validarNombreAcordeBloque(nombre)))
+  let bloque = ajustar(null, 0)
+  for (const nombre of cifrados) bloque = insertarAcordeBloque(bloque, 0, nombre)
+  const pizarra = ponerElemento(pizarraVacia(), 'bloque', bloque)
+  const guardada = normalizarPizarra(JSON.parse(JSON.stringify(pizarra)))
+  assert.deepEqual(guardada.elementos[0].datos.acordes.map(entrada => entrada.nombre), cifrados)
+  assert.ok(guardada.elementos[0].datos.acordes.every(entrada => !entrada.digitacion))
+  assert.equal(transponerPizarra(guardada, 1).elementos[0].datos.acordes[5].nombre, 'Cm7(b5)')
+  const html = imprimirPizarra(guardada, null)
+  assert.ok(html.includes(cifrados.join(' · ')))
+  assert.doesNotMatch(html, /<svg/)
 })
 
 test('la impresión de una pizarra con sólo bloques conserva compases y repeticiones', () => {

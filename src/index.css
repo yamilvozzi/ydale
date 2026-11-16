@@ -254,9 +254,38 @@ button.letra-acorde:focus-visible { outline: 1px solid currentColor; }
 
 .tarjeta-acorde { width: fit-content; }
 .tarjeta-escala { width: 100%; min-width: 0; }
-.tarjeta-acorde [draggable="true"] { cursor: grab; }
-.tarjeta-acorde [draggable="true"]:active { cursor: grabbing; }
+.tarjeta-acorde [data-arrastrable] { cursor: grab; user-select: none; }
+.tarjeta-acorde [data-arrastrable]:active { cursor: grabbing; }
+.pizarra-bloques, .pizarra-columna { display: grid; min-width: 0; gap: 0.875rem; }
+.pizarra-columna { align-content: start; border-radius: 0.5rem; }
+.pizarra-columna[data-vacia] { display: none; }
+.pizarra-columna[data-destino] { outline: 1px dashed var(--color-butter-muted); outline-offset: 3px; }
+@media (min-width: 56rem) {
+  .pizarra-bloques { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pizarra-columna[data-vacia] { display: grid; min-height: 4.5rem; }
+  .pizarra-columna[data-vacia][data-arrastrando] { outline: 1px dashed var(--color-borde); outline-offset: -1px; }
+  .pizarra-columna[data-vacia][data-destino] { outline-color: var(--color-butter-muted); }
+}
 .tarjeta-bloque { width: 100%; min-width: 0; }
+.tarjeta-bloque[data-arrastrando], .bloque-cifrado[data-arrastrando] { opacity: 0.45; }
+.tarjeta-bloque[data-insercion]::after, .bloque-cifrado[data-insercion]::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+  background: var(--color-butter-muted);
+  border-radius: 1px;
+}
+.tarjeta-bloque[data-insercion]::after { inset-inline: 0; height: 2px; }
+.tarjeta-bloque[data-insercion="antes"]::after { top: -0.45rem; }
+.tarjeta-bloque[data-insercion="despues"]::after { bottom: -0.45rem; }
+.pizarra-arrastre {
+  border: 1px solid var(--color-butter-muted);
+  border-radius: 0.375rem;
+  background: var(--color-superficie);
+  padding: 0.35rem 0.65rem;
+  box-shadow: 0 8px 24px #0005;
+  overflow-wrap: anywhere;
+}
 .bloque-cabecera {
   display: flex;
   align-items: flex-start;
@@ -281,11 +310,12 @@ button.letra-acorde:focus-visible { outline: 1px solid currentColor; }
   padding: 0.25rem;
   background: var(--color-fondo);
 }
-.bloque-compas[data-destino] {
+.bloque-compas[data-destino], .bloque-compas:has(.bloque-cifrado[data-insercion]) {
   border-color: var(--color-butter-muted);
   background: color-mix(in srgb, var(--color-teal) 55%, var(--color-fondo));
 }
 .bloque-cifrado {
+  position: relative;
   min-height: 2rem;
   border: 1px solid var(--color-borde);
   border-radius: 0.25rem;
@@ -295,8 +325,14 @@ button.letra-acorde:focus-visible { outline: 1px solid currentColor; }
   font-weight: 600;
   text-align: left;
   overflow-wrap: anywhere;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
+  touch-action: manipulation;
 }
+.bloque-cifrado:active { cursor: grabbing; }
+.bloque-cifrado[data-insercion]::after { inset-block: 0.15rem; width: 2px; }
+.bloque-cifrado[data-insercion="antes"]::after { left: -4px; }
+.bloque-cifrado[data-insercion="despues"]::after { right: -4px; }
 .bloque-cifrado:hover { border-color: var(--color-butter-muted); }
 .bloque-cifrado:focus-visible { outline: 2px solid var(--color-butter-muted); outline-offset: -2px; }
 .bloque-compas .bloque-agregar-acorde { width: 2rem; align-self: center; }

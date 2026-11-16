@@ -3,7 +3,7 @@ import { useState } from 'react'
 import EncabezadoSeccion from '../components/EncabezadoSeccion'
 import BotonAccionEncabezado from '../components/BotonAccionEncabezado'
 import EditorEscalaModal from '../components/EditorEscalaModal'
-import TarjetasOrdenables from '../components/TarjetasOrdenables'
+import ContenidoPizarra from '../components/ContenidoPizarra'
 import GeneradorAcordesModal from '../components/GeneradorAcordesModal'
 import EditorAcordeModal from '../components/EditorAcordeModal'
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal'
@@ -14,7 +14,6 @@ import BibliotecaPizarrasModal from '../components/BibliotecaPizarrasModal'
 import ModalProyectoPizarra from '../components/ModalProyectoPizarra'
 import MenuSetlist from '../components/MenuSetlist'
 import ModalExportarPDF from '../components/ModalExportarPDF'
-import BloqueMusical from '../components/BloqueMusical'
 import ModalBloqueMusical from '../components/ModalBloqueMusical'
 import { tituloEscala } from '../lib/escalas'
 import { pizarrasDB, usePizarra } from '../hooks/usePizarra'
@@ -29,9 +28,10 @@ function comprobarCambioLocal(resultado) {
 
 export default function Pizarra() {
   const pizarra = usePizarra()
-  const { elementos, proyecto, pendiente, error, lecturaFallida, guardar, eliminar, vaciar, reordenar, transponer, cargarTema, desplazamiento, reiniciarTransposicion } = pizarra
+  const { elementos, proyecto, pendiente, error, lecturaFallida, guardar, eliminar, vaciar, transponer, cargarTema, desplazamiento, reiniciarTransposicion } = pizarra
   const acordes = elementos.filter(({ tipo }) => tipo === 'acorde').map(({ datos }) => datos)
   const bloques = elementos.filter(({ tipo }) => tipo === 'bloque').map(({ datos }) => datos)
+  const escalas = elementos.filter(({ tipo }) => tipo === 'escala').map(({ datos }) => datos)
   const [editor, setEditor] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
   const [circuloAbierto, setCirculoAbierto] = useState(false)
@@ -113,28 +113,9 @@ export default function Pizarra() {
       </div>}
       {error && !editor && !repertorioAbierto && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
       {!elementos.length && !lecturaFallida && <p className="text-sm italic text-butter-muted">Pizarra vacía.</p>}
-      {['escala', 'acorde'].map((grupo) => {
-        const items = grupo === 'acorde' ? acordes : elementos.filter(({ tipo }) => tipo === grupo).map(({ datos }) => datos)
-        if (!items.length) return null
-        return <TarjetasOrdenables
-          key={grupo}
-          tipo={grupo}
-          items={items}
-          disabled={lecturaFallida}
-          onReordenar={(ordenados) => reordenar(grupo, ordenados)}
-          onEditar={(datos) => setEditor({ tipo: grupo, datos })}
-          onEliminar={(datos) => setConfirmacion({ elemento: { tipo: grupo, datos } })}
-          onResaltado={grupo === 'escala' ? datos => guardar('escala', datos) : undefined}
-          permiteCopiar={grupo === 'acorde' && bloques.length > 0}
-        />
-      })}
-      {bloques.length > 0 && <TarjetasOrdenables
-        tipo="bloque" items={bloques} disabled={lecturaFallida} onReordenar={ordenados => reordenar('bloque', ordenados)}
-        renderContenido={(bloque, controles) => <BloqueMusical
-          bloque={bloque} acordes={acordes} {...controles} error={error}
-          onGuardar={datos => guardar('bloque', datos)} onEliminar={() => eliminar(bloque.id)}
-        />}
-      />}
+      <ContenidoPizarra pizarra={pizarra} bloques={bloques} acordes={acordes} escalas={escalas}
+        onEditar={(tipo, datos) => setEditor({ tipo, datos })}
+        onEliminar={(tipo, datos) => setConfirmacion({ elemento: { tipo, datos } })} />
       {editor?.tipo === 'bloque' && <ModalBloqueMusical onGuardar={datos => guardar('bloque', datos)} onCerrar={() => setEditor(null)} error={error} />}
       {editor?.tipo === 'escala' && <EditorEscalaModal key={editor.datos?.id ?? 'nueva'} escala={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('escala', datos)} errorGuardado={error} />}
       {editor?.tipo === 'generador' && <GeneradorAcordesModal

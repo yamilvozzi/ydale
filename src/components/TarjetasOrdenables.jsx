@@ -6,21 +6,18 @@ import { GripVertical, Pencil, Trash2 } from 'lucide-react'
 import AcordeDiagrama from './AcordeDiagrama'
 import EscalaDiagrama from './EscalaDiagrama'
 import { tituloEscala } from '../lib/escalas'
-import { TIPO_ARRASTRE_ACORDE } from '../lib/bloquesPizarra'
 
-const grupos = { escala: 'Escalas', acorde: 'Acordes', bloque: 'Bloques musicales' }
+const grupos = { escala: 'Escalas', acorde: 'Acordes' }
 
 function nombreTarjeta(tipo, datos) {
   if (tipo === 'escala') return tituloEscala(datos)
-  if (tipo === 'bloque') return datos.titulo || 'Bloque musical'
   return datos.nombre || 'Sin nombre'
 }
 
-function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, permiteCopiar, renderContenido }) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: datos.id, disabled })
-  const [copiando, setCopiando] = useState(false)
+function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama }) {
   const nombre = nombreTarjeta(tipo, datos)
-  const puedeCopiar = permiteCopiar && !disabled
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+    useSortable({ id: datos.id, disabled, data: { tipo, nombre } })
   const mover = <button
     type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
     disabled={disabled} aria-label={`Mover ${nombre}`} title={`Mover ${nombre}`}
@@ -33,34 +30,37 @@ function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, per
     ref={setNodeRef}
     // Sólo traslación: nunca escalar el diapasón al pasar sobre una tarjeta de otro ancho.
     style={{ transform: CSS.Translate.toString(transform), transition }}
-    className={`tarjeta-musical tarjeta-${tipo}${isDragging || copiando ? ' tarjeta-arrastrando' : ''}`}
+    className={`tarjeta-musical tarjeta-${tipo}${isDragging ? ' tarjeta-arrastrando' : ''}`}
   >
-    {renderContenido ? renderContenido(mover) : <>
-      <header className="tarjeta-cabecera">
-        {tipo === 'escala' && <div className="tarjeta-mover-sector">{mover}</div>}
-        <h3 className="tarjeta-nombre" title={nombre}>{nombre}</h3>
-        {tipo === 'escala' && <div className="tarjeta-editar-sector">{editar}{eliminar}</div>}
-      </header>
-      <div
-        className={tipo === 'escala' ? 'min-w-0' : 'min-w-0 overflow-x-auto'}
-        draggable={puedeCopiar || undefined}
-        title={puedeCopiar ? 'Arrastrá el diagrama a un bloque para copiar el acorde' : undefined}
-        onDragStart={puedeCopiar ? evento => {
-          evento.dataTransfer.effectAllowed = 'copy'
-          evento.dataTransfer.setData(TIPO_ARRASTRE_ACORDE, datos.id)
-          setCopiando(true)
-        } : undefined}
-        onDragEnd={permiteCopiar ? () => setCopiando(false) : undefined}
-      >
-        {tipo === 'escala' ? <EscalaDiagrama escala={datos} onResaltado={onResaltado && (resaltado => onResaltado({ ...datos, resaltado }))} /> : <AcordeDiagrama acorde={datos} />}
-      </div>
-      {tipo === 'acorde' && <footer className="tarjeta-controles">{mover}{editar}{eliminar}</footer>}
-    </>}
+    <header className="tarjeta-cabecera">
+      {tipo === 'escala' && <div className="tarjeta-mover-sector">{mover}</div>}
+      <h3 className="tarjeta-nombre" title={nombre}>{nombre}</h3>
+      {tipo === 'escala' && <div className="tarjeta-editar-sector">{editar}{eliminar}</div>}
+    </header>
+    <div
+      className={tipo === 'escala' ? 'min-w-0' : 'min-w-0 overflow-x-auto'}
+      data-arrastrable={arrastreDesdeDiagrama || undefined}
+      onMouseDown={arrastreDesdeDiagrama ? listeners?.onMouseDown : undefined}
+      onTouchStart={arrastreDesdeDiagrama ? listeners?.onTouchStart : undefined}
+    >
+      {tipo === 'escala' ? <EscalaDiagrama escala={datos} onResaltado={onResaltado && (resaltado => onResaltado({ ...datos, resaltado }))} /> : <AcordeDiagrama acorde={datos} />}
+    </div>
+    {tipo === 'acorde' && <footer className="tarjeta-controles">{mover}{editar}{eliminar}</footer>}
   </article>
 }
 
+export function ListaTarjetasOrdenables({ tipo, items, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama, ocupada }) {
+  return <SortableContext items={items} strategy={tipo === 'acorde' ? rectSortingStrategy : verticalListSortingStrategy}>
+    <div role="group" aria-label={grupos[tipo]} aria-busy={ocupada} className={tipo === 'acorde' ? 'flex min-w-0 flex-wrap items-start gap-3' : 'flex min-w-0 flex-col gap-4'}>
+      {items.map(datos => <Tarjeta key={datos.id} tipo={tipo} datos={datos} disabled={disabled}
+        onEditar={onEditar} onEliminar={onEliminar} onResaltado={onResaltado} arrastreDesdeDiagrama={arrastreDesdeDiagrama}
+      />)}
+    </div>
+  </SortableContext>
+}
+
 /** Ordenamiento de las tarjetas dentro de su grupo. */
-export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar, onEliminar, onResaltado, permiteCopiar = false, renderContenido, disabled = false }) {
+export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar, onEliminar, onResaltado, disabled = false }) {
   const [pendientes, setPendientes] = useState(null)
   const [error, setError] = useState('')
   const guardando = useRef(false)
@@ -105,18 +105,8 @@ export default function TarjetasOrdenables({ tipo, items, onReordenar, onEditar,
         },
       }}
     >
-      <SortableContext items={visibles} strategy={tipo === 'acorde' ? rectSortingStrategy : verticalListSortingStrategy}>
-        <div role="group" aria-label={grupos[tipo]} aria-busy={Boolean(pendientes)} className={tipo === 'acorde' ? 'flex min-w-0 flex-wrap items-start gap-3' : 'flex min-w-0 flex-col gap-4'}>
-          {visibles.map((datos, indice) => <Tarjeta key={datos.id} tipo={tipo} datos={datos} disabled={disabled || Boolean(pendientes)}
-            onEditar={onEditar} onEliminar={onEliminar} onResaltado={onResaltado} permiteCopiar={permiteCopiar}
-            renderContenido={renderContenido && (mover => renderContenido(datos, {
-              mover,
-              subir: indice > 0 ? () => moverEntre(indice, indice - 1) : undefined,
-              bajar: indice < visibles.length - 1 ? () => moverEntre(indice, indice + 1) : undefined,
-            }))}
-          />)}
-        </div>
-      </SortableContext>
+      <ListaTarjetasOrdenables tipo={tipo} items={visibles} disabled={disabled || Boolean(pendientes)}
+        onEditar={onEditar} onEliminar={onEliminar} onResaltado={onResaltado} ocupada={Boolean(pendientes)} />
     </DndContext>
   </div>
 }

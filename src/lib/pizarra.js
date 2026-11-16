@@ -1,6 +1,6 @@
 import { normalizarEscala } from './escalas.js'
 import { normalizarAcorde } from './notasConAcordes.js'
-import { transponerNota, transponerDiagrama } from './transposicion.js'
+import { transponerNota, transponerDiagrama, transponerNombreAcorde } from './transposicion.js'
 import { conSeccionesBloque, normalizarBloque, seccionesBloque } from './bloquesPizarra.js'
 
 export const CLAVE_PIZARRA = 'ydaaaale_pizarra_v1'
@@ -10,7 +10,11 @@ export const desplazamientoPizarra = pizarra => pizarra.desplazamiento ?? 0
 function transponerElemento({ tipo, datos }, semitonos) {
   if (tipo === 'escala') return { ...datos, tonica: transponerNota(datos.tonica, semitonos) }
   if (tipo === 'bloque') return conSeccionesBloque(datos, seccionesBloque(datos).map(acordes =>
-    acordes.map(entrada => ({ ...entrada, digitacion: transponerDiagrama(entrada.digitacion, semitonos) })),
+    acordes.map(entrada => ({
+      ...entrada,
+      ...(entrada.nombre && { nombre: transponerNombreAcorde(entrada.nombre, semitonos) }),
+      ...(entrada.digitacion && { digitacion: transponerDiagrama(entrada.digitacion, semitonos) }),
+    })),
   ))
   return transponerDiagrama(datos, semitonos)
 }

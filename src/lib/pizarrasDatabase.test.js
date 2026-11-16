@@ -86,8 +86,9 @@ test('SQL y repositorio de pizarras: CRUD, copias fieles, orden, conflictos y pe
     await db.exec('set role anon')
     const biblioteca = repositorioPizarras(clienteLocal(db))
     const original = contenidoMusical()
-    const bloque = configurarBloque(null, { titulo: 'Intro', cantidad: 4, repeticiones: 2 })
-    const base = ponerElemento(original, 'bloque', insertarAcordeBloque(bloque, 1, original.elementos[1].datos))
+    const bloque = { ...configurarBloque(null, { titulo: 'Intro', cantidad: 4, repeticiones: 2 }), columna: 'derecha' }
+    const conDigitacion = insertarAcordeBloque(bloque, 1, original.elementos[1].datos)
+    const base = ponerElemento(original, 'bloque', insertarAcordeBloque(conDigitacion, 2, 'Bm7(b5)'))
     const ficha = { id: randomUUID(), titulo: ' Estudio ', fecha: '' }
     const creada = await biblioteca.crear(ficha, base)
     assert.equal(creada.titulo, 'Estudio')

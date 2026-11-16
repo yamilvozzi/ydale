@@ -10,7 +10,11 @@
 
 ## Pizarra
 
-`+ Escala` usa el editor y diapasón actuales. `+ Acorde` permite dibujar directamente en el editor manual. `Generador` abre el generador y ELEGIR transfiere la posición al editor manual. Los tres botones comparten el color principal. Las escalas aparecen siempre arriba, en orden de incorporación; los acordes debajo, en filas que se ajustan al ancho disponible. Los diagramas conservan sus componentes y proporciones. Se pueden editar y eliminar individualmente. Las confirmaciones de eliminación y VACIAR PIZARRA muestran la pregunta como título y los botones de cancelar/eliminar.
+`+ Escala` usa el editor y diapasón actuales. `+ Acorde` permite dibujar directamente en el editor manual. `Generador` abre el generador y ELEGIR transfiere la posición al editor manual. Los bloques aparecen arriba, los acordes sueltos en el medio y las escalas abajo. Los diagramas conservan sus componentes y proporciones. Se pueden editar y eliminar individualmente. Las confirmaciones de eliminación y VACIAR PIZARRA muestran la pregunta como título y los botones de cancelar/eliminar.
+
+`+ Bloque` crea un bloque en la columna izquierda. Arrastrá la agarradera del bloque para reordenarlo o cambiarlo de columna. El menú de tres puntos ofrece las mismas acciones sin arrastrar. En pantallas angostas y al imprimir se lee primero la columna izquierda y luego la derecha. El proyecto guarda la columna de cada bloque y el orden dentro de ella.
+
+Arrastrá un acorde suelto a un compás o a una secuencia libre para copiar su digitación. Arrastrá un cifrado que ya esté en un bloque para moverlo, incluso a otro bloque. En pantallas táctiles, mantené presionado el cifrado para arrastrarlo. Con el botón + de cada compás podés escribir el cifrado o seleccionar un acorde de la Pizarra. Un toque o clic en el cifrado abre su ficha, donde podés consultar o asociar una digitación disponible.
 
 El espacio de trabajo se recupera desde `localStorage` bajo `ydaaaale_pizarra_v1`. Permanece al recargar o volver a abrir el mismo navegador. La carpeta abre la biblioteca compartida y el disquete guarda el contenido actual en Supabase. En una pizarra vinculada, el disquete permite guardar cambios o crear una variante independiente. El borrador local guarda también el vínculo y la referencia al último guardado para detectar cambios pendientes.
 
