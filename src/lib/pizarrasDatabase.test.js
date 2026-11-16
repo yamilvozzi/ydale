@@ -3,6 +3,7 @@ import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
+import { configurarBloque, insertarAcordeBloque } from './bloquesPizarra.js'
 import { cambiosPizarra, guardarTrabajoPizarra, leerTrabajoPizarra, repositorioPizarras } from './proyectosPizarra.js'
 import { guardarPizarra, pizarraVacia, ponerElemento, transponerPizarra } from './pizarra.js'
 import { crearAcorde } from './notasConAcordes.js'
@@ -84,7 +85,9 @@ test('SQL y repositorio de pizarras: CRUD, copias fieles, orden, conflictos y pe
     await db.exec(migracion)
     await db.exec('set role anon')
     const biblioteca = repositorioPizarras(clienteLocal(db))
-    const base = contenidoMusical()
+    const original = contenidoMusical()
+    const bloque = configurarBloque(null, { titulo: 'Intro', cantidad: 4, repeticiones: 2 })
+    const base = ponerElemento(original, 'bloque', insertarAcordeBloque(bloque, 1, original.elementos[1].datos))
     const ficha = { id: randomUUID(), titulo: ' Estudio ', fecha: '' }
     const creada = await biblioteca.crear(ficha, base)
     assert.equal(creada.titulo, 'Estudio')

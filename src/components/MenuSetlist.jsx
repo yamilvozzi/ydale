@@ -94,7 +94,7 @@ export default function MenuSetlist({ nombre, acciones, disabled = false, flotan
     <button ref={boton} type="button" disabled={disabled} aria-label={`Opciones de ${nombre}`} aria-expanded={visible} aria-controls={id}
       onClick={() => setAbierto(!abierto)} className="accion-plana accion-icono rounded-lg disabled:opacity-50"><MoreVertical /></button>
     {visible && <div ref={menu} id={id} className={`${flotante ? 'fixed overflow-y-auto overscroll-contain scheme-dark' : 'absolute right-0 top-full'} z-20 w-52 rounded-lg border border-borde bg-superficie p-1 shadow-xl`}>
-      {acciones.map(({ texto, ejecutar }) => <button key={texto} type="button" className="w-full min-h-11 rounded-lg px-3 py-2 text-left text-sm text-butter hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter"
+      {acciones.map(({ texto, ejecutar, disabled }) => <button key={texto} type="button" disabled={disabled} className="w-full min-h-11 rounded-lg px-3 py-2 text-left text-sm text-butter enabled:hover:bg-borde focus-visible:outline-2 focus-visible:outline-butter disabled:opacity-50"
         onClick={() => { setAbierto(false); boton.current?.focus({ preventScroll: flotante }); ejecutar() }}>{texto}</button>)}
     </div>}
   </div>

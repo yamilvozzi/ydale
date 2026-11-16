@@ -1,10 +1,19 @@
 import { normalizarEscala } from './escalas.js'
 import { normalizarAcorde } from './notasConAcordes.js'
 import { transponerNota, transponerDiagrama } from './transposicion.js'
+import { conSeccionesBloque, normalizarBloque, seccionesBloque } from './bloquesPizarra.js'
 
 export const CLAVE_PIZARRA = 'ydaaaale_pizarra_v1'
 export const pizarraVacia = () => ({ version: 1, elementos: [] })
 export const desplazamientoPizarra = pizarra => pizarra.desplazamiento ?? 0
+
+function transponerElemento({ tipo, datos }, semitonos) {
+  if (tipo === 'escala') return { ...datos, tonica: transponerNota(datos.tonica, semitonos) }
+  if (tipo === 'bloque') return conSeccionesBloque(datos, seccionesBloque(datos).map(acordes =>
+    acordes.map(entrada => ({ ...entrada, digitacion: transponerDiagrama(entrada.digitacion, semitonos) })),
+  ))
+  return transponerDiagrama(datos, semitonos)
+}
 
 export function transponerPizarra(pizarra, semitonos) {
   if (!Number.isSafeInteger(semitonos)) throw new Error('La transposición debe ser un número entero de semitonos.')
@@ -14,9 +23,7 @@ export function transponerPizarra(pizarra, semitonos) {
   const { desplazamiento: _anterior, ...datos } = pizarra
   return { ...datos, ...(desplazamiento ? { desplazamiento } : {}), elementos: pizarra.elementos.map(elemento => ({
     ...elemento,
-    datos: elemento.tipo === 'escala'
-      ? { ...elemento.datos, tonica: transponerNota(elemento.datos.tonica, semitonos) }
-      : transponerDiagrama(elemento.datos, semitonos),
+    datos: transponerElemento(elemento, semitonos),
   })) }
 }
 
@@ -36,6 +43,7 @@ export function leerPizarra(storage) {
 
 function normalizarElemento(tipo, datos) {
   if (tipo === 'acorde') return normalizarAcorde(datos)
+  if (tipo === 'bloque') return normalizarBloque(datos)
   const escala = normalizarEscala(datos)
   const acordes = Array.isArray(datos.resaltado?.acordes) ? datos.resaltado.acordes.filter(acorde =>
     typeof acorde?.id === 'string' && typeof acorde.nombre === 'string' && typeof acorde.tonica === 'string' && /^[A-G][#b]?$/.test(acorde.tonica),
@@ -53,7 +61,7 @@ export function normalizarPizarra(datos) {
     version: 1,
     ...(datos.desplazamiento ? { desplazamiento: datos.desplazamiento } : {}),
     elementos: datos.elementos.map((elemento) => {
-      if (!elemento || !['escala', 'acorde'].includes(elemento.tipo) || !elemento.datos ||
+      if (!elemento || !['escala', 'acorde', 'bloque'].includes(elemento.tipo) || !elemento.datos ||
           typeof elemento.datos.id !== 'string' || !elemento.datos.id || ids.has(elemento.datos.id)) {
         throw new Error('Elemento de pizarra inválido')
       }

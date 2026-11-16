@@ -14,6 +14,8 @@ import BibliotecaPizarrasModal from '../components/BibliotecaPizarrasModal'
 import ModalProyectoPizarra from '../components/ModalProyectoPizarra'
 import MenuSetlist from '../components/MenuSetlist'
 import ModalExportarPDF from '../components/ModalExportarPDF'
+import BloqueMusical from '../components/BloqueMusical'
+import ModalBloqueMusical from '../components/ModalBloqueMusical'
 import { tituloEscala } from '../lib/escalas'
 import { pizarrasDB, usePizarra } from '../hooks/usePizarra'
 
@@ -28,6 +30,8 @@ function comprobarCambioLocal(resultado) {
 export default function Pizarra() {
   const pizarra = usePizarra()
   const { elementos, proyecto, pendiente, error, lecturaFallida, guardar, eliminar, vaciar, reordenar, transponer, cargarTema, desplazamiento, reiniciarTransposicion } = pizarra
+  const acordes = elementos.filter(({ tipo }) => tipo === 'acorde').map(({ datos }) => datos)
+  const bloques = elementos.filter(({ tipo }) => tipo === 'bloque').map(({ datos }) => datos)
   const [editor, setEditor] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
   const [circuloAbierto, setCirculoAbierto] = useState(false)
@@ -75,6 +79,7 @@ export default function Pizarra() {
           <button type="button" disabled={lecturaFallida} onClick={() => setRepertorioAbierto(true)} className="boton-funcion flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs tracking-wide"><BookOpen size={17} /> REPERTORIO</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'escala' })} aria-label="+ Escala" className={botonAgregar}><Plus size={17} /> Escala</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'acorde' })} aria-label="+ Acorde" className={botonAgregar}><Plus size={17} /> Acorde</button>
+          <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'bloque' })} aria-label="+ Bloque" className={botonAgregar}><Plus size={17} /> Bloque</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'generador' })} className={botonAgregar}><WandSparkles size={17} /> Generador</button>
           <button type="button" onClick={() => setCirculoAbierto(true)} className={botonAgregar}><CircleDot size={17} /> Círculo de 5tas</button>
           <button type="button" onClick={() => setTapAbierto(true)} className={botonAgregar}><Timer size={17} /> Tap Tempo</button>
@@ -109,19 +114,28 @@ export default function Pizarra() {
       {error && !editor && !repertorioAbierto && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
       {!elementos.length && !lecturaFallida && <p className="text-sm italic text-butter-muted">Pizarra vacía.</p>}
       {['escala', 'acorde'].map((grupo) => {
-        const items = elementos.filter(({ tipo }) => tipo === grupo)
+        const items = grupo === 'acorde' ? acordes : elementos.filter(({ tipo }) => tipo === grupo).map(({ datos }) => datos)
         if (!items.length) return null
         return <TarjetasOrdenables
           key={grupo}
           tipo={grupo}
-          items={items.map(({ datos }) => datos)}
+          items={items}
           disabled={lecturaFallida}
           onReordenar={(ordenados) => reordenar(grupo, ordenados)}
           onEditar={(datos) => setEditor({ tipo: grupo, datos })}
           onEliminar={(datos) => setConfirmacion({ elemento: { tipo: grupo, datos } })}
           onResaltado={grupo === 'escala' ? datos => guardar('escala', datos) : undefined}
+          permiteCopiar={grupo === 'acorde' && bloques.length > 0}
         />
       })}
+      {bloques.length > 0 && <TarjetasOrdenables
+        tipo="bloque" items={bloques} disabled={lecturaFallida} onReordenar={ordenados => reordenar('bloque', ordenados)}
+        renderContenido={(bloque, controles) => <BloqueMusical
+          bloque={bloque} acordes={acordes} {...controles} error={error}
+          onGuardar={datos => guardar('bloque', datos)} onEliminar={() => eliminar(bloque.id)}
+        />}
+      />}
+      {editor?.tipo === 'bloque' && <ModalBloqueMusical onGuardar={datos => guardar('bloque', datos)} onCerrar={() => setEditor(null)} error={error} />}
       {editor?.tipo === 'escala' && <EditorEscalaModal key={editor.datos?.id ?? 'nueva'} escala={editor.datos} onCerrar={() => setEditor(null)} onGuardar={(datos) => alGuardar('escala', datos)} errorGuardado={error} />}
       {editor?.tipo === 'generador' && <GeneradorAcordesModal
         onCerrar={() => setEditor(null)}

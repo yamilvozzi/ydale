@@ -1,4 +1,5 @@
 import { caracteresConPosicion, distribuirCarriles, versosConPosicion } from './anclasEstructura.js'
+import { nombreAcordeBloque, seccionesBloque } from './bloquesPizarra.js'
 import { claseDeNota } from './circuloQuintas.js'
 import { AFINACION, CANTIDAD_TRASTES, TRASTES_DE_REFERENCIA, notaEnTraste, tituloEscala } from './escalas.js'
 import { leerEstructura, nombreBloque, separarParrafos } from './estructura.js'
@@ -29,6 +30,10 @@ const estilos = `
   ol { margin: 0; padding: 0 }
   .bloque h3 { display: flex; justify-content: space-between; gap: 3mm }
   .repite { flex: none; font-weight: normal; color: #444 }
+  .progresion { border: .55pt solid #aaa; border-radius: 2mm; padding: 2mm 2.7mm; margin-bottom: 2.5mm }
+  .progresion h3 { display: flex; justify-content: space-between; gap: 3mm }
+  .compases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1mm }
+  .compas { border: .55pt solid #aaa; border-radius: 1mm; padding: 1mm 2mm; break-inside: avoid }
   .indicacion { margin-top: 1.5mm }
   .pre { white-space: pre-wrap; overflow-wrap: anywhere }
   .letra { font: 10.5pt/1.45 "Courier New", monospace }
@@ -146,11 +151,26 @@ function grupoAcordes(acordes, orientacion) {
 }
 
 export function imprimirPizarra(pizarra, proyecto, orientacion = 'apaisado') {
-  // La vista de Pizarra muestra primero las escalas y luego los acordes.
   const escalas = pizarra.elementos.filter(e => e.tipo === 'escala').map(e => e.datos)
   const acordes = pizarra.elementos.filter(e => e.tipo === 'acorde').map(e => e.datos)
+  const bloques = pizarra.elementos.filter(e => e.tipo === 'bloque').map(e => e.datos)
+  const secciones = [
+    escalas.length ? `<section><h2>Escalas</h2>${escalas.map(diagramaEscala).join('')}</section>` : '',
+    acordes.length ? `<section><h2>Acordes</h2>${grupoAcordes(acordes, orientacion)}</section>` : '',
+    bloques.length ? `<section><h2>Bloques musicales</h2>${bloques.map(imprimirBloquePizarra).join('')}</section>` : '',
+  ]
   return documento(proyecto?.titulo ?? 'Pizarra musical', [proyecto?.fecha ? fechaEvento.format(new Date(`${proyecto.fecha}T12:00:00Z`)) : ''],
-    `${escalas.length ? `<section><h2>Escalas</h2>${escalas.map(diagramaEscala).join('')}</section>` : ''}${acordes.length ? `<section><h2>Acordes</h2>${grupoAcordes(acordes, orientacion)}</section>` : ''}`, orientacion)
+    secciones.join(''), orientacion)
+}
+
+function imprimirBloquePizarra(bloque) {
+  const libre = bloque.tipo === 'libre'
+  const partes = seccionesBloque(bloque)
+  const orden = acordes => acordes.map(({ digitacion }) => texto(nombreAcordeBloque(digitacion))).join(' · ')
+  const contenido = libre ? `<p>${orden(partes[0])}</p>` : `<ol class="compases">${partes.map((acordes, i) =>
+    `<li class="compas"><span class="dato">${i + 1}</span><p>${orden(acordes)}</p></li>`,
+  ).join('')}</ol>`
+  return `<article class="progresion"><h3><span>${texto(bloque.titulo || (libre ? 'Libre' : 'Bloque musical'))}</span><span class="repite">×${bloque.repeticiones}</span></h3>${contenido}</article>`
 }
 
 export function contenidoTemaPDF(tema, escalas = []) {
