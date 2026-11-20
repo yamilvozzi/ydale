@@ -253,6 +253,23 @@ button.letra-acorde:focus-visible { outline: 1px solid currentColor; }
 }
 
 .tarjeta-acorde { width: fit-content; }
+/* Organización exclusiva de ACORDES del Repertorio: conserva las fichas originales. */
+.repertorio-bloque .tarjeta-acorde { flex: none; }
+.repertorio-zona-acordes { min-width: 0; border-radius: 0.375rem; }
+.repertorio-zona-acordes:empty { min-height: 3rem; }
+.repertorio-zona-acordes[data-destino],
+.repertorio-zona-acordes:has(.tarjeta-acorde[data-destino]) { outline: 1px dashed var(--color-butter-muted); outline-offset: 3px; }
+.repertorio-compases { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--repertorio-ancho-compas, 17rem)), 1fr)); gap: 0.75rem; }
+.repertorio-bloques[data-una-columna] { grid-template-columns: minmax(0, 1fr); }
+.repertorio-bloques[data-una-columna] > .pizarra-columna[data-vacia] { display: none; }
+.repertorio-compas { border: 1px solid var(--color-borde); padding: 0.5rem; background: var(--color-fondo); }
+.repertorio-sueltos { min-height: 3rem; }
+.repertorio-bloques[data-estrecho] .repertorio-bloque { padding: 0.375rem; }
+.repertorio-bloques[data-estrecho] .bloque-cabecera { margin: -0.25rem -0.25rem 0.125rem 0; }
+.repertorio-bloques[data-estrecho] .repertorio-compas { padding: 0.25rem; }
+.repertorio-bloques[data-muy-estrecho] .repertorio-bloque { padding: 0.125rem; }
+.repertorio-bloques[data-muy-estrecho] .bloque-cabecera { margin: 0 0 0.125rem; }
+.repertorio-bloques[data-muy-estrecho] .repertorio-compas { padding: 0.5rem 0; border-width: 1px 0 0; border-radius: 0; }
 .tarjeta-escala { width: 100%; min-width: 0; }
 .tarjeta-acorde [data-arrastrable] { cursor: grab; user-select: none; }
 .tarjeta-acorde [data-arrastrable]:active { cursor: grabbing; }

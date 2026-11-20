@@ -1,7 +1,7 @@
 import { Plus, WandSparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import TarjetasOrdenables from '../TarjetasOrdenables'
+import AcordesRepertorio from '../AcordesRepertorio'
 import EditorAcordeModal from '../EditorAcordeModal'
 import GeneradorAcordesModal from '../GeneradorAcordesModal'
 import ConfirmarEliminacionModal from '../ConfirmarEliminacionModal'
@@ -18,23 +18,32 @@ export default function Notas() {
   const [acordeAEliminar, setAcordeAEliminar] = useState(null)
   const [guardandoAcorde, setGuardandoAcorde] = useState(false)
   const [guardandoTexto, setGuardandoTexto] = useState(false)
+  const [modalBloque, setModalBloque] = useState(null)
+  const [error, setError] = useState('')
+  const envio = useRef(false)
   const ocupado = guardandoAcorde || guardandoTexto
 
-  async function persistirAcordes(acordes, mostrarError = true) {
-    if (ocupado) return false
+  async function persistirNotas(datos, mostrarError = true) {
+    if (ocupado || envio.current) return false
+    envio.current = true
     setGuardandoAcorde(true)
+    setError('')
     try {
-      const valor = guardarNotas({ ...notas, acordes })
+      const valor = guardarNotas(datos)
       await actualizarTema(supabase, tema.id, { notas: valor })
       actualizarCampoLocal('notas', valor)
       return true
     } catch {
+      setError('No se pudo guardar la organización de acordes. Revisá la conexión e intentá de nuevo.')
       if (mostrarError) alert('No se pudo guardar el acorde. Revisá la conexión e intentá de nuevo.')
       return false
     } finally {
+      envio.current = false
       setGuardandoAcorde(false)
     }
   }
+
+  const persistirAcordes = (acordes, mostrarError = true) => persistirNotas({ ...notas, acordes }, mostrarError)
 
   async function guardarAcorde(acorde) {
     const acordes = editor?.id && !editor.esNuevo
@@ -70,20 +79,16 @@ export default function Notas() {
             <Plus size={17} />
             Acorde
           </button>
+          <button type="button" onClick={() => setModalBloque({ tipo: 'crear' })} disabled={ocupado}
+            className="boton-funcion flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
+            <Plus size={17} /> Bloque
+          </button>
         </div>
 
-        {notas.acordes.length > 0 ? (
-          <TarjetasOrdenables
-            tipo="acorde"
-            items={notas.acordes}
-            disabled={ocupado}
-            onReordenar={(acordes) => persistirAcordes(acordes, false)}
-            onEditar={setEditor}
-            onEliminar={setAcordeAEliminar}
-          />
-        ) : (
-          <p className="text-sm italic text-butter-muted">Todavía no hay diagramas cargados.</p>
-        )}
+        {error && <p role="alert" className="mb-3 text-sm text-butter-muted">{error}</p>}
+        <AcordesRepertorio notas={notas} disabled={ocupado} error={error}
+          onGuardar={datos => persistirNotas(datos, false)} onEditar={setEditor} onEliminar={setAcordeAEliminar}
+          modal={modalBloque} setModal={setModalBloque} />
       </section>
 
       <div className="border-t border-borde pt-5">

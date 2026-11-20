@@ -1,5 +1,6 @@
 import { caracteresConPosicion, distribuirCarriles, versosConPosicion } from './anclasEstructura.js'
 import { nombreAcordeBloque, ordenarBloques, seccionesBloque } from './bloquesPizarra.js'
+import { acordesSueltos } from './bloquesRepertorio.js'
 import { claseDeNota } from './circuloQuintas.js'
 import { AFINACION, CANTIDAD_TRASTES, TRASTES_DE_REFERENCIA, notaEnTraste, tituloEscala } from './escalas.js'
 import { leerEstructura, nombreBloque, separarParrafos } from './estructura.js'
@@ -174,11 +175,27 @@ function imprimirBloquePizarra(bloque) {
 }
 
 export function contenidoTemaPDF(tema, escalas = []) {
-  const acordes = leerNotas(tema.notas).acordes
+  const { acordes, bloquesAcordes = [] } = leerNotas(tema.notas)
   let bloques = [], estructuraIncompatible = false
   try { bloques = leerEstructura(tema.estructura).bloques }
   catch { estructuraIncompatible = true }
-  return { tema, escalas, acordes, bloques, estructuraIncompatible }
+  return { tema, escalas, acordes, bloquesAcordes, bloques, estructuraIncompatible }
+}
+
+function diagramasTema(contenido, orientacion) {
+  const { acordes, bloquesAcordes = [] } = contenido
+  if (!bloquesAcordes.length) return grupoAcordes(acordes, orientacion)
+  const porId = new Map(acordes.map(a => [a.id, a]))
+  const bloques = ordenarBloques(bloquesAcordes).map(bloque => {
+    const libre = bloque.tipo === 'libre'
+    const partes = seccionesBloque(bloque).map((lista, i) => {
+      const diagramas = grupoAcordes(lista.map(a => porId.get(a.id)).filter(Boolean), orientacion)
+      return libre ? diagramas : `<div><h3>Compás ${i + 1}</h3>${diagramas}</div>`
+    }).join('')
+    return `<article class="progresion"><h3><span>${texto(bloque.titulo || (libre ? 'Libre' : 'Bloque de acordes'))}</span><span class="repite">×${bloque.repeticiones}</span></h3>${partes}</article>`
+  }).join('')
+  const sueltos = acordesSueltos(contenido)
+  return `${bloques}${sueltos.length ? `<h3>Acordes sueltos</h3>${grupoAcordes(sueltos, orientacion)}` : ''}`
 }
 
 export const SECCIONES_PDF = [
@@ -266,7 +283,7 @@ export function imprimirTema(contenido, seleccion, orientacion = 'vertical') {
     estructura: () => `<div class="${dosColumnas ? 'columnas' : ''}">${bloques.map((bloque, i) => `<article class="bloque"><h3><span>${i + 1}. ${texto(nombreBloque(bloque))}</span><span class="repite">×${bloque.repeticiones}</span></h3>${bloque.letra || bloque.anclas?.length ? letraAnclada(bloque.letra, bloque.anclas, porId, ancho - 3) : ''}${bloque.nota ? `<p class="dato pre indicacion">${texto(bloque.nota)}</p>` : ''}</article>`).join('')}</div>`,
     escala: () => escalas.map(diagramaEscala).join(''),
     percusion: () => `<p class="pre">${texto(tema.percusion)}</p>`,
-    acordes: () => grupoAcordes(acordes, orientacion),
+    acordes: () => diagramasTema(contenido, orientacion),
   }
   const cuerpo = SECCIONES_PDF.filter(([clave]) => disponibles[clave] && seleccion.includes(clave))
     .map(([clave, nombre]) => `<section><h2>${nombre}</h2>${secciones[clave]()}</section>`).join('')

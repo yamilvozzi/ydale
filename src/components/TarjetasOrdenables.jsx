@@ -14,13 +14,14 @@ function nombreTarjeta(tipo, datos) {
   return datos.nombre || 'Sin nombre'
 }
 
-function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama }) {
+function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama, contextoArrastre, onMover }) {
   const nombre = nombreTarjeta(tipo, datos)
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
-    useSortable({ id: datos.id, disabled, data: { tipo, nombre } })
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging, isOver } =
+    useSortable({ id: datos.id, disabled, data: { tipo, nombre, ...contextoArrastre } })
   const mover = <button
     type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
     disabled={disabled} aria-label={`Mover ${nombre}`} title={`Mover ${nombre}`}
+    onClick={onMover ? () => onMover(datos) : undefined} aria-haspopup={onMover ? 'dialog' : undefined}
     className="tarjeta-control tarjeta-mover"
   ><GripVertical aria-hidden="true" /></button>
   const editar = <button type="button" disabled={disabled} onClick={() => onEditar(datos)} aria-label={`Editar ${nombre}`} title="Editar" className="tarjeta-control"><Pencil aria-hidden="true" /></button>
@@ -31,6 +32,7 @@ function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, arr
     // Sólo traslación: nunca escalar el diapasón al pasar sobre una tarjeta de otro ancho.
     style={{ transform: CSS.Translate.toString(transform), transition }}
     className={`tarjeta-musical tarjeta-${tipo}${isDragging ? ' tarjeta-arrastrando' : ''}`}
+    data-destino={contextoArrastre && isOver && !isDragging || undefined}
   >
     <header className="tarjeta-cabecera">
       {tipo === 'escala' && <div className="tarjeta-mover-sector">{mover}</div>}
@@ -49,11 +51,12 @@ function Tarjeta({ tipo, datos, disabled, onEditar, onEliminar, onResaltado, arr
   </article>
 }
 
-export function ListaTarjetasOrdenables({ tipo, items, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama, ocupada }) {
+export function ListaTarjetasOrdenables({ tipo, items, disabled, onEditar, onEliminar, onResaltado, arrastreDesdeDiagrama, ocupada, contextoArrastre, onMover }) {
   return <SortableContext items={items} strategy={tipo === 'acorde' ? rectSortingStrategy : verticalListSortingStrategy}>
     <div role="group" aria-label={grupos[tipo]} aria-busy={ocupada} className={tipo === 'acorde' ? 'flex min-w-0 flex-wrap items-start gap-3' : 'flex min-w-0 flex-col gap-4'}>
       {items.map(datos => <Tarjeta key={datos.id} tipo={tipo} datos={datos} disabled={disabled}
         onEditar={onEditar} onEliminar={onEliminar} onResaltado={onResaltado} arrastreDesdeDiagrama={arrastreDesdeDiagrama}
+        contextoArrastre={contextoArrastre} onMover={onMover}
       />)}
     </div>
   </SortableContext>

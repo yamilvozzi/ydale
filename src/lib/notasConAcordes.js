@@ -1,5 +1,29 @@
 const VERSION = 1
 
+// Esquema propio del documento de Repertorio; no carga ni altera el modelo
+// de Pizarra. Sólo referencias: la digitación sigue viviendo en acordes.
+function normalizarBloquesRepertorio(bloques, acordes) {
+  const disponibles = new Set(acordes.map(a => a.id))
+  const usados = new Set(), ids = new Set()
+  if (!Array.isArray(bloques)) return []
+  return bloques.flatMap(bloque => {
+    const columna = bloque?.columna ?? 'izquierda'
+    if (!bloque || typeof bloque.id !== 'string' || !bloque.id || ids.has(bloque.id) ||
+        typeof bloque.titulo !== 'string' || !Number.isSafeInteger(bloque.repeticiones) || bloque.repeticiones < 1 ||
+        !['izquierda', 'derecha'].includes(columna)) return []
+    const partes = bloque.tipo === 'libre' ? [bloque.acordes] : bloque.tipo === 'compases' ? bloque.compases : null
+    if (!Array.isArray(partes) || !partes.length || partes.length > 256 || !partes.every(Array.isArray)) return []
+    ids.add(bloque.id)
+    const secciones = partes.map(lista => lista.flatMap(entrada => {
+      if (!entrada || !disponibles.has(entrada.id) || usados.has(entrada.id)) return []
+      usados.add(entrada.id)
+      return [{ id: entrada.id }]
+    }))
+    return [{ id: bloque.id, titulo: bloque.titulo, tipo: bloque.tipo, repeticiones: bloque.repeticiones, columna,
+      ...(bloque.tipo === 'libre' ? { acordes: secciones[0] } : { compases: secciones }) }]
+  })
+}
+
 /**
  * `notas` era un campo de texto antes de que existieran los diagramas. Para no
  * requerir una migración de la base ni perder notas ya cargadas, el campo acepta
@@ -16,10 +40,12 @@ export function leerNotas(valor) {
       Array.isArray(datos.acordes) &&
       typeof datos.texto === 'string'
     ) {
+      const acordes = datos.acordes.filter((acorde) => acorde && typeof acorde === 'object' && !Array.isArray(acorde)).map(normalizarAcorde)
       return {
         version: VERSION,
         texto: datos.texto,
-        acordes: datos.acordes.filter((acorde) => acorde && typeof acorde === 'object' && !Array.isArray(acorde)).map(normalizarAcorde),
+        acordes,
+        ...(datos.bloquesAcordes ? { bloquesAcordes: normalizarBloquesRepertorio(datos.bloquesAcordes, acordes) } : {}),
       }
     }
   } catch {
@@ -34,6 +60,7 @@ export function guardarNotas(datos) {
     version: VERSION,
     texto: datos.texto ?? '',
     acordes: (datos.acordes ?? []).map(normalizarAcorde),
+    ...(datos.bloquesAcordes ? { bloquesAcordes: normalizarBloquesRepertorio(datos.bloquesAcordes, datos.acordes ?? []) } : {}),
   })
 }
 
