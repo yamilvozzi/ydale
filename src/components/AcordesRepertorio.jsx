@@ -234,8 +234,9 @@ export default function AcordesRepertorio({ notas, disabled, error, onGuardar, o
         return false
       }} />}
     {modal?.tipo === 'mover-acorde' && <MoverAcordeModal acorde={modal.acorde} notas={notas} disabled={disabled} error={error} onGuardar={onGuardar} onCerrar={() => setModal(null)} />}
-    {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal preguntaComoTitulo
-      mensaje={`${modal.tipo === 'vaciar' ? '¿Vaciar' : '¿Eliminar'} el bloque? Sus acordes volverán al sector suelto y se conservarán en la canción.`}
+    {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal preguntaComoTitulo={modal.tipo === 'vaciar'}
+      titulo={modal.tipo === 'eliminar' ? '¿Eliminar bloque?' : undefined}
+      mensaje={modal.tipo === 'eliminar' ? 'Los acordes no se borran: vuelven a quedar sueltos.' : '¿Vaciar el bloque? Sus acordes volverán al sector suelto y se conservarán en la canción.'}
       onCancelar={() => setModal(null)} onConfirmar={() => onGuardar(vaciarBloqueRepertorio(notas, modal.bloque.id, modal.tipo === 'eliminar'))} />}
   </>
 }
