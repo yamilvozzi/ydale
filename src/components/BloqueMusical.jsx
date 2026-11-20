@@ -120,7 +120,9 @@ export default function BloqueMusical({ bloque, acordes, subir, bajar, cambiarCo
       onQuitar={() => editarCompas(quitarEntrada)}
     />}
     {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal
-      preguntaComoTitulo mensaje={modal.tipo === 'vaciar' ? '¿Quitar todos los acordes de este bloque?' : '¿Eliminar este bloque de la Pizarra?'}
+      titulo={modal.tipo === 'vaciar' ? '¿Vaciar bloque?' : '¿Eliminar bloque?'}
+      mensaje={modal.tipo === 'vaciar' ? 'Se borra el contenido del bloque. Los acordes sueltos quedan igual.' : 'Se borra el bloque con su contenido. Los acordes sueltos quedan igual.'}
+      etiquetaConfirmar={modal.tipo === 'vaciar' ? 'VACIAR' : 'ELIMINAR'}
       onCancelar={cerrar}
       onConfirmar={modal.tipo === 'vaciar' ? () => guardarSecciones(compases.map(() => [])) : onEliminar}
     />}

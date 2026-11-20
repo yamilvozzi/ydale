@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
-export default function ConfirmarEliminacionModal({ mensaje, titulo, onCancelar, onConfirmar, preguntaComoTitulo = false, destructiva = false }) {
+export default function ConfirmarEliminacionModal({ mensaje, titulo, onCancelar, onConfirmar, preguntaComoTitulo = false, destructiva = false, etiquetaConfirmar = 'ELIMINAR' }) {
   const dialogo = useRef(null)
   const cancelar = useRef(null)
   const enviando = useRef(false)
@@ -51,10 +51,10 @@ export default function ConfirmarEliminacionModal({ mensaje, titulo, onCancelar,
     >
       <h2 id={`${id}-titulo`} className="break-words text-lg modal-titulo">{titulo ?? (preguntaComoTitulo ? mensaje : 'Confirmar eliminación')}</h2>
       {!preguntaComoTitulo && <p id={`${id}-mensaje`} className="mt-3 break-words text-sm text-butter-muted">{mensaje}</p>}
-      {error && <p role="alert" className="mt-3 text-sm text-butter-muted">No se pudo eliminar. Intentá de nuevo.</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-butter-muted">No se pudo completar la acción. Probá de nuevo.</p>}
       <div className="mt-5 flex justify-end gap-2">
         <button ref={cancelar} type="button" disabled={ocupado} onClick={onCancelar} className="rounded-lg border border-borde bg-fondo px-4 py-2 text-xs text-butter-muted hover:text-butter disabled:opacity-50">CANCELAR</button>
-        <button type="button" disabled={ocupado} onClick={confirmar} className={`rounded-lg px-4 py-2 text-xs text-butter disabled:opacity-50 ${destructiva ? 'bg-red-700 hover:bg-red-800' : 'bg-teal hover:bg-green'}`}>ELIMINAR</button>
+        <button type="button" disabled={ocupado} onClick={confirmar} className={`rounded-lg px-4 py-2 text-xs text-butter disabled:opacity-50 ${destructiva ? 'bg-red-700 hover:bg-red-800' : 'bg-teal hover:bg-green'}`}>{etiquetaConfirmar}</button>
       </div>
     </dialog>
   )

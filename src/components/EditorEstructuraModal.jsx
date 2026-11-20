@@ -153,14 +153,14 @@ export default function EditorEstructuraModal({ estructura, letraTema = '', refe
             <button type="button" aria-expanded={importadorAbierto} aria-controls={`${id}-importar`} onClick={() => setImportadorAbierto(abierto => !abierto)} className="mb-3 min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-fondo hover:text-butter">PEGAR LETRA COMPLETA</button>
             {importadorAbierto && <section id={`${id}-importar`} className="mb-5 rounded-lg border border-borde bg-fondo/40 p-3 sm:p-4">
               <label className={etiqueta}>Letra completa
-                <textarea ref={entrada} value={letraCompleta} onPaste={alPegar} onChange={evento => setLetraCompleta(evento.target.value)} rows={6} placeholder="Pegá la letra completa. Los párrafos separados por una línea vacía se convertirán en bloques." className={`${campo} mt-1 min-h-36 resize-y leading-relaxed`} />
+                <textarea ref={entrada} value={letraCompleta} onPaste={alPegar} onChange={evento => setLetraCompleta(evento.target.value)} rows={6} placeholder="Pegá la letra con una línea en blanco entre secciones. Cada sección será un bloque." className={`${campo} mt-1 min-h-36 resize-y leading-relaxed`} />
               </label>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-butter-muted">{parrafos} {parrafos === 1 ? 'bloque' : 'bloques'}{borrador.bloques.length > 0 ? ' · Reemplaza los bloques del borrador.' : ''}</p>
                 <button type="button" disabled={!parrafos} onClick={separarLetra} className="min-h-11 rounded-lg bg-teal px-3 text-xs text-butter hover:bg-green disabled:opacity-40">SEPARAR EN BLOQUES</button>
               </div>
             </section>}
-            {!borrador.bloques.length && <p className="mb-4 text-sm text-butter-muted">Pegá la letra o agregá un bloque instrumental.</p>}
+            {!borrador.bloques.length && <p className="mb-4 text-sm text-butter-muted">Pegá la letra o agregá un bloque.</p>}
             <ol className="space-y-3" aria-label="Bloques de la estructura">
               {borrador.bloques.map((bloque, indice) => <li key={bloque.id} data-bloque={bloque.id} className="rounded-lg border border-borde bg-fondo/30 p-3 sm:p-4">
                 <header className="mb-3 flex items-center justify-between gap-3">
@@ -177,7 +177,7 @@ export default function EditorEstructuraModal({ estructura, letraTema = '', refe
                     disabled={!borrador.bloques.some(otro => otro.id !== bloque.id && otro.anclas?.length)}
                     onClick={() => setCopiarEn(actual => actual === bloque.id ? null : bloque.id)}
                     className="min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-superficie hover:text-butter disabled:opacity-40"
-                  >Copiar acordes desde...</button>
+                  >Copiar acordes de otro bloque…</button>
                 </div>
                 {copiarEn === bloque.id && <div id={`${id}-copiar-${bloque.id}`} className="mb-3 rounded-lg border border-borde bg-superficie p-3">
                   <label className={etiqueta}>Bloque de origen
@@ -192,7 +192,7 @@ export default function EditorEstructuraModal({ estructura, letraTema = '', refe
                   <label className={etiqueta}>Tipo
                     <select value={bloque.tipo} onChange={evento => editarBloque(bloque.id, { tipo: evento.target.value })} className={campo}>{TIPOS_BLOQUE.map(tipo => <option key={tipo.valor} value={tipo.valor}>{tipo.etiqueta}</option>)}</select>
                   </label>
-                  <label className={`${etiqueta} order-3 col-span-2 sm:order-none sm:col-span-1`}>Nombre libre
+                  <label className={`${etiqueta} order-3 col-span-2 sm:order-none sm:col-span-1`}>Nombre (opcional)
                     <input value={bloque.nombre} onChange={evento => editarBloque(bloque.id, { nombre: evento.target.value })} maxLength={80} placeholder="Ej.: VERSO 1" className={campo} />
                   </label>
                   <label className={etiqueta}>Repeticiones
@@ -203,12 +203,12 @@ export default function EditorEstructuraModal({ estructura, letraTema = '', refe
                   <label className={etiqueta}>Letra del bloque
                     <textarea data-letra-bloque={bloque.id} value={bloque.letra} onSelect={evento => capturarSeleccion(bloque.id, evento)} onBeforeInput={evento => capturarSeleccion(bloque.id, evento)} onKeyDown={evento => capturarSeleccion(bloque.id, evento)} onChange={evento => editarLetra(bloque.id, evento)} rows={Math.min(8, Math.max(3, bloque.letra.split('\n').length))} placeholder="Letra o indicación instrumental" className={`${campo} resize-y leading-relaxed`} />
                   </label>
-                  <label className={etiqueta}>Nota del bloque
+                  <label className={etiqueta}>Indicaciones (opcional)
                     <textarea value={bloque.nota} onChange={evento => editarBloque(bloque.id, { nota: evento.target.value })} maxLength={180} rows={3} placeholder="Ej.: Entra batería en la segunda vuelta" className={`${campo} resize-y leading-relaxed`} />
                   </label>
                 </div>
                 <div className="mt-3 border-t border-borde pt-3">
-                  <p className="mb-2 text-xs text-butter-muted">Tocá la letra para ubicar un acorde. Mantené pulsado un acorde y movelo dentro de su línea.</p>
+                  <p className="mb-2 text-xs text-butter-muted">Tocá la letra para agregar un acorde. Para moverlo, mantenelo pulsado y arrastralo en esa línea.</p>
                   <LetraConAcordes letra={bloque.letra} anclas={bloque.anclas} acordes={acordes} editable disabled={guardando}
                     onAsignar={(posicion, acordeId, anclaId) => setBorrador(actual => ({ ...actual, bloques: actual.bloques.map(actual => actual.id === bloque.id ? asignarAcorde(actual, posicion, acordeId, acordes, anclaId) : actual) }))}
                     onEliminar={id => editarBloque(bloque.id, { anclas: (bloque.anclas ?? []).filter(ancla => ancla.id !== id) })}

@@ -53,7 +53,7 @@ export default function EditorAcordeModal({ acorde, onCerrar, onGuardar, guardan
 
         <fieldset disabled={guardando} className="min-w-0">
         <label className="mb-5 flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-wide text-butter-muted">Nombre o nota</span>
+          <span className="text-xs uppercase tracking-wide text-butter-muted">Nombre del acorde</span>
           <input
             ref={nombre}
             value={borrador.nombre}

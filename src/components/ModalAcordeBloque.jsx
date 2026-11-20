@@ -69,7 +69,7 @@ export default function ModalAcordeBloque({
     {vista ? <div className="mb-3 overflow-x-auto rounded-lg border border-borde bg-fondo p-3 pb-1">
       <div className="mx-auto w-max"><AcordeDiagrama acorde={vista} /></div>
       {vista.bajo && <p className="pb-1 text-center text-xs text-butter-muted">Bajo en cuerda {vista.bajo.cuerda + 1}</p>}
-    </div> : <p className="mb-3 text-sm text-butter-muted">Sin digitación asociada.</p>}
+    </div> : <p className="mb-3 text-sm text-butter-muted">Este acorde no tiene diagrama.</p>}
     {vista && vista !== digitacion && <button type="button" onClick={() => aplicar(() => onElegir(vista))}
       className={`${botonPrincipalPizarra} mb-3 w-full`}>Usar esta digitación</button>}
     <div className="grid gap-2 border-t border-borde pt-3">

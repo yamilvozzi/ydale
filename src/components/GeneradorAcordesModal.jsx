@@ -196,7 +196,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
                     >{opcion.nombre}</li>
                   ))}
                 </ul>
-                {opciones.length === 0 && <p role="status" className="px-3 py-2 text-sm text-butter-muted">Sin coincidencias</p>}
+                {opciones.length === 0 && <p role="status" className="px-3 py-2 text-sm text-butter-muted">No hay resultados.</p>}
               </div>
             )}
           </div>
@@ -223,10 +223,10 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
             }}
           />
         </div>
-        {consulta.trim() && !interpretado && <p role="status" className="mt-2 text-center text-sm text-butter-muted">Acorde no reconocido</p>}
-        {interpretado && !propuesta && <p role="status" className="mt-2 text-center text-sm text-butter-muted">{completo ? 'Sin formas tocables en esta zona' : 'Sin posiciones para estos filtros'}</p>}
-        {propuesta?.opcional && <p className="mt-2 text-center text-xs text-butter-muted">Círculo sin relleno: tónica opcional para completar el acorde.</p>}
-        {propuesta?.omitidas?.length > 0 && <p className="mt-2 text-center text-xs text-butter-muted">Grados omitidos para esta digitación: {propuesta.omitidas.map(nota => `${nota.nombre} (${nota.grado + 1}ª)`).join(', ')}.</p>}
+        {consulta.trim() && !interpretado && <p role="status" className="mt-2 text-center text-sm text-butter-muted">No se reconoce ese acorde. Revisá el nombre.</p>}
+        {interpretado && !propuesta && <p role="status" className="mt-2 text-center text-sm text-butter-muted">{completo ? 'No hay posiciones para esta zona.' : 'No hay posiciones con estos filtros.'}</p>}
+        {propuesta?.opcional && <p className="mt-2 text-center text-xs text-butter-muted">Círculo sin relleno: tónica opcional.</p>}
+        {propuesta?.omitidas?.length > 0 && <p className="mt-2 text-center text-xs text-butter-muted">Grados omitidos: {propuesta.omitidas.map(nota => `${nota.nombre} (${nota.grado + 1}ª)`).join(', ')}.</p>}
       </div>
       {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
@@ -237,7 +237,7 @@ export default function GeneradorAcordesModal({ onCerrar, onElegir, onEditar, gu
         </div>
         <div className="ml-auto flex gap-1 sm:gap-2">
           <button type="button" disabled={guardando || !propuesta || !onEditar} onClick={() => onEditar(propuestaAEditable(interpretado, propuesta))} className="rounded-lg border border-borde px-2 py-2.5 text-xs text-butter-muted hover:bg-fondo disabled:opacity-40 sm:px-3">EDITAR</button>
-          <button type="button" disabled={guardando || !propuesta || !onElegir} onClick={() => onElegir(propuestaAEditable(interpretado, propuesta))} className="rounded-lg bg-teal px-2 py-2.5 text-xs text-butter hover:bg-green disabled:opacity-40 sm:px-4">{guardando ? 'GUARDANDO…' : 'ELEGIR'}</button>
+          <button type="button" disabled={guardando || !propuesta || !onElegir} onClick={() => onElegir(propuestaAEditable(interpretado, propuesta))} className="rounded-lg bg-teal px-2 py-2.5 text-xs text-butter hover:bg-green disabled:opacity-40 sm:px-4">{guardando ? 'GUARDANDO…' : 'AGREGAR'}</button>
         </div>
       </div>
     </dialog>

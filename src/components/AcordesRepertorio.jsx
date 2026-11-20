@@ -84,7 +84,7 @@ function ZonaAcordes({ bloqueId, compas = 0, numero, items, disabled, onEditar, 
     {numero && <p className="mb-2 text-xs text-butter-muted">Compás {numero}</p>}
     {items.length > 0 && <ListaTarjetasOrdenables tipo="acorde" items={items} disabled={disabled}
       contextoArrastre={{ bloqueId, compas }} onEditar={onEditar} onEliminar={onEliminar} onMover={onMover} />}
-    {!items.length && <p className="text-sm text-butter-muted">{sueltos ? 'Soltá aquí para devolver un acorde al sector suelto.' : 'Arrastrá acordes aquí o usá su control de movimiento.'}</p>}
+    {!items.length && <p className="text-sm text-butter-muted">{sueltos ? 'Soltá el acorde acá para dejarlo suelto.' : 'Arrastrá un acorde acá o tocá su ícono de movimiento.'}</p>}
   </div>
 }
 
@@ -153,7 +153,6 @@ function MoverAcordeModal({ acorde, notas, disabled, error, onGuardar, onCerrar 
       e.preventDefault()
       if (await onGuardar(moverAcordeRepertorio(notas, acorde.id, { bloqueId: bloqueId || undefined, compas, referencia: posicion === 'final' ? undefined : posicion }))) onCerrar()
     }}>
-      <p className="text-sm text-butter-muted">También podés arrastrar desde el control de movimiento.</p>
       <label className="grid gap-1 text-sm">Destino
         <select className={campo} disabled={disabled} value={bloqueId} onChange={e => { setBloqueId(e.target.value); setCompas(0); setPosicion('final') }}>
           <option value="">Acordes sueltos</option>
@@ -234,9 +233,10 @@ export default function AcordesRepertorio({ notas, disabled, error, onGuardar, o
         return false
       }} />}
     {modal?.tipo === 'mover-acorde' && <MoverAcordeModal acorde={modal.acorde} notas={notas} disabled={disabled} error={error} onGuardar={onGuardar} onCerrar={() => setModal(null)} />}
-    {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal preguntaComoTitulo={modal.tipo === 'vaciar'}
-      titulo={modal.tipo === 'eliminar' ? '¿Eliminar bloque?' : undefined}
-      mensaje={modal.tipo === 'eliminar' ? 'Los acordes no se borran: vuelven a quedar sueltos.' : '¿Vaciar el bloque? Sus acordes volverán al sector suelto y se conservarán en la canción.'}
+    {(modal?.tipo === 'vaciar' || modal?.tipo === 'eliminar') && <ConfirmarEliminacionModal
+      titulo={modal.tipo === 'vaciar' ? '¿Vaciar bloque?' : '¿Eliminar bloque?'}
+      mensaje="Los acordes no se borran: vuelven a quedar sueltos."
+      etiquetaConfirmar={modal.tipo === 'vaciar' ? 'VACIAR' : 'ELIMINAR'}
       onCancelar={() => setModal(null)} onConfirmar={() => onGuardar(vaciarBloqueRepertorio(notas, modal.bloque.id, modal.tipo === 'eliminar'))} />}
   </>
 }

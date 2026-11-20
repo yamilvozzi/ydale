@@ -17,7 +17,7 @@ export default function Estructura() {
   const [errorGuardado, setErrorGuardado] = useState('')
   const lectura = useMemo(() => {
     try { return { datos: leerEstructura(tema.estructura), error: '' } }
-    catch { return { datos: estructuraVacia(), error: 'La estructura guardada no tiene un formato compatible. Podés reemplazarla desde el editor.' } }
+    catch { return { datos: estructuraVacia(), error: 'No se puede abrir esta estructura. Si guardás otra desde el editor, reemplazás la anterior.' } }
   }, [tema.estructura])
   const referencia = referenciaEstructura(escalas)
   const acordes = useMemo(() => leerNotas(tema.notas).acordes, [tema.notas])

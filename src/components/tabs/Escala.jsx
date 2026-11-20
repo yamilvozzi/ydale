@@ -30,7 +30,7 @@ export default function Escala() {
           <p className="text-butter-muted">Cargando…</p>
         ) : error ? (
           <p className="rounded-lg border border-borde bg-superficie p-4 text-sm text-butter-muted">
-            No se pudieron cargar las escalas. Verificá la conexión y que la migración esté aplicada.
+            No se pudieron cargar las escalas. Revisá la conexión e intentá de nuevo.
           </p>
         ) : escalas.length > 0 ? (
           <TarjetasOrdenables

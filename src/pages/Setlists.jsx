@@ -61,7 +61,7 @@ export default function Setlists() {
       </ul> : <p className="mt-8 text-center text-butter-muted">Todavía no hay setlists. Creá uno para organizar el próximo show.</p>)}
     {modal && <ModalSetlist original={modal.original} editando={modal.editando} onCerrar={() => setModal(null)} onGuardar={guardar} />}
     {exportar && <ModalExportarPDF tipo="setlist" datos={exportar} onCerrar={() => setExportar(null)} />}
-    {eliminar && <ConfirmarEliminacionModal mensaje={`¿Eliminar “${eliminar.title}”? Las canciones seguirán en Repertorio.`}
+    {eliminar && <ConfirmarEliminacionModal titulo="¿Eliminar setlist?" mensaje={`“${eliminar.title}” se borrará. Los temas siguen en el repertorio.`}
       onCancelar={() => setEliminar(null)} onConfirmar={async () => {
         try { await setlistsDB.eliminar(eliminar); await recargar(); return true }
         catch (error) { setErrorAccion(mensajeErrorSetlists(error)); return false }

@@ -23,7 +23,7 @@ export default function NuevoTemaModal({ onCerrar, onGuardado, temaEditando = nu
       setGuardando(false)
 
       if (error) {
-        alert('No se pudo guardar los cambios. Probá de nuevo.')
+        alert('No se pudieron guardar los cambios. Probá de nuevo.')
         return
       }
 
@@ -65,11 +65,11 @@ export default function NuevoTemaModal({ onCerrar, onGuardado, temaEditando = nu
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-butter-muted uppercase tracking-wide">Artista</label>
+          <label className="text-xs text-butter-muted uppercase tracking-wide">Artista (opcional)</label>
           <input
             value={artista}
             onChange={(e) => setArtista(e.target.value)}
-            placeholder="Y daaaale! (si es propio)"
+            placeholder="Ej.: Y daaaale!"
             className="bg-fondo border border-borde rounded-lg p-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
           />
         </div>

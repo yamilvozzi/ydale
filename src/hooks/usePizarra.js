@@ -13,7 +13,7 @@ export function usePizarra() {
     try {
       return { ...leerTrabajoPizarra(window.localStorage), error: '', lecturaFallida: false }
     } catch {
-      return { datos: pizarraVacia(), proyecto: null, error: 'No se pudo leer la pizarra guardada en este dispositivo.', lecturaFallida: true }
+      return { datos: pizarraVacia(), proyecto: null, error: 'No se pudo abrir el borrador guardado en este dispositivo.', lecturaFallida: true }
     }
   })
 
@@ -33,7 +33,7 @@ export function usePizarra() {
         setEstado({ datos, proyecto, lecturaFallida: false, error: 'Se actualizó la biblioteca, pero no se pudo actualizar el borrador local de este dispositivo.' })
         return true
       }
-      setEstado(actual => ({ ...actual, error: 'No se pudo guardar la pizarra en este dispositivo. Revisá el almacenamiento e intentá de nuevo.' }))
+      setEstado(actual => ({ ...actual, error: 'No se pudo guardar el borrador en este dispositivo. Probá de nuevo.' }))
       return false
     }
   }

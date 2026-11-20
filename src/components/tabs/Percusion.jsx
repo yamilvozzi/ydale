@@ -20,7 +20,7 @@ export default function Percusion() {
         onGuardado={(v) => actualizarCampoLocal('percusion', v)}
         titulo="Percusión"
         claseLectura="break-words text-left"
-        placeholder="Todavía no hay nada acá. Reservado para Diego."
+        placeholder="Todavía no hay nada acá. Reservado para Diego y Luli."
       />
       {tapAbierto && <TapTempoModal onCerrar={() => setTapAbierto(false)} />}
     </div>

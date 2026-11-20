@@ -80,7 +80,7 @@ export default function BibliotecaPizarrasModal({ onCerrar, onAbrir, onRenombrar
         <p>{error}</p><button type="button" disabled={abriendo || cargando} onClick={recargar} className={botonPizarra}>Actualizar lista</button>
       </div>}
       {(cargando || abriendo) && <p role="status" className="py-2 text-sm text-butter-muted">{abriendo ? 'Abriendo pizarra…' : 'Cargando pizarras…'}</p>}
-      {!cargando && !error && !filtradas.length && <p role="status" className="py-2 text-sm text-butter-muted">{pizarras.length ? 'No hay resultados.' : 'Todavía no hay pizarras guardadas.'}</p>}
+      {!cargando && !error && !filtradas.length && <p role="status" className="py-2 text-sm text-butter-muted">{pizarras.length ? 'No hay resultados.' : 'Guardá una pizarra y la encontrás acá.'}</p>}
       <ul className="grid min-w-0 gap-2 sm:grid-cols-2" aria-label="Biblioteca de pizarras">
         {filtradas.map(proyecto => <li key={proyecto.id} className="tarjeta-enlace flex min-w-0 items-start rounded-lg">
           <button type="button" disabled={abriendo || cargando} onClick={() => abrir(proyecto)}

@@ -90,7 +90,7 @@ export default function Setlist() {
             {errorGuardado && <div role="alert" className="mb-4 text-sm text-butter-muted"><p>{errorGuardado}</p>
               <button onClick={async () => { setSelector(false); setEdicion(false); setErrorGuardado(''); await recargar(); setConflicto(false) }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:bg-superficie">RECARGAR SETLIST</button>
             </div>}
-            {edicion && <button type="button" disabled={ocupado || conflicto} onClick={() => setSelector(true)} className="boton-funcion mb-4 inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm"><Plus size={18} /> AGREGAR CANCIONES</button>}
+            {edicion && <button type="button" disabled={ocupado || conflicto} onClick={() => setSelector(true)} className="boton-funcion mb-4 inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm"><Plus size={18} /> AGREGAR TEMAS</button>}
             <p role="status" className="mb-3 text-xs text-butter-muted">{ocupado ? 'Guardando…' : edicion ? 'Los cambios se guardan automáticamente.' : `${items.length} ${items.length === 1 ? 'tema' : 'temas'}`}</p>
             {items.length ? <CancionesSetlist items={items} setlistId={id} edicion={edicion} ocupado={ocupado || conflicto} onGuardar={guardar}
               onAbrir={e => {
@@ -102,7 +102,7 @@ export default function Setlist() {
                   e.preventDefault()
                   navegar(destino.pathname + destino.search, { state: { setlistScroll: window.scrollY, setlistId: id } })
                 }
-              }} /> : <p className="mt-4 text-center text-butter-muted">Este setlist todavía no tiene canciones.</p>}
+              }} /> : <p className="mt-4 text-center text-butter-muted">Acá va el orden de los temas.</p>}
             {selector && <AgregarCancionesSetlist items={items} ocupado={ocupado} bloqueado={conflicto} error={errorGuardado} onCerrar={() => setSelector(false)}
               onAgregar={tema => guardar([...setlist.items, { id: crypto.randomUUID(), song_id: tema.id, nombre: tema.nombre, artista: tema.artista }])} />}
             {exportar && <ModalExportarPDF tipo="setlist" datos={setlist} onCerrar={() => setExportar(false)} />}

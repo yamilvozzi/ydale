@@ -127,7 +127,7 @@ export default function LetraConAcordes({ letra, anclas = [], acordes, editable 
           >{acorde.nombre || 'Sin nombre'}</button>)}
         </div>
         {!acordes.length && <p className="max-w-xs text-xs text-butter-muted">Cargá acordes en la pestaña ACORDES de este tema.</p>}
-        {existente && <button type="button" onClick={() => { onEliminar(existente.id); setSeleccion(null) }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-fondo hover:text-butter">Eliminar acorde</button>}
+        {existente && <button type="button" onClick={() => { onEliminar(existente.id); setSeleccion(null) }} className="mt-2 min-h-11 rounded-lg border border-borde px-3 text-xs text-butter-muted hover:bg-fondo hover:text-butter">Quitar de la letra</button>}
       </div>}
     </div>
   )

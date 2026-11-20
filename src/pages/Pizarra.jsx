@@ -71,17 +71,17 @@ export default function Pizarra() {
   return (
     <main className="flex min-h-dvh w-full flex-col px-4 py-6 sm:px-6">
       <EncabezadoSeccion titulo="PIZARRA" compacto acciones={<>
-        <BotonAccionEncabezado icono={FolderOpen} etiqueta="Abrir pizarras" onClick={() => setBibliotecaAbierta(true)} />
+        <BotonAccionEncabezado icono={FolderOpen} etiqueta="Abrir pizarra" onClick={() => setBibliotecaAbierta(true)} />
         <BotonAccionEncabezado icono={Save} etiqueta="Guardar pizarra" disabled={lecturaFallida || (!proyecto && !pendiente)} onClick={() => setModalProyecto({ modo: 'guardar' })} />
       </>} />
       <div className="pizarra-herramientas border-b border-butter-muted pb-3">
         <div role="group" aria-label="Funciones de pizarra" className="pizarra-funciones">
-          <button type="button" disabled={lecturaFallida} onClick={() => setRepertorioAbierto(true)} className="boton-funcion flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs tracking-wide"><BookOpen size={17} /> REPERTORIO</button>
+          <button type="button" disabled={lecturaFallida} onClick={() => setRepertorioAbierto(true)} className="boton-funcion flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs tracking-wide"><BookOpen size={17} /> CARGAR TEMA</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'escala' })} aria-label="+ Escala" className={botonAgregar}><Plus size={17} /> Escala</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'acorde' })} aria-label="+ Acorde" className={botonAgregar}><Plus size={17} /> Acorde</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'bloque' })} aria-label="+ Bloque" className={botonAgregar}><Plus size={17} /> Bloque</button>
           <button type="button" disabled={lecturaFallida} onClick={() => setEditor({ tipo: 'generador' })} className={botonAgregar}><WandSparkles size={17} /> Generador</button>
-          <button type="button" onClick={() => setCirculoAbierto(true)} className={botonAgregar}><CircleDot size={17} /> Círculo de 5tas</button>
+          <button type="button" onClick={() => setCirculoAbierto(true)} className={botonAgregar}><CircleDot size={17} /> Círculo de quintas</button>
           <button type="button" onClick={() => setTapAbierto(true)} className={botonAgregar}><Timer size={17} /> Tap Tempo</button>
         </div>
         <div className="pizarra-utilidades">
@@ -135,8 +135,10 @@ export default function Pizarra() {
         onGuardarFicha={async ficha => pizarra.confirmarGuardado(await pizarrasDB.crear(ficha, pizarra.datos))} />}
       {exportar && <ModalExportarPDF tipo="pizarra" datos={{ pizarra: pizarra.datos, proyecto }} onCerrar={() => setExportar(false)} />}
       {confirmacion && <ConfirmarEliminacionModal
-        preguntaComoTitulo
-        mensaje={confirmacion.todo ? '¿Vaciar toda la pizarra?' : `¿Eliminar ${nombreElemento(confirmacion.elemento)} de la pizarra?`}
+        preguntaComoTitulo={confirmacion.todo}
+        titulo={confirmacion.todo ? undefined : confirmacion.elemento.tipo === 'escala' ? '¿Eliminar escala?' : '¿Eliminar acorde?'}
+        mensaje={confirmacion.todo ? '¿Vaciar toda la pizarra?' : nombreElemento(confirmacion.elemento)}
+        etiquetaConfirmar={confirmacion.todo ? 'VACIAR' : 'ELIMINAR'}
         onCancelar={() => setConfirmacion(null)}
         onConfirmar={() => confirmacion.todo ? vaciar() : eliminar(confirmacion.elemento.datos.id)}
       />}

@@ -52,16 +52,16 @@ export default function Repertorio() {
   return (
     <div className="min-h-dvh flex flex-col px-4 sm:px-6 lg:px-8 pt-6 pb-8">
       <EncabezadoSeccion titulo="REPERTORIO" acciones={
-        <BotonAccionEncabezado icono={Plus} etiqueta="Agregar tema" onClick={() => setModalAbierto(true)} />
+        <BotonAccionEncabezado icono={Plus} etiqueta="Nuevo tema" onClick={() => setModalAbierto(true)} />
       } />
       <div className="mx-auto w-full max-w-3xl">
         <div className="relative mb-4">
           <Search size={18} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-butter-muted" />
           <input
-            aria-label="Buscar temas"
+            aria-label="Buscar tema o artista"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar..."
+            placeholder="Buscar tema o artista…"
             className="block w-full bg-superficie border border-borde rounded-lg pl-10 pr-4 py-3 text-butter placeholder-butter-muted focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal/30"
           />
         </div>
@@ -70,7 +70,7 @@ export default function Repertorio() {
           <p className="text-butter-muted text-center mt-8">Cargando…</p>
         ) : temasFiltrados.length === 0 ? (
           <p className="text-butter-muted text-center mt-8">
-            {temas.length === 0 ? 'Todavía no hay temas cargados.' : 'No hay resultados.'}
+            {temas.length === 0 ? 'Sumá el primer tema.' : 'No hay resultados.'}
           </p>
         ) : (
           <ul className="flex w-full flex-col gap-2">
@@ -112,7 +112,8 @@ export default function Repertorio() {
 
       {temaAEliminar && <ConfirmarEliminacionModal
         destructiva
-        mensaje={`¿Seguro que querés eliminar “${temaAEliminar.nombre}” del repertorio?`}
+        titulo="¿Eliminar tema?"
+        mensaje={`“${temaAEliminar.nombre}” se borrará del repertorio. No se puede deshacer.`}
         onCancelar={() => setTemaAEliminar(null)}
         onConfirmar={() => eliminarTema(temaAEliminar)}
       />}

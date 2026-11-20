@@ -35,7 +35,7 @@ export function fechaLocal(hoy = new Date()) {
 }
 
 export function mensajeProyectoPizarra(error) {
-  if (error?.code === '40001') return 'El proyecto cambió o fue eliminado en otra sesión. Abrí la versión actual o guardá tu trabajo como nueva pizarra.'
+  if (error?.code === '40001') return 'Esta pizarra cambió o se eliminó en otra sesión. Abrí la versión actual o guardá tu trabajo como una pizarra nueva.'
   if (['PGRST202', 'PGRST205', '42P01'].includes(error?.code)) return 'Falta instalar la biblioteca de pizarras en Supabase.'
   if (error?.code === '23514') return 'La pizarra supera el tamaño admitido o sus datos son inválidos.'
   if (error instanceof Error) return error.message
@@ -49,7 +49,7 @@ function comprobar({ data, error }) {
 
 function confirmarFila(resultado, id) {
   const fila = comprobar(resultado)
-  if (fila?.id !== id || !Number.isInteger(fila.revision)) throw new Error('No se pudo confirmar el proyecto en Supabase.')
+  if (fila?.id !== id || !Number.isInteger(fila.revision)) throw new Error('No se pudo confirmar la pizarra en Supabase. Probá de nuevo.')
   return fila
 }
 

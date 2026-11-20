@@ -4,11 +4,11 @@ export function fechaSetlist(fecha) {
 }
 
 export function mensajeErrorSetlists(error) {
-  if (error?.code === '40001') return 'Este setlist cambió en otra sesión. Recargá para ver la versión actual antes de volver a editar.'
+  if (error?.code === '40001') return 'Este setlist cambió en otra sesión. Recargalo antes de seguir editando.'
   if (['42P01', '42883', 'PGRST200', 'PGRST202', 'PGRST205'].includes(error?.code)) {
     return 'Falta instalar Setlists en la base de datos. Ejecutá el SQL indicado en docs/setlists.md.'
   }
-  if (error?.code === '23503') return 'Una canción ya no está en Repertorio. Recargá el setlist para actualizar sus referencias.'
+  if (error?.code === '23503') return 'Un tema ya no está en el repertorio. Recargá el setlist para actualizarlo.'
   return 'No se pudo completar la operación. Revisá la conexión y volvé a intentar.'
 }
 

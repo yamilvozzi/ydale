@@ -31,7 +31,7 @@ export default function ModalExportarPDF({ tipo, datos, onCerrar }) {
         if (vigente) setCarga({ cargando: false, escalas, setlist: null, error: '' })
       } catch {
         if (vigente) setCarga({ cargando: false, escalas: [], setlist: null,
-          error: tipo === 'tema' ? 'No se pudo preparar la escala. Las demás secciones siguen disponibles.' : 'No se pudo cargar el listado completo de canciones.' })
+          error: tipo === 'tema' ? 'No se pudo cargar la escala. Podés exportar las demás secciones.' : 'No se pudieron cargar todos los temas del setlist.' })
       }
     }
     cargar()
@@ -75,12 +75,12 @@ export default function ModalExportarPDF({ tipo, datos, onCerrar }) {
           A4 {valor}
         </label>)}
       </fieldset>}
-      {tipo === 'setlist' && carga.cargando && <p role="status" className="text-sm text-butter-muted">Cargando canciones…</p>}
+      {tipo === 'setlist' && carga.cargando && <p role="status" className="text-sm text-butter-muted">Cargando temas…</p>}
       {carga.error && <div role="alert" className="space-y-2 text-sm text-butter-muted"><p>{carga.error}</p>
         <button type="button" className={botonPizarra} onClick={() => { setCarga(actual => ({ ...actual, cargando: true, error: '' })); setIntento(actual => actual + 1) }}>Reintentar</button>
       </div>}
       {error && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
-      <p className="text-sm text-butter-muted">En la vista de impresión podés imprimir o guardar como PDF.</p>
+      <p className="text-sm text-butter-muted">En la próxima pantalla podés imprimir o guardar como PDF.</p>
       <div className="flex flex-wrap justify-end gap-2">
         <button type="button" onClick={onCerrar} className={botonPizarra}>Cancelar</button>
         <button type="submit" disabled={!listo} className={botonPrincipalPizarra}>Abrir vista de impresión</button>

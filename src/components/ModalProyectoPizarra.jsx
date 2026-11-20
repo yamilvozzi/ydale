@@ -68,20 +68,20 @@ export default function ModalProyectoPizarra({ modo, proyecto, onGuardar, onGuar
         <button type="submit" disabled={ocupado || !titulo.trim()} className={botonPrincipalPizarra}>{ocupado ? 'Guardando…' : modo === 'duplicar' ? 'Duplicar' : 'Guardar'}</button>
       </div>
     </form> : <div className="space-y-3">
-      {paso === 'pendientes' && <p className="text-sm text-butter-muted">Hay modificaciones en la pizarra actual. Elegí qué hacer antes de continuar.</p>}
+      {paso === 'pendientes' && <p className="text-sm text-butter-muted">Elegí si querés guardar los cambios o descartarlos.</p>}
       {paso === 'opciones' && <p className="break-words text-sm text-butter-muted">Estás trabajando en «{proyecto.titulo}».</p>}
       {error && <p role="alert" className="text-sm text-butter-muted">{error}</p>}
       {ocupado && <p role="status" className="text-sm text-butter-muted">Procesando…</p>}
       <div className="grid gap-2">
         {paso === 'pendientes' && <>
-          <button type="button" disabled={ocupado} onClick={() => elegir(proyecto ? 'opciones' : 'ficha')} className={botonPrincipalPizarra}>Guardar los cambios</button>
+          <button type="button" disabled={ocupado} onClick={() => elegir(proyecto ? 'opciones' : 'ficha')} className={botonPrincipalPizarra}>Guardar cambios</button>
           <button type="button" disabled={ocupado} onClick={() => completar(onContinuar)} className={botonPizarra}>Descartar cambios y continuar</button>
         </>}
         {paso === 'opciones' && <>
           <button type="button" disabled={ocupado} onClick={() => completar(onGuardar, true)} className={botonPrincipalPizarra}>Guardar cambios</button>
           <button type="button" disabled={ocupado} onClick={() => elegir('ficha')} className={botonPizarra}>Guardar como nueva</button>
         </>}
-        {paso === 'continuar' && <button type="button" disabled={ocupado} onClick={() => completar(onContinuar)} className={botonPrincipalPizarra}>Reintentar continuar</button>}
+        {paso === 'continuar' && <button type="button" disabled={ocupado} onClick={() => completar(onContinuar)} className={botonPrincipalPizarra}>Continuar</button>}
         <button type="button" ref={foco} disabled={ocupado} onClick={onCerrar} className={botonPizarra}>Cancelar</button>
       </div>
     </div>}

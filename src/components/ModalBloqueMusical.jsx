@@ -35,11 +35,11 @@ export default function ModalBloqueMusical({ bloque, onCerrar, onGuardar, error 
             className={`${botonPizarra} aria-pressed:border-butter-muted aria-pressed:bg-teal`}>{etiqueta}</button>)}
         </div>
         {bloque && <label className="flex items-center justify-between gap-2 text-sm text-butter-muted">
-          Cantidad personalizada (0 = libre)
+          Compases (0 = libre)
           <input type="number" inputMode="numeric" required min={0} max={MAX_COMPASES} value={cantidad}
             onChange={evento => setCantidad(evento.target.value)} className={`${entrada} w-20`} />
         </label>}
-        {reubicaAcordes && <p role="status" className="text-sm text-butter-muted">Los acordes de los compases que se quiten pasarán al último compás, en el mismo orden.</p>}
+        {reubicaAcordes && <p role="status" className="text-sm text-butter-muted">Los acordes de los compases que quites pasan al último, en el mismo orden.</p>}
       </fieldset>
       <label className="flex items-center justify-between gap-2 text-sm text-butter-muted">
         Repeticiones

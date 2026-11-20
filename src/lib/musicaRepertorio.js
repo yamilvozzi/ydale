@@ -12,7 +12,7 @@ function escalaDeReferencia(tema) {
     ?? (nombreTipo === 'menor natural' ? 'menor' : null)
     ?? (!nombreTipo && tonalidad ? tonalidad.calidad === 'm' ? 'menor' : 'mayor' : null)
   if (!tonalidad || !['', 'm'].includes(tonalidad.calidad) || tonalidad.bajo || !tipo) {
-    throw new Error('La referencia de tonalidad o escala no es compatible con el diapasón. Cargá un diagrama de escala en el tema para importarlo.')
+    throw new Error('Esa referencia de tonalidad o escala no es compatible. Agregá un diagrama en la pestaña ESCALA del tema y volvé a intentar.')
   }
   return normalizarEscala({ tonica: tonalidad.raiz.nombre, tipo })
 }

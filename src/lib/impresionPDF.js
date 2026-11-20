@@ -84,8 +84,8 @@ export function imprimirSetlist(setlist) {
   const fecha = setlist.date && new Date(`${setlist.date}T12:00:00Z`)
   const items = setlist.items ?? []
   const fichas = items.map((tema, i) => `<li class="ficha"><span class="numero">${i + 1}.</span><div><p><strong>${texto(tema.nombre)}</strong></p>${tema.artista ? `<p class="dato">${texto(tema.artista)}</p>` : ''}</div></li>`).join('')
-  return documento(setlist.title, [fecha && Number.isFinite(+fecha) ? fechaEvento.format(fecha) : '', setlist.place, `${items.length} ${items.length === 1 ? 'canción' : 'canciones'}`],
-    items.length ? `<ol class="${items.length > 12 ? 'columnas' : ''}">${fichas}</ol>` : '<p>Sin canciones.</p>', 'vertical')
+  return documento(setlist.title, [fecha && Number.isFinite(+fecha) ? fechaEvento.format(fecha) : '', setlist.place, `${items.length} ${items.length === 1 ? 'tema' : 'temas'}`],
+    items.length ? `<ol class="${items.length > 12 ? 'columnas' : ''}">${fichas}</ol>` : '<p>Sin temas.</p>', 'vertical')
 }
 
 const linea = (x1, y1, x2, y2, grosor = 1) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#555" stroke-width="${grosor}"/>`

@@ -63,7 +63,7 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
 
           <fieldset className="min-w-0">
             <legend className="mb-2 text-xs uppercase tracking-wide text-butter-muted">
-              Escala / Modo
+              Escala o modo
             </legend>
             <div className="grid grid-cols-5 gap-1 sm:gap-2">
               {TIPOS_ESCALA.map((tipo) => {
@@ -90,7 +90,6 @@ export default function EditorEscalaModal({ escala, onCerrar, onGuardar, guardan
 
         <div className="rounded-lg border border-borde bg-fondo/40 p-3 sm:p-5">
           <div className="mb-5 flex items-center justify-between gap-3">
-            <p className="text-xs uppercase tracking-wide text-butter-muted">Vista previa</p>
             <p className="text-sm text-butter">
               {tituloEscala(borrador)}
             </p>

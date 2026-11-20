@@ -7,7 +7,7 @@ import MenuSetlist from './MenuSetlist'
 
 function Cancion({ item, numero, total, edicion, ocupado, setlistId, onCambiar, onAbrir }) {
   const { setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: item.id, disabled: !edicion || ocupado })
-  const nombre = item.nombre || 'Canción no disponible'
+  const nombre = item.nombre || 'Tema no disponible'
   return <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
     className={`tarjeta-enlace relative grid w-full min-w-0 items-center gap-1 rounded-lg ${edicion ? 'grid-cols-[5rem_minmax(0,1fr)_5rem]' : 'grid-cols-[3rem_minmax(0,1fr)_3rem]'} ${isDragging ? 'z-10 opacity-70' : ''}`}>
     <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
@@ -51,14 +51,14 @@ export default function CancionesSetlist({ items, edicion, ocupado, setlistId, o
     accessibility={{
       screenReaderInstructions: { draggable: 'Para mover, presioná espacio. Usá las flechas para elegir la posición, espacio para soltar y Escape para cancelar.' },
       announcements: {
-        onDragStart: ({ active }) => `Moviendo canción ${items.findIndex(item => item.id === active.id) + 1}.`,
+        onDragStart: ({ active }) => `Moviendo tema ${items.findIndex(item => item.id === active.id) + 1}.`,
         onDragOver: ({ over }) => over ? `Posición ${items.findIndex(item => item.id === over.id) + 1}.` : 'Fuera de la lista.',
         onDragEnd: ({ over }) => over ? `Nueva posición ${items.findIndex(item => item.id === over.id) + 1}.` : 'Movimiento cancelado.',
         onDragCancel: () => 'Movimiento cancelado.',
       },
     }}>
     <SortableContext items={items} strategy={verticalListSortingStrategy}>
-      <ol aria-label="Canciones del setlist" aria-busy={ocupado} className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+      <ol aria-label="Temas del setlist" aria-busy={ocupado} className="mx-auto flex w-full max-w-3xl flex-col gap-2">
         {items.map((item, indice) => <Cancion key={item.id} item={item} numero={indice + 1} total={items.length}
           edicion={edicion} ocupado={ocupado} setlistId={setlistId} onCambiar={cambiar} onAbrir={onAbrir} />)}
       </ol>

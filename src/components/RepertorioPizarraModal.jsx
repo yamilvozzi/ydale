@@ -90,7 +90,7 @@ export default function RepertorioPizarraModal({ onCerrar, onCargar, contieneEle
       </>}
       {seleccionado && <section aria-label="Vista previa del tema" aria-busy={vista.cargando} className="rounded-lg border border-borde bg-fondo/40 p-4">
         <h3 className="mb-2 break-words text-base text-butter">{musica?.nombre ?? seleccionado.nombre}</h3>
-        {vista.cargando ? <p role="status" className="text-sm text-butter-muted">Cargando información musical…</p>
+        {vista.cargando ? <p role="status" className="text-sm text-butter-muted">Cargando acordes y escalas…</p>
           : vista.error ? <div role="alert" className="text-sm text-butter-muted"><p>{vista.error}</p><button type="button" onClick={reintentar} className="mt-2 min-h-11 rounded-lg border border-borde px-3 hover:text-butter">Reintentar</button></div>
           : musica && <div className="space-y-2 break-words text-sm text-butter-muted">
             <p><span className="text-butter">Escala: </span>{musica.escalas.length ? musica.escalas.map(escala => `${escala.tonica}${escala.tipo === 'menor' ? 'm' : ''} / ${etiquetaTipo(escala.tipo)}`).join(' · ') : 'Sin escala cargada'}</p>
@@ -98,11 +98,11 @@ export default function RepertorioPizarraModal({ onCerrar, onCargar, contieneEle
             {!hayMusica && <p>Este tema no tiene escalas ni acordes para cargar.</p>}
           </div>}
       </section>}
-      {confirmar && <p role="alert" className="mt-4 rounded-lg border border-borde bg-fondo p-4 text-sm text-butter">La Pizarra contiene elementos. Cargar este tema reemplazará el contenido actual.</p>}
+      {confirmar && <p role="alert" className="mt-4 rounded-lg border border-borde bg-fondo p-4 text-sm text-butter">Cargar este tema reemplaza lo que hay en la pizarra.</p>}
       {errorGuardado && <p role="alert" className="mt-4 text-sm text-butter-muted">{errorGuardado}</p>}
       <footer className="mt-5 flex justify-end gap-2">
         <button ref={cancelar} type="button" onClick={() => confirmar ? setConfirmar(false) : onCerrar()} className="min-h-11 rounded-lg border border-borde px-4 text-sm text-butter-muted hover:bg-fondo hover:text-butter">Cancelar</button>
-        <button ref={cargar} type="button" disabled={!hayMusica || vista.cargando} onClick={() => contieneElementos && !confirmar ? setConfirmar(true) : confirmarCarga()} className="min-h-11 rounded-lg bg-teal px-4 text-sm text-butter hover:bg-green disabled:opacity-40">{confirmar ? 'Cargar' : 'CARGAR EN PIZARRA'}</button>
+        <button ref={cargar} type="button" disabled={!hayMusica || vista.cargando} onClick={() => contieneElementos && !confirmar ? setConfirmar(true) : confirmarCarga()} className="min-h-11 rounded-lg bg-teal px-4 text-sm text-butter hover:bg-green disabled:opacity-40">{confirmar ? 'REEMPLAZAR PIZARRA' : 'CARGAR EN PIZARRA'}</button>
       </footer>
     </dialog>
   )
