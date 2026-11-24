@@ -1,49 +1,14 @@
 import { useState } from 'react'
-import { GripVertical, Plus } from 'lucide-react'
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCombinedRefs } from '@dnd-kit/utilities'
 import ConfirmarEliminacionModal from './ConfirmarEliminacionModal'
-import MenuSetlist from './MenuSetlist'
 import ModalAcordeBloque, { SelectorAcordeBloque } from './ModalAcordeBloque'
 import ModalBloqueMusical from './ModalBloqueMusical'
+import { CabeceraBloque, CompasBloque } from './VistaBloqueMusical'
 import {
-  columnaBloque, conSeccionesBloque, insertarAcordeBloque, MAX_COMPASES, nombreAcordeBloque, seccionesBloque,
+  columnaBloque, conSeccionesBloque, insertarAcordeBloque, MAX_COMPASES, seccionesBloque,
 } from '../lib/bloquesPizarra'
-
-function CifradoBloque({ bloqueId, compas, entrada, onConsultar }) {
-  const { collisions } = useDndContext()
-  const id = `cifrado:${bloqueId}:${compas}:${entrada.id}`
-  const nombre = nombreAcordeBloque(entrada)
-  const data = { tipo: 'cifrado', nombre, bloqueId, compas, entradaId: entrada.id }
-  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id, data })
-  const destino = useDroppable({ id, data })
-  const ref = useCombinedRefs(setNodeRef, destino.setNodeRef)
-  const insercion = destino.isOver && !isDragging ? (collisions?.[0]?.data?.despues ? 'despues' : 'antes') : undefined
-  return <li className="min-w-0 max-w-full">
-    <button type="button" ref={ref} {...attributes} {...listeners} aria-haspopup="dialog"
-      onClick={() => { if (!isDragging) onConsultar(entrada.id) }} onContextMenu={evento => evento.preventDefault()}
-      data-insercion={insercion} data-arrastrando={isDragging || undefined} className="bloque-cifrado">{nombre}</button>
-  </li>
-}
-
-function CompasBloque({ bloqueId, compas, numero, acordes, onAgregar, onConsultar }) {
-  const nombre = numero ? `Compás ${numero}` : 'Secuencia libre'
-  const { setNodeRef, isOver } = useDroppable({
-    id: `compas:${bloqueId}:${compas}`, data: { tipo: 'compas', nombre, bloqueId, compas, vacio: !acordes.length },
-  })
-
-  return <div ref={setNodeRef} role="group" aria-label={nombre} data-destino={isOver || undefined} className="bloque-compas">
-    <div className="min-w-0">
-      {numero && <div aria-hidden="true" className="px-1 text-xs tabular-nums text-butter-muted">{numero}</div>}
-      {acordes.length > 0 && <ul className="flex flex-wrap items-center gap-1">
-        {acordes.map(entrada => <CifradoBloque key={entrada.id} bloqueId={bloqueId} compas={compas} entrada={entrada} onConsultar={onConsultar} />)}
-      </ul>}
-    </div>
-    <button type="button" aria-haspopup="dialog" aria-label={numero ? `Agregar acorde al compás ${numero}` : 'Agregar acorde al bloque libre'}
-      title="Agregar acorde" onClick={onAgregar} className="tarjeta-control bloque-agregar-acorde"><Plus aria-hidden="true" /></button>
-  </div>
-}
 
 export default function BloqueMusical({ bloque, acordes, subir, bajar, cambiarColumna, otraColumna, onGuardar, onEliminar, error }) {
   const [modal, setModal] = useState(null)
@@ -53,7 +18,8 @@ export default function BloqueMusical({ bloque, acordes, subir, bajar, cambiarCo
   const id = `bloque:${bloque.id}`
   const data = { tipo: 'bloque', nombre, bloqueId: bloque.id, columna: columnaBloque(bloque) }
   const { collisions } = useDndContext()
-  const { setNodeRef, setActivatorNodeRef, attributes, listeners, isDragging } = useDraggable({ id, data })
+  const arrastre = useDraggable({ id, data })
+  const { setNodeRef, isDragging } = arrastre
   const destino = useDroppable({ id, data })
   const ref = useCombinedRefs(setNodeRef, destino.setNodeRef)
   const insercion = destino.isOver && !isDragging ? (collisions?.[0]?.data?.despues ? 'despues' : 'antes') : undefined
@@ -87,20 +53,7 @@ export default function BloqueMusical({ bloque, acordes, subir, bajar, cambiarCo
   ]
 
   return <article ref={ref} className="tarjeta-musical tarjeta-bloque" data-insercion={insercion} data-arrastrando={isDragging || undefined}>
-    <header className="bloque-cabecera">
-      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
-        {bloque.titulo && <h3 className="min-w-0 text-base font-semibold [overflow-wrap:anywhere]">{bloque.titulo}</h3>}
-        <div className="flex flex-wrap items-baseline gap-2 text-xs tabular-nums text-butter-muted">
-          <span>{libre ? 'Libre' : `${compases.length} ${compases.length === 1 ? 'compás' : 'compases'}`}</span>
-          <span aria-label={`${bloque.repeticiones} repeticiones`}>×{bloque.repeticiones}</span>
-        </div>
-      </div>
-      <div className="flex shrink-0 items-center">
-        <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
-          aria-label={`Mover ${nombre}`} title={`Mover ${nombre}`} className="tarjeta-control tarjeta-mover"><GripVertical aria-hidden="true" /></button>
-        <MenuSetlist nombre={nombre} acciones={acciones} flotante />
-      </div>
-    </header>
+    <CabeceraBloque bloque={bloque} cantidad={compases.length} nombre={nombre} arrastre={arrastre} acciones={acciones} />
     <div className={libre ? undefined : 'bloque-compases'}>
       {compases.map((acordesCompas, indice) => <CompasBloque key={indice}
         bloqueId={bloque.id} compas={indice}

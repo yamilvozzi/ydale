@@ -43,7 +43,7 @@ export function SelectorAcordeBloque({ acordes, onElegir, onCerrar, error }) {
 }
 
 export default function ModalAcordeBloque({
-  entrada, acordes, onElegir, onAdelantar, onAtrasar, onQuitar, onCerrar, error,
+  entrada, acordes, onElegir, onAdelantar, onAtrasar, onQuitar, onCerrar, error, children,
 }) {
   const [variante, setVariante] = useState(0)
   const { digitacion } = entrada
@@ -70,14 +70,15 @@ export default function ModalAcordeBloque({
       <div className="mx-auto w-max"><AcordeDiagrama acorde={vista} /></div>
       {vista.bajo && <p className="pb-1 text-center text-xs text-butter-muted">Bajo en cuerda {vista.bajo.cuerda + 1}</p>}
     </div> : <p className="mb-3 text-sm text-butter-muted">Este acorde no tiene diagrama.</p>}
-    {vista && vista !== digitacion && <button type="button" onClick={() => aplicar(() => onElegir(vista))}
+    {onElegir && vista && vista !== digitacion && <button type="button" onClick={() => aplicar(() => onElegir(vista))}
       className={`${botonPrincipalPizarra} mb-3 w-full`}>Usar esta digitación</button>}
     <div className="grid gap-2 border-t border-borde pt-3">
       {(onAdelantar || onAtrasar) && <div className="flex flex-wrap gap-2">
         <button type="button" disabled={!onAdelantar} onClick={() => aplicar(onAdelantar)} className={botonPizarra}>Mover antes</button>
         <button type="button" disabled={!onAtrasar} onClick={() => aplicar(onAtrasar)} className={botonPizarra}>Mover después</button>
       </div>}
-      <button type="button" onClick={() => aplicar(onQuitar)} className={`${botonPizarra} justify-self-start`}>Quitar del bloque</button>
+      {onQuitar && <button type="button" onClick={() => aplicar(onQuitar)} className={`${botonPizarra} justify-self-start`}>Quitar del bloque</button>}
+      {children}
     </div>
     {error && <p role="alert" className="mt-3 text-sm text-butter-muted">{error}</p>}
   </DialogoPizarra>

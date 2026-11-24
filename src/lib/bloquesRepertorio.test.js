@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { configurarBloque, seccionesBloque } from './bloquesPizarra.js'
-import { acordesSueltos, duplicarBloqueRepertorio, guardarBloqueRepertorio, moverAcordeRepertorio, moverBloqueRepertorio, ubicacionAcorde, vaciarBloqueRepertorio } from './bloquesRepertorio.js'
+import { acordesSueltos, colocarAcordeRepertorio, duplicarBloqueRepertorio, guardarBloqueRepertorio, moverAcordeRepertorio, moverBloqueRepertorio, ubicacionAcorde, vaciarBloqueRepertorio } from './bloquesRepertorio.js'
 import { crearAcorde, guardarNotas, leerNotas } from './notasConAcordes.js'
 import { contenidoTemaPDF, imprimirTema } from './impresionPDF.js'
 
@@ -48,6 +48,25 @@ test('mover entre libre, compases y sector suelto mantiene una sola entidad inta
   for (const acorde of notas.acordes) assert.deepEqual(acorde, original.acordes.find(a => a.id === acorde.id))
   assert.equal(notas.acordes.length, original.acordes.length)
   assert.deepEqual(original, copia)
+})
+
+test('un acorde suelto se reutiliza en varios compases y cada copia se puede mover', () => {
+  const original = cancion()
+  const acorde = original.acordes[0]
+  const destino = { bloqueId: 'estribillo', compas: 0 }
+  const primera = colocarAcordeRepertorio(original, acorde.id, destino)
+  const copia = primera.acordes.at(-1)
+  const segunda = colocarAcordeRepertorio(primera, acorde.id, { ...destino, compas: 1 })
+  const movida = colocarAcordeRepertorio(segunda, copia.id, { ...destino, compas: 1, referencia: segunda.acordes.at(-1).id })
+  const guardada = leerNotas(guardarNotas(movida))
+
+  assert.notEqual(copia.id, acorde.id)
+  assert.deepEqual({ ...copia, id: acorde.id }, acorde)
+  assert.deepEqual(acordesSueltos(guardada), original.acordes)
+  assert.deepEqual(ids(guardada.bloquesAcordes[1].compases[1]), [copia.id, segunda.acordes.at(-1).id])
+  assert.deepEqual(guardada.bloquesAcordes[1].compases[0], [])
+  assert.equal(guardada.acordes.length, original.acordes.length + 2)
+  assert.equal(colocarAcordeRepertorio(original, acorde.id, { ...destino, compas: 99 }), original)
 })
 
 test('reordenar dentro de bloque o compás usa referencias y no duplica tarjetas', () => {

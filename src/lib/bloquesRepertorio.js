@@ -19,6 +19,22 @@ function insertar(lista, elemento, referencia, despues) {
   return [...lista.slice(0, posicion), elemento, ...lista.slice(posicion)]
 }
 
+function copiarAcorde(acorde) {
+  return { ...structuredClone(acorde), id: globalThis.crypto.randomUUID() }
+}
+
+export function colocarAcordeRepertorio(notas, id, destino) {
+  if (!destino.bloqueId || ubicacionAcorde(notas, id).bloqueId) return moverAcordeRepertorio(notas, id, destino)
+
+  const acorde = notas.acordes.find(a => a.id === id)
+  if (!acorde) return notas
+  // Una copia de la digitación permite reutilizar el original en otros compases.
+  const copia = copiarAcorde(acorde)
+  const conCopia = { ...notas, acordes: [...notas.acordes, copia] }
+  const resultado = moverAcordeRepertorio(conCopia, copia.id, destino)
+  return resultado === conCopia ? notas : resultado
+}
+
 export function moverAcordeRepertorio(notas, id, destino) {
   const acorde = notas.acordes.find(a => a.id === id)
   const bloques = notas.bloquesAcordes ?? []
@@ -64,7 +80,7 @@ export function duplicarBloqueRepertorio(notas, id) {
   const porId = new Map(notas.acordes.map(a => [a.id, a]))
   const copias = []
   const copia = conSeccionesBloque({ ...bloque, id: globalThis.crypto.randomUUID() }, seccionesBloque(bloque).map(lista => lista.map(entrada => {
-    const acorde = { ...structuredClone(porId.get(entrada.id)), id: globalThis.crypto.randomUUID() }
+    const acorde = copiarAcorde(porId.get(entrada.id))
     copias.push(acorde)
     return { id: acorde.id }
   })))
